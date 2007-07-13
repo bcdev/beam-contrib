@@ -1,0 +1,19 @@
+<projectDescription>
+  <name>gpf-decisiontree</name>
+  <comment/>
+  <projects>
+    <project>beam-gpf</project>
+    <project>beam-core</project>
+    <project>ceres-binding</project>
+    <project>ceres-launcher</project>
+    <project>ceres-core</project>
+  </projects>
+  <buildSpec>
+    <buildCommand>
+      <name>org.eclipse.jdt.core.javabuilder</name>
+    </buildCommand>
+  </buildSpec>
+  <natures>
+    <nature>org.eclipse.jdt.core.javanature</nature>
+  </natures>
+</projectDescription>
