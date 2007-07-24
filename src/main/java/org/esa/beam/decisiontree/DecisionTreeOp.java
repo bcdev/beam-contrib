@@ -17,7 +17,8 @@
 package org.esa.beam.decisiontree;
 
 import java.awt.Rectangle;
-import java.io.IOException;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -26,33 +27,38 @@ import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.framework.gpf.AbstractOperator;
 import org.esa.beam.framework.gpf.AbstractOperatorSpi;
+import org.esa.beam.framework.gpf.GPF;
 import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.OperatorSpi;
 import org.esa.beam.framework.gpf.Raster;
-import org.esa.beam.framework.gpf.Tile;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
+import org.esa.beam.framework.gpf.internal.DefaultOperatorContext;
+import org.esa.beam.framework.gpf.operators.common.BandArithmeticOp;
+import org.esa.beam.util.StringUtils;
 
 import com.bc.ceres.core.ProgressMonitor;
 
 public class DecisionTreeOp extends AbstractOperator {
 
-    public static final int FLAG_CLEAR = 1;
-    public static final int FLAG_SNOW = 2;
-    public static final int FLAG_DENSE_CLOUD = 4;
-    public static final int FLAG_THIN_CLOUD = 8;
-
-    public static final String DECISION_BAND = "blue_cloud";
-
-    private DecisionNode rootNode;
+    public static final String CLASSIFICATION_BAND = "classification";
 
     @SourceProduct(alias="input")
     private Product sourceProduct;
     @TargetProduct
     private Product targetProduct;
     @Parameter
-    private DecisionNode[] nodes;
+    private String decisionConfigFile;
+    @Parameter
+    private DecisionTreeConfiguration configuration;
+
+	private DecisionData[] dds;
+	
+	private static class DecisionData {
+		Decision decision;
+		Band band;
+	}
     
     public DecisionTreeOp(OperatorSpi spi) {
         super(spi);
@@ -60,42 +66,54 @@ public class DecisionTreeOp extends AbstractOperator {
 
     @Override
 	protected Product initialize(ProgressMonitor pm) throws OperatorException {
-    	buildDecisionTree();
         targetProduct = new Product("name", "type",
         		sourceProduct.getSceneRasterWidth(), sourceProduct.getSceneRasterHeight());
         
-        // create and add the flags dataset
-        Band cloudFlagBand = targetProduct.addBand(DECISION_BAND, ProductData.TYPE_UINT8);
-        cloudFlagBand.setDescription("decisions");
+        Band classBand = targetProduct.addBand(CLASSIFICATION_BAND, ProductData.TYPE_UINT8);
+        classBand.setDescription("decisions");
 
+        if (StringUtils.isNotNullAndNotEmpty(decisionConfigFile)) {
+        	try {
+        	FileReader reader = new FileReader(decisionConfigFile);
+        	configuration = new DecisionTreeConfiguration(reader);
+        	} catch (FileNotFoundException e) {
+				throw new OperatorException("Could not open config file: "+decisionConfigFile, e);
+			} catch (Exception e) {
+				throw new OperatorException("Could not parse config file: "+decisionConfigFile, e);
+			}
+        }
+        
+        Map<String, Object> parameters = new HashMap<String, Object>();
+        Decision[] decisions = configuration.getAllDecisions();
+        
+        BandArithmeticOp.BandDescriptor[] bandDescriptions = new BandArithmeticOp.BandDescriptor[decisions.length];
+        for (int i = 0; i < decisions.length; i++) {
+        	BandArithmeticOp.BandDescriptor bandDescriptor = new BandArithmeticOp.BandDescriptor();
+        	bandDescriptor.name = "b"+i;
+			bandDescriptor.expression = decisions[i].getTerm();
+			bandDescriptor.type = ProductData.TYPESTRING_BOOLEAN;
+			bandDescriptions[i] = bandDescriptor;
+    	}
+		parameters.put("bandDescriptors", bandDescriptions);
+		
+		Map<String, Product> products = new HashMap<String, Product>();
+		for (Product product : getContext().getSourceProducts()) {
+			products.put(getContext().getIdForSourceProduct(product), product);	
+		}
+		Product expressionProduct = GPF.createProduct("BandArithmetic", parameters, products, pm);
+		DefaultOperatorContext context = (DefaultOperatorContext) getContext();
+		context.addSourceProduct("x", expressionProduct);
+		
+		dds = new DecisionData[decisions.length];
+		for (int i = 0; i < decisions.length; i++) {
+			DecisionData dd = new DecisionData();
+        	dd.decision = decisions[i];
+        	dd.band = expressionProduct.getBand("b"+i);
+        	dds[i] = dd;	
+		}
+		
         return targetProduct;
     }
-
-	private void buildDecisionTree() throws OperatorException {
-		Map<String, DecisionNode> nodeMap = new HashMap<String, DecisionNode>(nodes.length);
-		for (DecisionNode decisionNode : nodes) {
-			nodeMap.put(decisionNode.name, decisionNode);
-		}
-		for (DecisionNode decisionNode : nodes) {
-			decisionNode.initNode(sourceProduct);
-			if (!decisionNode.isLeaf) {
-				decisionNode.yesNode = nodeMap.get(decisionNode.yes);
-				if (decisionNode.yesNode == null) {
-					throw new OperatorException("Node " + decisionNode.name + " has not existing yes node: " + decisionNode.yes);
-				}
-				decisionNode.yesNode.parent = decisionNode;
-				decisionNode.noNode = nodeMap.get(decisionNode.no);
-				if (decisionNode.noNode == null) {
-					throw new OperatorException("Node " + decisionNode.name + " has not existing no node: " + decisionNode.no);
-				}
-				decisionNode.noNode.parent = decisionNode;
-			}
-		}
-		rootNode = nodes[0];
-		while (rootNode.parent != null) {
-			rootNode = rootNode.parent;
-		}
-	}
 
 	@Override
     public void computeBand(Raster targetRaster,
@@ -105,33 +123,51 @@ public class DecisionTreeOp extends AbstractOperator {
         final int size = rect.height * rect.width;
         pm.beginTask("Processing frame...", size);
         try {
-        	for (DecisionNode decisionNode : nodes) {
-        		decisionNode.data = new boolean[size];
-        		sourceProduct.readBitmask(rect.x, rect.y, rect.width, rect.height,
-        				decisionNode.term, decisionNode.data, ProgressMonitor.NULL);
+        	Map<Decision, Raster> rasterMap = new HashMap<Decision, Raster>(dds.length);
+        	for (int i = 0; i < dds.length; i++) {
+        		DecisionData decisionData = dds[i];
+				Raster raster = getRaster(decisionData.band, rect);
+				rasterMap.put(decisionData.decision, raster);
         	}
-            byte[] decisions = (byte[]) targetRaster.getDataBuffer().getElems();
-
-            for (int i = 0; i < size; i++) {
-                DecisionNode node = rootNode;
-                while (!node.isLeaf) {
-					if (node.data[i]) {
-						node = node.yesNode;
-					} else {
-						node = node.noNode;
-					}
+        	
+        	for (int y = rect.y; y < rect.y + rect.height; y++) {
+				if (pm.isCanceled()) {
+					break;
 				}
-                decisions[i] = node.value;
-                pm.worked(1);
-            }
-        } catch (IOException e) {
-        	throw new OperatorException("Couldn't load bitmasks", e);
+				for (int x = rect.x; x < rect.x+rect.width; x++) {
+					Decision decision = configuration.getRootDecisions();
+					int value = evaluateDecision(x, y, decision, rasterMap);
+					targetRaster.setInt(x, y, value);
+				}
+				pm.worked(1);
+			}
 		} finally {
             pm.done();
         }
     }
 
-    public static class Spi extends AbstractOperatorSpi {
+	private int evaluateDecision(int x, int y, Decision decision, Map<Decision, Raster> rasterMap) {
+		Raster raster = rasterMap.get(decision);
+		boolean b = raster.getBoolean(x, y);
+		if (b) {
+			if (decision.getYesDecision() != null) {
+				Decision yesDecision = decision.getYesDecision();
+				return evaluateDecision(x, y, yesDecision, rasterMap);
+			} else {
+				return decision.getYesClass().getValue();
+			}
+		} else {
+			if (decision.getNoDecision() != null) {
+				Decision noDecision = decision.getNoDecision();
+				return evaluateDecision(x, y, noDecision, rasterMap);
+			} else {
+				return decision.getNoClass().getValue();
+			}
+		}
+	}
+
+	
+	public static class Spi extends AbstractOperatorSpi {
         public Spi() {
             super(DecisionTreeOp.class, "DecisionTree");
         }
