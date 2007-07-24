@@ -46,7 +46,7 @@ public class DecisionTreeConfiguration {
 			Classification yesClass = getClass(yesClassName);
 			decisions.setYesClass(yesClass);
 		} else {
-			Decision yesDecision = buildDecisionTree(yesDom);
+			Decision yesDecision = buildDecisionTree(yesDom.getChild("decision"));
 			decisions.setYesDecision(yesDecision);
 		}
 		if (noDom.getChildCount() == 0) {
@@ -54,7 +54,7 @@ public class DecisionTreeConfiguration {
 			Classification noClass = getClass(noClassName);
 			decisions.setNoClass(noClass);
 		} else {
-			Decision noDecision = buildDecisionTree(noDom);
+			Decision noDecision = buildDecisionTree(noDom.getChild("decision"));
 			decisions.setNoDecision(noDecision);
 		}
 		

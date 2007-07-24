@@ -90,6 +90,7 @@ public class DecisionTreeOp extends AbstractOperator {
         for (int i = 0; i < decisions.length; i++) {
         	BandArithmeticOp.BandDescriptor bandDescriptor = new BandArithmeticOp.BandDescriptor();
         	bandDescriptor.name = "b"+i;
+        	System.out.println("i:"+i+" >"+decisions[i].getTerm()+"<");
 			bandDescriptor.expression = decisions[i].getTerm();
 			bandDescriptor.type = ProductData.TYPESTRING_BOOLEAN;
 			bandDescriptions[i] = bandDescriptor;

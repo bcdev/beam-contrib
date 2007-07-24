@@ -1,0 +1,36 @@
+<graph>
+    <id>waq</id>
+
+    <node>
+        <id>l1b</id>
+        <operator>org.esa.beam.framework.gpf.operators.common.ReadProductOp$Spi</operator>
+        <parameters>
+            <filePath>${inputFile1}</filePath>
+        </parameters>
+    </node>
+
+
+    <node>
+        <id>classify</id>
+        <operator>org.esa.beam.decisiontree.DecisionTreeOp$Spi</operator>
+        <sources>
+            <input>l1b</input>
+            <input1>l2</input1>
+        </sources>
+        <parameters>
+            <decisionConfigFile>C:\Workspace\Beam41\beam-4.x-contrib\gpf-decisiontree\gpf\waqDt.xml</decisionConfigFile>
+        </parameters>
+    </node>
+
+    <node>
+        <id>write</id>
+        <operator>org.esa.beam.framework.gpf.operators.common.WriteProductOp$Spi</operator>
+        <sources>
+            <input>classify</input>
+        </sources>
+        <parameters>
+            <filePath>${outputFile1}</filePath>
+        </parameters>
+    </node>
+
+</graph>
