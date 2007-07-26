@@ -13,6 +13,11 @@
     <packaging>jar</packaging>
 
     <dependencies>
+       <dependency>
+            <groupId>org.esa.beam</groupId>
+            <artifactId>beam-visat</artifactId>
+            <version>4.1-SNAPSHOT</version>
+        </dependency>
         <dependency>
             <groupId>org.esa.beam</groupId>
             <artifactId>beam-gpf</artifactId>

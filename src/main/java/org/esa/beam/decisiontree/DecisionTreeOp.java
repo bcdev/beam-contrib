@@ -25,6 +25,7 @@ import java.util.Map;
 import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.ProductData;
+import org.esa.beam.framework.datamodel.ROIDefinition;
 import org.esa.beam.framework.gpf.AbstractOperator;
 import org.esa.beam.framework.gpf.AbstractOperatorSpi;
 import org.esa.beam.framework.gpf.GPF;
@@ -32,7 +33,7 @@ import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.OperatorSpi;
 import org.esa.beam.framework.gpf.Raster;
 import org.esa.beam.framework.gpf.annotations.Parameter;
-import org.esa.beam.framework.gpf.annotations.SourceProduct;
+import org.esa.beam.framework.gpf.annotations.SourceProducts;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
 import org.esa.beam.framework.gpf.internal.DefaultOperatorContext;
 import org.esa.beam.framework.gpf.operators.common.BandArithmeticOp;
@@ -44,12 +45,14 @@ public class DecisionTreeOp extends AbstractOperator {
 
     public static final String CLASSIFICATION_BAND = "classification";
 
-    @SourceProduct(alias="input")
-    private Product sourceProduct;
+    @SourceProducts
+    private Product[] sourceProducts;
     @TargetProduct
     private Product targetProduct;
     @Parameter
     private String decisionConfigFile;
+    @Parameter
+    private ROIDefinition roiDefinition;
     @Parameter
     private DecisionTreeConfiguration configuration;
 
@@ -67,7 +70,7 @@ public class DecisionTreeOp extends AbstractOperator {
     @Override
 	protected Product initialize(ProgressMonitor pm) throws OperatorException {
         targetProduct = new Product("name", "type",
-        		sourceProduct.getSceneRasterWidth(), sourceProduct.getSceneRasterHeight());
+        		sourceProducts[0].getSceneRasterWidth(), sourceProducts[0].getSceneRasterHeight());
         
         Band classBand = targetProduct.addBand(CLASSIFICATION_BAND, ProductData.TYPE_UINT8);
         classBand.setDescription("decisions");
@@ -97,8 +100,22 @@ public class DecisionTreeOp extends AbstractOperator {
     	}
 		parameters.put("bandDescriptors", bandDescriptions);
 		
+		DecisionVariable[] decisionVariables = configuration.getVariables();
+		if (decisionVariables != null) {
+			BandArithmeticOp.Variable[] variables = new BandArithmeticOp.Variable[decisionVariables.length];
+			for (int i = 0; i < decisionVariables.length; i++) {
+				BandArithmeticOp.Variable variable = new BandArithmeticOp.Variable();
+				variable.name = decisionVariables[i].getName();
+				System.out.println("i:"+i+" >"+decisionVariables[i].getName()+"< "+decisionVariables[i].getValue());
+				variable.type = ProductData.TYPESTRING_FLOAT32;
+				variable.value = decisionVariables[i].getValue();
+				variables[i] = variable;
+			}
+			parameters.put("variables", variables);
+		}
+		
 		Map<String, Product> products = new HashMap<String, Product>();
-		for (Product product : getContext().getSourceProducts()) {
+		for (Product product : sourceProducts) {
 			products.put(getContext().getIdForSourceProduct(product), product);	
 		}
 		Product expressionProduct = GPF.createProduct("BandArithmetic", parameters, products, pm);

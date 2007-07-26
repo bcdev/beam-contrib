@@ -19,6 +19,9 @@
         </sources>
         <parameters>
             <decisionConfigFile>C:\Workspace\Beam41\beam-4.x-contrib\gpf-decisiontree\gpf\waqDt.xml</decisionConfigFile>
+			<variables>
+				<variable name="muschel" value="0.77"/>
+			</variables>            
         </parameters>
     </node>
 
