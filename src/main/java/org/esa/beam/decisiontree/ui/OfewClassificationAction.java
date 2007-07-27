@@ -61,14 +61,7 @@ import javax.swing.JOptionPane;
  * @author Ralf Quast
  * @version $Revision:$ $Date:$
  */
-public class OfewAction extends ExecCommand {
-
-    static List<String> CHRIS_TYPES;
-
-    static {
-        CHRIS_TYPES = new ArrayList<String>();
-        Collections.addAll(CHRIS_TYPES, "CHRIS_M1", "CHRIS_M2", "CHRIS_M3", "CHRIS_M3A", "CHRIS_M4", "CHRIS_M5");
-    }
+public class OfewClassificationAction extends ExecCommand {
 
     @Override
     public void actionPerformed(CommandEvent commandEvent) {
@@ -90,16 +83,16 @@ public class OfewAction extends ExecCommand {
             return;
         }
         
-        final OfewPresenter presenter = new OfewPresenter(selectedProduct, configuration);
-        OfewPanel ofewPanel = new OfewPanel(presenter);
-		dialog.setContent(ofewPanel);
+        final OfewClassificationPresenter presenter = new OfewClassificationPresenter(selectedProduct, configuration);
+        OfewClassificationPanel ofewClassificationPanel = new OfewClassificationPanel(presenter);
+		dialog.setContent(ofewClassificationPanel);
 
         if (dialog.show() == ModalDialog.ID_OK) {
             final DialogProgressMonitor pm = new DialogProgressMonitor(VisatApp.getApp().getMainFrame(),
                                                                        "OFEW Klassifikation",
                                                                        Dialog.ModalityType.APPLICATION_MODAL);
 
-            ofewPanel.postActionEvent();
+            ofewClassificationPanel.postActionEvent();
             try {
                 performOfewAction(presenter, pm);
             } catch (OperatorException e) {
@@ -112,13 +105,21 @@ public class OfewAction extends ExecCommand {
     @Override
     public void updateState() {
         final Product selectedProduct = VisatApp.getApp().getSelectedProduct();
-        final boolean enabled = selectedProduct != null;
-        // TODO LandSat only ???
-        // && CHRIS_TYPES.contains(selectedProduct.getProductType());
+        boolean enabled = false;
+        if (selectedProduct != null) {
+        	if (selectedProduct.containsBand("band1") &&
+        			selectedProduct.containsBand("band1") &&
+        			selectedProduct.containsBand("band1") &&
+        			selectedProduct.containsBand("band1") &&
+        			selectedProduct.containsBand("band1") &&
+        			selectedProduct.containsBand("band1")) {
+        		enabled = true;
+        	}
+        }
         setEnabled(enabled);
     }
 
-    private void performOfewAction(OfewPresenter presenter, ProgressMonitor pm)
+    private void performOfewAction(OfewClassificationPresenter presenter, ProgressMonitor pm)
             throws OperatorException {
         try {
             pm.beginTask("Performing OFEW Classification", 42);
@@ -197,7 +198,7 @@ public class OfewAction extends ExecCommand {
 		return parameter;
 	}
 	
-	private Map<String, Object> getClassificationParameter(OfewPresenter presenter) {
+	private Map<String, Object> getClassificationParameter(OfewClassificationPresenter presenter) {
 		Map<String, Object> parameter = new HashMap<String, Object>();
 		parameter.put("configuration", presenter.getConfiguration());
 		parameter.put("roi", presenter.getInputProduct().getBand("band4").getROIDefinition());

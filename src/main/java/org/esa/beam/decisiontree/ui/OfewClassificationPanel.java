@@ -15,13 +15,13 @@ import org.esa.beam.framework.ui.TableLayout;
 import com.bc.ceres.binding.ValueContainer;
 import com.bc.ceres.binding.swing.SwingBindingContext;
 
-class OfewPanel extends JPanel {
+class OfewClassificationPanel extends JPanel {
 
     private JTextField[] variablesTextFields;
 	private ValueContainer[] valueContainers;
     
 
-	public OfewPanel(OfewPresenter presenter) {
+	public OfewClassificationPanel(OfewClassificationPresenter presenter) {
 		valueContainers = presenter.getVariableValueContainers();
 		variablesTextFields = new JTextField[valueContainers.length];
 		
@@ -44,7 +44,7 @@ class OfewPanel extends JPanel {
 		}
     }
 
-    private void initComponents(OfewPresenter presenter) {
+    private void initComponents(OfewClassificationPresenter presenter) {
         TableLayout tableLayout = new TableLayout(1);
 		setLayout(tableLayout);
         tableLayout.setTableAnchor(TableLayout.Anchor.LINE_START);

@@ -30,13 +30,13 @@ import com.bc.ceres.binding.ValueContainer;
  * @author marcoz
  * @version $Revision: $ $Date: $
  */
-public class OfewPresenter {
+public class OfewClassificationPresenter {
 
 	private final Product inputProduct;
 	private final DecisionTreeConfiguration configuration;
 	private ValueContainer[] variableValueContainer;
 
-	public OfewPresenter(Product selectedProduct, DecisionTreeConfiguration configuration) {
+	public OfewClassificationPresenter(Product selectedProduct, DecisionTreeConfiguration configuration) {
 		this.inputProduct = selectedProduct;
 		this.configuration = configuration;
 		

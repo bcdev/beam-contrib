@@ -26,7 +26,7 @@
     <extension point="beam-visat:actions">
         <action>
             <id>ofewClassification</id>
-            <class>org.esa.beam.decisiontree.ui.OfewAction</class>
+            <class>org.esa.beam.decisiontree.ui.OfewClassificationAction</class>
             <text>OFEW Klassifikation....</text>
             <shortDescr>Aufruf des OFEW Klassifikations Werkzeugs</shortDescr>
             <mnemonic></mnemonic>
