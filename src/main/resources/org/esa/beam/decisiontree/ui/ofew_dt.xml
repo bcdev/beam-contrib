@@ -19,9 +19,9 @@
     </inputProducts>
     
     <variables>
-        <variable name="offset_sed" value="0.02" description="Sedimente"/>
-        <variable name="offset_veg" value="0.02" description="Vegetation"/>
-        <variable name="offset_musch" value="0.02" description="Muscheln"/>
+        <variable name="offset_sed" value="0.0" description="Sedimente"/>
+        <variable name="offset_veg" value="0.0" description="Vegetation"/>
+        <variable name="offset_musch" value="0.0" description="Muscheln"/>
     </variables>
 
     <decision name="nodata?" term="$f2.ndvi &lt; 0 or ($f3.band1 + $f3.band2 + $f3.band3 + $f3.band4) &lt; 0.12 or $f2.ndvi &gt; 0.7">
