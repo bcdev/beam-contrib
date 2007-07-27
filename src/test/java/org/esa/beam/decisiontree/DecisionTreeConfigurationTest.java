@@ -16,10 +16,10 @@
  */
 package org.esa.beam.decisiontree;
 
+import junit.framework.TestCase;
+
 import java.awt.Color;
 import java.io.StringReader;
-
-import junit.framework.TestCase;
 
 /**
  * Created by marcoz.

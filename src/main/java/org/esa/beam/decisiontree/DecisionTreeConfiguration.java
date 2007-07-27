@@ -1,5 +1,9 @@
 package org.esa.beam.decisiontree;
 
+import com.thoughtworks.xstream.io.xml.xppdom.Xpp3Dom;
+import com.thoughtworks.xstream.io.xml.xppdom.Xpp3DomBuilder;
+import org.esa.beam.util.StringUtils;
+
 import java.awt.Color;
 import java.io.Reader;
 import java.util.ArrayList;
@@ -8,11 +12,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import org.esa.beam.util.StringUtils;
-
-import com.thoughtworks.xstream.io.xml.xppdom.Xpp3Dom;
-import com.thoughtworks.xstream.io.xml.xppdom.Xpp3DomBuilder;
 
 public class DecisionTreeConfiguration {
 	
