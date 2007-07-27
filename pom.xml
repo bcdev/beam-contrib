@@ -5,9 +5,9 @@
 
     <modelVersion>4.0.0</modelVersion>
 
-    <name>BEAM decision tree</name>
+    <name>BEAM ofew tools</name>
     <groupId>org.esa.beam</groupId>
-    <artifactId>gpf-decisiontree</artifactId>
+    <artifactId>beam-ofew</artifactId>
     <version>1.0-SNAPSHOT</version>
 
     <packaging>jar</packaging>
@@ -22,6 +22,11 @@
             <groupId>org.esa.beam</groupId>
             <artifactId>beam-gpf</artifactId>
             <version>4.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.beam</groupId>
+            <artifactId>beam-decisiontree</artifactId>
+            <version>1.0-SNAPSHOT</version>
         </dependency>        
     </dependencies>
 
