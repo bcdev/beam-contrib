@@ -94,7 +94,6 @@ public class DecisionTreeOp extends AbstractOperator {
         for (int i = 0; i < decisions.length; i++) {
         	BandArithmeticOp.BandDescriptor bandDescriptor = new BandArithmeticOp.BandDescriptor();
         	bandDescriptor.name = "b"+i;
-        	System.out.println("i:"+i+" >"+decisions[i].getTerm()+"<");
 			bandDescriptor.expression = decisions[i].getTerm();
 			bandDescriptor.type = ProductData.TYPESTRING_BOOLEAN;
 			bandDescriptions[i] = bandDescriptor;
@@ -107,7 +106,6 @@ public class DecisionTreeOp extends AbstractOperator {
 			for (int i = 0; i < decisionVariables.length; i++) {
 				BandArithmeticOp.Variable variable = new BandArithmeticOp.Variable();
 				variable.name = decisionVariables[i].getName();
-				System.out.println("i:"+i+" >"+decisionVariables[i].getName()+"< "+decisionVariables[i].getValue());
 				variable.type = ProductData.TYPESTRING_FLOAT32;
 				variable.value = decisionVariables[i].getValue();
 				variables[i] = variable;
