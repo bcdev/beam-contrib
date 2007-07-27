@@ -44,7 +44,7 @@ class OfewClassificationPanel extends JPanel {
 	}
 	
 	public String getRoiBandName() {
-		if (roiCheckBox != null && roiCheckBox.isSelected()) {
+		if (roiCheckBox != null && roiCheckBox.isEnabled() && roiCheckBox.isSelected()) {
 			String name = (String) roiCombo.getSelectedItem();
 			return name;
 		}
@@ -98,17 +98,21 @@ class OfewClassificationPanel extends JPanel {
 		inputPanel.add(inputProductTextField);
 		
 		String[] bandsWithRoi = presenter.getBandsWithRoi();
+
+		roiCheckBox = new JCheckBox("Nur in der ROI von ", true);
+		inputPanel.add(roiCheckBox);
+		roiCombo = new JComboBox(bandsWithRoi);
+		inputPanel.add(roiCombo);
+
 		if (bandsWithRoi.length > 0) {
-			roiCheckBox = new JCheckBox("Nur in der ROI von ", true);
-			inputPanel.add(roiCheckBox);
-			roiCombo = new JComboBox(bandsWithRoi);
-			inputPanel.add(roiCombo);
-			
 			roiCheckBox.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					roiCombo.setEnabled(roiCheckBox.isSelected());
 				}
 			});
+		} else {
+			roiCombo.setEnabled(false);
+			roiCheckBox.setEnabled(false);
 		}
 		add(inputPanel);
 		
