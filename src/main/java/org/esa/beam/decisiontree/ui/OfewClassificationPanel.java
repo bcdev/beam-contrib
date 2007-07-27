@@ -24,6 +24,9 @@ class OfewClassificationPanel extends JPanel {
 	private ValueContainer[] valueContainers;
 	private JComboBox roiCombo;
 	private JCheckBox roiCheckBox;
+	private JTextField indexProductName;
+	private JTextField endmemberProductName;
+	private JTextField classifyProductName;
     
 
 	public OfewClassificationPanel(OfewClassificationPresenter presenter) {
@@ -41,15 +44,26 @@ class OfewClassificationPanel extends JPanel {
 	}
 	
 	public String getRoiBandName() {
-		if (roiCheckBox.isSelected()) {
+		if (roiCheckBox != null && roiCheckBox.isSelected()) {
 			String name = (String) roiCombo.getSelectedItem();
 			return name;
 		}
 		return "";
 	}
+	
+	public String getClassificationProductName() {
+		return classifyProductName.getText();
+	}
+	
+	public String getEndmemberProductName() {
+		return endmemberProductName.getText();
+	}
+
+	public String getIndexProductName() {
+		return indexProductName.getText();
+	}
 
     private void bindComponents() {
-    	
     	for (int i = 0; i < valueContainers.length; i++) {
     		ValueContainer container = valueContainers[i];
     		SwingBindingContext bindingContext = new SwingBindingContext(container);
@@ -70,7 +84,6 @@ class OfewClassificationPanel extends JPanel {
         inputTableLayout.setTableFill(TableLayout.Fill.HORIZONTAL);
         inputTableLayout.setColumnWeightX(0, 0.1);
         inputTableLayout.setColumnWeightX(1, 1);
-//        inputTableLayout.setCellColspan(1, 0, 2);
         inputTableLayout.setTablePadding(2, 2);
 		JPanel inputPanel = new JPanel(inputTableLayout);
 
@@ -80,7 +93,7 @@ class OfewClassificationPanel extends JPanel {
                                                                 new Font("Tahoma", 0, 11),
                                                                 new Color(0, 70, 213)));
         inputPanel.add(new JLabel("Eingabe-Produkt:"));
-        JTextField inputProductTextField = new JTextField(presenter.getInputProduct().getName());
+        JTextField inputProductTextField = new JTextField(presenter.getInputProduct().getName(), 40);
         inputProductTextField.setEditable(false);
 		inputPanel.add(inputProductTextField);
 		
@@ -140,11 +153,14 @@ class OfewClassificationPanel extends JPanel {
                                                                 new Font("Tahoma", 0, 11),
                                                                 new Color(0, 70, 213)));
 		outputPanel.add(new JLabel("Klassifikations-Produkt:"));
-		outputPanel.add(new JTextField(16));
+		classifyProductName = new JTextField(presenter.getClassificationProductNameSuggestion(), 40);
+		outputPanel.add(classifyProductName);
 		outputPanel.add(new JLabel("Entmischungs-Produkt:"));
-		outputPanel.add(new JTextField(16));
+		endmemberProductName = new JTextField(presenter.getEndmemberProductNameSuggestion(), 40);
+		outputPanel.add(endmemberProductName);
 		outputPanel.add(new JLabel("Index-Produkt:"));
-		outputPanel.add(new JTextField(16));
+		indexProductName = new JTextField(presenter.getIndexProductNameSuggestion(), 40);
+		outputPanel.add(indexProductName);
         add(outputPanel);
     }
 }

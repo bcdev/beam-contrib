@@ -98,9 +98,8 @@ public class OfewClassificationAction extends ExecCommand {
                                                                        Dialog.ModalityType.APPLICATION_MODAL);
 
             ofewClassificationPanel.postActionEvent();
-            String roiBandName = ofewClassificationPanel.getRoiBandName();
             try {
-                performOfewAction(presenter, roiBandName, pm);
+                performOfewAction(presenter, ofewClassificationPanel, pm);
             } catch (OperatorException e) {
                 dialog.showErrorDialog(e.getMessage());
                 VisatApp.getApp().getLogger().log(Level.SEVERE, e.getMessage(), e);
@@ -123,7 +122,7 @@ public class OfewClassificationAction extends ExecCommand {
         setEnabled(enabled);
     }
 
-    private void performOfewAction(OfewClassificationPresenter presenter, String roiBandName, ProgressMonitor pm)
+    private void performOfewAction(OfewClassificationPresenter presenter, OfewClassificationPanel panel, ProgressMonitor pm)
             throws OperatorException {
         try {
             pm.beginTask("Performing OFEW Classification", 30);
@@ -132,6 +131,7 @@ public class OfewClassificationAction extends ExecCommand {
             final Product endmemberProduct = GPF.createProduct("SpectralUnmixing",
 					unmixingParameter, presenter.getInputProduct(),
 					new SubProgressMonitor(pm, 10));
+            endmemberProduct.setName(panel.getEndmemberProductName());
 
             Map<String, Object> indexParameter = getIndexParameter();
             Map<String, Product> indexInputProducts = new HashMap<String, Product>();
@@ -140,21 +140,22 @@ public class OfewClassificationAction extends ExecCommand {
             final Product indexProduct = GPF.createProduct("BandArithmetic",
 					indexParameter, indexInputProducts,
 					new SubProgressMonitor(pm, 10));
+            indexProduct.setName(panel.getIndexProductName());
             
-            Map<String, Object> classificationParameter = getClassificationParameter(presenter, roiBandName);
+            Map<String, Object> classificationParameter = getClassificationParameter(presenter, panel.getRoiBandName());
             Map<String, Product> classificationInputProducts = new HashMap<String, Product>();
             classificationInputProducts.put("f3", presenter.getInputProduct());
             classificationInputProducts.put("f1", endmemberProduct);
             classificationInputProducts.put("f2", indexProduct);
-            final Product classificationProducts = GPF.createProduct("DecisionTree",
+            final Product classificationProduct = GPF.createProduct("DecisionTree",
             		classificationParameter, classificationInputProducts,
 					new SubProgressMonitor(pm, 10));
-            
+            classificationProduct.setName(panel.getClassificationProductName());
 
             
             VisatApp.getApp().addProduct(endmemberProduct);
             VisatApp.getApp().addProduct(indexProduct);
-            VisatApp.getApp().addProduct(classificationProducts);
+            VisatApp.getApp().addProduct(classificationProduct);
         } catch (URISyntaxException e) {
 			throw new OperatorException(e);
 		} finally {

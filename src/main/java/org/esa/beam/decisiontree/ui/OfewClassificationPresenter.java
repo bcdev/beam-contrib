@@ -81,6 +81,18 @@ public class OfewClassificationPresenter {
 		return inputProduct;
 	}
 	
+	public String getClassificationProductNameSuggestion() {
+		return inputProduct.getName() + "_klassifikation";
+	}
+	
+	public String getEndmemberProductNameSuggestion() {
+		return inputProduct.getName() + "_entmischung";
+	}
+
+	public String getIndexProductNameSuggestion() {
+		return inputProduct.getName() + "_indizes";
+	}
+	
 	public DecisionTreeConfiguration getConfiguration() {
 		return configuration;
 	}
