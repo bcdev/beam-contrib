@@ -32,11 +32,11 @@ public class DecisionTreeConfiguration {
         Classification[] theClasses = parseClasses(classesDom);
         setClasses(theClasses);
         
-        Xpp3Dom variablesDom = dom.getChild("variables");
-        if (variables != null) {
-        	Xpp3Dom[] variableDoms = variablesDom.getChildren();
-        	DecisionVariable[] variables = parseVariables(variableDoms);
-        	setVariables(variables);
+        Xpp3Dom allVariablesDom = dom.getChild("variables");
+        if (allVariablesDom != null) {
+        	Xpp3Dom[] variableDoms = allVariablesDom.getChildren();
+        	DecisionVariable[] theVariables = parseVariables(variableDoms);
+        	setVariables(theVariables);
         }
         
         Xpp3Dom decisionDom = dom.getChild("decision");
@@ -74,17 +74,17 @@ public class DecisionTreeConfiguration {
 	}
 
 	private DecisionVariable[] parseVariables(Xpp3Dom[] variableDoms) {
-		DecisionVariable[]  variables = new DecisionVariable[variableDoms.length];
+		DecisionVariable[] theVariables = new DecisionVariable[variableDoms.length];
 		int i = 0;
 		for (Xpp3Dom variableDom : variableDoms) {
-			String name = variableDom.getAttribute("name");
+			String varName = variableDom.getAttribute("name");
 			String value = variableDom.getAttribute("value");
 			String description = variableDom.getAttribute("description");
-			DecisionVariable decisionVariable = new DecisionVariable(name, value, description);
-			variables[i] = decisionVariable;
+			DecisionVariable decisionVariable = new DecisionVariable(varName, value, description);
+			theVariables[i] = decisionVariable;
 			i++;
 		}
-		return variables;
+		return theVariables;
 	}
 	
 	private Classification[] parseClasses(Xpp3Dom[] classesDoms) {
