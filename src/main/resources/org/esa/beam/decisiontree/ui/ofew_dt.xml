@@ -2,13 +2,13 @@
     <classes>
         <class name="nodata" value="0" color="0,0,0"/>
         <class name="Sand" value="1" color="255,255,75"/>
-        <class name="Misch" value="2" color="55,215,0"/>
+        <class name="Misch" value="2" color="255,215,0"/>
         <class name="Misch2" value="3" color="238,154,0"/>
         <class name="Schlick" value="4" color="125,38,205"/>
         <class name="Schlick-tr" value="5" color="162,88,167"/>
-        <class name="Veg1" value="6" color="0,255,0"/>
+        <class name="Veg1" value="6" color="0,240,0"/>
         <class name="Veg2" value="7" color="46,139,87"/>
-        <class name="Muschel" value="8" color="255,0,0"/>
+        <class name="Muschel" value="8" color="240,0,0"/>
         <class name="Strand" value="9" color="230,230,230"/>
     </classes>
     
