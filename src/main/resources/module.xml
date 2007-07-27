@@ -17,6 +17,9 @@
         <module>beam-decisiontree</module>
     </dependency>
     <dependency>
+        <module>beam-unmix</module>
+    </dependency>
+    <dependency>
         <module>beam-visat</module>
         <optional>true</optional>
     </dependency>

@@ -16,13 +16,10 @@
 package org.esa.beam.decisiontree.ui;
 
 import java.awt.Dialog;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -42,6 +39,10 @@ import org.esa.beam.framework.gpf.operators.common.BandArithmeticOp;
 import org.esa.beam.framework.ui.ModalDialog;
 import org.esa.beam.framework.ui.command.CommandEvent;
 import org.esa.beam.framework.ui.command.ExecCommand;
+import org.esa.beam.framework.ui.diagram.DiagramGraph;
+import org.esa.beam.framework.ui.diagram.DiagramGraphIO;
+import org.esa.beam.unmixing.Endmember;
+import org.esa.beam.unmixing.SpectralUnmixingOp;
 import org.esa.beam.visat.VisatApp;
 
 import com.bc.ceres.core.ProgressMonitor;
@@ -156,7 +157,7 @@ public class OfewClassificationAction extends ExecCommand {
             VisatApp.getApp().addProduct(endmemberProduct);
             VisatApp.getApp().addProduct(indexProduct);
             VisatApp.getApp().addProduct(classificationProduct);
-        } catch (URISyntaxException e) {
+        } catch (IOException e) {
 			throw new OperatorException(e);
 		} finally {
             pm.done();
@@ -189,12 +190,14 @@ public class OfewClassificationAction extends ExecCommand {
 		return parameter;
 	}
 
-	private Map<String, Object> getUnmixingParameter() throws URISyntaxException {
+	private Map<String, Object> getUnmixingParameter() throws IOException {
 		Map<String, Object> parameter = new HashMap<String, Object>();
-		URL resource = this.getClass().getResource("em.csv");
-		File file = new File(resource.toURI());
-		parameter.put("endmemberFile", file);
-		
+		InputStream inputStream = this.getClass().getResourceAsStream("em.csv");
+		InputStreamReader reader = new InputStreamReader(inputStream);
+		DiagramGraph[] diagramGraphs = DiagramGraphIO.readGraphs(reader);
+        Endmember[] endmembers = SpectralUnmixingOp.convertGraphsToEndmembers(diagramGraphs);
+        parameter.put("endmembers", endmembers);
+        
 		parameter.put("sourceBandNames", sourceBandNames);
 		parameter.put("unmixingModelName", "Constrained LSU");
 		parameter.put("targetBandNameSuffix", "");
