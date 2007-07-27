@@ -15,15 +15,27 @@
  */
 package org.esa.beam.decisiontree.ui;
 
-import com.bc.ceres.core.ProgressMonitor;
-import com.bc.ceres.core.SubProgressMonitor;
-import com.bc.ceres.swing.progress.DialogProgressMonitor;
+import java.awt.Dialog;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.logging.Level;
 
+import javax.media.jai.ROI;
+
+import org.esa.beam.decisiontree.Decision;
 import org.esa.beam.decisiontree.DecisionTreeConfiguration;
-import org.esa.beam.framework.dataio.ProductIO;
+import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.ProductData;
-import org.esa.beam.framework.datamodel.ROIDefinition;
+import org.esa.beam.framework.dataop.barithm.BandArithmetic;
+import org.esa.beam.framework.dataop.barithm.RasterDataEvalEnv;
 import org.esa.beam.framework.gpf.GPF;
 import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.operators.common.BandArithmeticOp;
@@ -32,27 +44,13 @@ import org.esa.beam.framework.ui.command.CommandEvent;
 import org.esa.beam.framework.ui.command.ExecCommand;
 import org.esa.beam.visat.VisatApp;
 
-import java.awt.Dialog;
-import java.io.File;
-import java.io.FileFilter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.SortedSet;
-import java.util.TreeSet;
-import java.util.logging.Level;
-
-import javax.swing.JComponent;
-import javax.swing.JOptionPane;
+import com.bc.ceres.core.ProgressMonitor;
+import com.bc.ceres.core.SubProgressMonitor;
+import com.bc.ceres.swing.progress.DialogProgressMonitor;
+import com.bc.jexp.EvalEnv;
+import com.bc.jexp.EvalException;
+import com.bc.jexp.Symbol;
+import com.bc.jexp.impl.AbstractSymbol;
 
 /**
  * Noise reduction action.
@@ -63,7 +61,14 @@ import javax.swing.JOptionPane;
  */
 public class OfewClassificationAction extends ExecCommand {
 
-    @Override
+    private final String[] sourceBandNames;
+
+	public OfewClassificationAction() {
+		sourceBandNames = new String[] { "band1", "band2", "band3", "band4",
+				"band5", "band6" };
+	}
+
+	@Override
     public void actionPerformed(CommandEvent commandEvent) {
         final Product selectedProduct = VisatApp.getApp().getSelectedProduct();
 
@@ -93,8 +98,9 @@ public class OfewClassificationAction extends ExecCommand {
                                                                        Dialog.ModalityType.APPLICATION_MODAL);
 
             ofewClassificationPanel.postActionEvent();
+            String roiBandName = ofewClassificationPanel.getRoiBandName();
             try {
-                performOfewAction(presenter, pm);
+                performOfewAction(presenter, roiBandName, pm);
             } catch (OperatorException e) {
                 dialog.showErrorDialog(e.getMessage());
                 VisatApp.getApp().getLogger().log(Level.SEVERE, e.getMessage(), e);
@@ -107,22 +113,20 @@ public class OfewClassificationAction extends ExecCommand {
         final Product selectedProduct = VisatApp.getApp().getSelectedProduct();
         boolean enabled = false;
         if (selectedProduct != null) {
-        	if (selectedProduct.containsBand("band1") &&
-        			selectedProduct.containsBand("band1") &&
-        			selectedProduct.containsBand("band1") &&
-        			selectedProduct.containsBand("band1") &&
-        			selectedProduct.containsBand("band1") &&
-        			selectedProduct.containsBand("band1")) {
-        		enabled = true;
-        	}
+        	enabled = true;
+        	for (String bandName : sourceBandNames) {
+        		if (!selectedProduct.containsBand(bandName)) {
+        			enabled = false;
+        		}
+			}
         }
         setEnabled(enabled);
     }
 
-    private void performOfewAction(OfewClassificationPresenter presenter, ProgressMonitor pm)
+    private void performOfewAction(OfewClassificationPresenter presenter, String roiBandName, ProgressMonitor pm)
             throws OperatorException {
         try {
-            pm.beginTask("Performing OFEW Classification", 42);
+            pm.beginTask("Performing OFEW Classification", 30);
             
             Map<String, Object> unmixingParameter = getUnmixingParameter();
             final Product endmemberProduct = GPF.createProduct("SpectralUnmixing",
@@ -137,7 +141,7 @@ public class OfewClassificationAction extends ExecCommand {
 					indexParameter, indexInputProducts,
 					new SubProgressMonitor(pm, 10));
             
-            Map<String, Object> classificationParameter = getClassificationParameter(presenter);
+            Map<String, Object> classificationParameter = getClassificationParameter(presenter, roiBandName);
             Map<String, Product> classificationInputProducts = new HashMap<String, Product>();
             classificationInputProducts.put("f3", presenter.getInputProduct());
             classificationInputProducts.put("f1", endmemberProduct);
@@ -145,7 +149,7 @@ public class OfewClassificationAction extends ExecCommand {
             final Product classificationProducts = GPF.createProduct("DecisionTree",
             		classificationParameter, classificationInputProducts,
 					new SubProgressMonitor(pm, 10));
-
+            
 
             
             VisatApp.getApp().addProduct(endmemberProduct);
@@ -190,18 +194,41 @@ public class OfewClassificationAction extends ExecCommand {
 		File file = new File(resource.toURI());
 		parameter.put("endmemberFile", file);
 		
-		String[] sourceBandNames = {"band1", "band2", "band3",
-				"band4", "band5", "band6"};
 		parameter.put("sourceBandNames", sourceBandNames);
 		parameter.put("unmixingModelName", "Constrained LSU");
 		parameter.put("targetBandNameSuffix", "");
 		return parameter;
 	}
 	
-	private Map<String, Object> getClassificationParameter(OfewClassificationPresenter presenter) {
+	private Map<String, Object> getClassificationParameter(OfewClassificationPresenter presenter, String roiBandName) throws OperatorException {
 		Map<String, Object> parameter = new HashMap<String, Object>();
-		parameter.put("configuration", presenter.getConfiguration());
-		parameter.put("roi", presenter.getInputProduct().getBand("band4").getROIDefinition());
+		DecisionTreeConfiguration configuration = presenter.getConfiguration();
+		if (roiBandName.length()>0) {
+			registerRoiSymbol(presenter.getInputProduct().getBand(roiBandName), ProgressMonitor.NULL);
+			Decision inRoiDecision = new Decision("inRoi", "inROI");
+			inRoiDecision.setYesDecision(configuration.getRootDecisions());
+			inRoiDecision.setNoClass(configuration.getClass("nodata"));
+			configuration.setRootDecisions(inRoiDecision);
+		}
+		parameter.put("configuration", configuration);
 		return parameter;
+	}
+	
+	private void registerRoiSymbol(Band band, ProgressMonitor pm) throws OperatorException {
+		if (band.isROIUsable()) {
+			final String symbolName = "inROI";
+			try {
+				final ROI roi = band.createROI(pm);
+				Symbol s = new AbstractSymbol.B(symbolName) {
+					public boolean evalB(EvalEnv env) throws EvalException {
+						RasterDataEvalEnv eEnv = (RasterDataEvalEnv) env;
+						return roi.contains(eEnv.getPixelX(), eEnv.getPixelY());
+					}
+				};
+				BandArithmetic.registerSymbol(s);
+			} catch (IOException e) {
+				throw new OperatorException("Couldn't create ROI", e);
+			}
+		}
 	}
 }

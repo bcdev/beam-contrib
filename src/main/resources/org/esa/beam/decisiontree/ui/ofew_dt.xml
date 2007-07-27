@@ -24,12 +24,12 @@
         <variable name="offset_musch" value="0.02" description="Muscheln"/>
     </variables>
 
-    <decision name="nodata?" term="$f2.ndvi &lt; 0">
+    <decision name="nodata?" term="$f2.ndvi &lt; 0 or ($f3.band1 + $f3.band2 + $f3.band3 + $f3.band4) &lt; 0.12 or $f2.ndvi &gt; 0.7">
         <yes>nodata</yes>
         <no>
             <decision name="Vegetation?" term="(($f2.ndvi &gt; 0.3 + offset_veg) or (($f2.Steigung_3_4 &gt; 0.3) and ($f2.ndvi &gt; 0.28 + offset_veg)) and ($f2.ndvi &lt; 0.45)) or ($f2.ndvi &gt; 0.4)">
                 <yes>
-                    <decision name="Muschel?" term="(($f3.band4 + $f3.band3 / 0.175 * $f3.band3) &gt; 0.06 + offset_musch) and ($f2.ndvi &lt; 0.5) and ($f2.Steigung_4_5 &lt; -0.05)">
+                    <decision name="Muschel?" term="((($f3.band4 + $f3.band3) / 0.175 * $f3.band3) &gt; 0.06 + offset_musch) and ($f2.ndvi &lt; 0.5) and ($f2.Steigung_4_5 &lt; -0.05)">
                         <yes>Muschel</yes>
                         <no>
                             <decision name ="dicht?" term="$f2.ndvi &gt; 0.45 + offset_veg">

@@ -2,9 +2,12 @@ package org.esa.beam.decisiontree.ui;
 
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 import javax.swing.BorderFactory;
 import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
@@ -19,6 +22,8 @@ class OfewClassificationPanel extends JPanel {
 
     private JTextField[] variablesTextFields;
 	private ValueContainer[] valueContainers;
+	private JComboBox roiCombo;
+	private JCheckBox roiCheckBox;
     
 
 	public OfewClassificationPanel(OfewClassificationPresenter presenter) {
@@ -33,6 +38,14 @@ class OfewClassificationPanel extends JPanel {
 		for (JTextField textField : variablesTextFields) {
 			textField.postActionEvent();
 		}
+	}
+	
+	public String getRoiBandName() {
+		if (roiCheckBox.isSelected()) {
+			String name = (String) roiCombo.getSelectedItem();
+			return name;
+		}
+		return "";
 	}
 
     private void bindComponents() {
@@ -57,7 +70,7 @@ class OfewClassificationPanel extends JPanel {
         inputTableLayout.setTableFill(TableLayout.Fill.HORIZONTAL);
         inputTableLayout.setColumnWeightX(0, 0.1);
         inputTableLayout.setColumnWeightX(1, 1);
-        inputTableLayout.setCellColspan(1, 0, 2);
+//        inputTableLayout.setCellColspan(1, 0, 2);
         inputTableLayout.setTablePadding(2, 2);
 		JPanel inputPanel = new JPanel(inputTableLayout);
 
@@ -70,9 +83,22 @@ class OfewClassificationPanel extends JPanel {
         JTextField inputProductTextField = new JTextField(presenter.getInputProduct().getName());
         inputProductTextField.setEditable(false);
 		inputPanel.add(inputProductTextField);
-        inputPanel.add(new JCheckBox("ROI only", true));
-        add(inputPanel);
-
+		
+		String[] bandsWithRoi = presenter.getBandsWithRoi();
+		if (bandsWithRoi.length > 0) {
+			roiCheckBox = new JCheckBox("Nur in der ROI von ", true);
+			inputPanel.add(roiCheckBox);
+			roiCombo = new JComboBox(bandsWithRoi);
+			inputPanel.add(roiCombo);
+			
+			roiCheckBox.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					roiCombo.setEnabled(roiCheckBox.isSelected());
+				}
+			});
+		}
+		add(inputPanel);
+		
         if (valueContainers.length != 0) {
         	TableLayout paramTableLayout = new TableLayout(2);
         	paramTableLayout.setTableAnchor(TableLayout.Anchor.LINE_START);

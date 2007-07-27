@@ -16,8 +16,12 @@
  */
 package org.esa.beam.decisiontree.ui;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.esa.beam.decisiontree.DecisionTreeConfiguration;
 import org.esa.beam.decisiontree.DecisionVariable;
+import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.gpf.annotations.ParameterDefinitionFactory;
 
@@ -52,6 +56,17 @@ public class OfewClassificationPresenter {
         	variableValueContainer[i] = factory.createObjectBackedValueContainer(variables[i]);
 		}
     }
+	
+	public String[] getBandsWithRoi() {
+		Band[] bands = inputProduct.getBands();
+		List<String> nameList = new ArrayList<String>(bands.length);
+		for (Band band : bands) {
+			if (band.isROIUsable()) {
+				nameList.add(band.getName());
+			}
+		}
+		return nameList.toArray(new String[nameList.size()]);
+	}
 
 	public ValueContainer getParamValueContainer(String name) {
 		for (ValueContainer valueContainer : variableValueContainer) {
