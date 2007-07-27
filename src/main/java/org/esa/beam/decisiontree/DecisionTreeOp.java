@@ -23,6 +23,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.esa.beam.framework.datamodel.Band;
+import org.esa.beam.framework.datamodel.BitmaskDef;
+import org.esa.beam.framework.datamodel.BitmaskOverlayInfo;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.framework.gpf.AbstractOperator;
@@ -69,9 +71,6 @@ public class DecisionTreeOp extends AbstractOperator {
         targetProduct = new Product("name", "type",
         		sourceProducts[0].getSceneRasterWidth(), sourceProducts[0].getSceneRasterHeight());
         
-        Band classBand = targetProduct.addBand(CLASSIFICATION_BAND, ProductData.TYPE_UINT8);
-        classBand.setDescription("decisions");
-
         if (StringUtils.isNotNullAndNotEmpty(decisionConfigFile)) {
         	try {
         	FileReader reader = new FileReader(decisionConfigFile);
@@ -82,6 +81,11 @@ public class DecisionTreeOp extends AbstractOperator {
 				throw new OperatorException("Could not parse config file: "+decisionConfigFile, e);
 			}
         }
+        
+        Band classBand = targetProduct.addBand(CLASSIFICATION_BAND, ProductData.TYPE_UINT8);
+        classBand.setDescription("decisions");
+        addBitmaskDefs();
+
         
         Map<String, Object> parameters = new HashMap<String, Object>();
         Decision[] decisions = configuration.getAllDecisions();
@@ -129,6 +133,19 @@ public class DecisionTreeOp extends AbstractOperator {
 		
         return targetProduct;
     }
+
+	private void addBitmaskDefs() {
+		Classification[] classes = configuration.getClasses();
+		BitmaskOverlayInfo bitmaskOverlayInfo = new BitmaskOverlayInfo();
+		for (Classification aClass : classes) {
+			BitmaskDef bitmaskDef = new BitmaskDef(aClass.getName(), "",
+					CLASSIFICATION_BAND + " == " + aClass.getValue(), aClass.getColor(),
+					0.0f);
+			targetProduct.addBitmaskDef(bitmaskDef);
+			bitmaskOverlayInfo.addBitmaskDef(bitmaskDef);
+		}
+		targetProduct.getBand(CLASSIFICATION_BAND).setBitmaskOverlayInfo(bitmaskOverlayInfo);
+	}
 
 	@Override
     public void computeBand(Raster targetRaster,
