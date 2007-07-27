@@ -25,7 +25,6 @@ import java.util.Map;
 import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.ProductData;
-import org.esa.beam.framework.datamodel.ROIDefinition;
 import org.esa.beam.framework.gpf.AbstractOperator;
 import org.esa.beam.framework.gpf.AbstractOperatorSpi;
 import org.esa.beam.framework.gpf.GPF;
@@ -51,8 +50,6 @@ public class DecisionTreeOp extends AbstractOperator {
     private Product targetProduct;
     @Parameter
     private String decisionConfigFile;
-    @Parameter
-    private ROIDefinition roiDefinition;
     @Parameter
     private DecisionTreeConfiguration configuration;
 
@@ -138,8 +135,7 @@ public class DecisionTreeOp extends AbstractOperator {
             ProgressMonitor pm) throws OperatorException {
     	
     	Rectangle rect = targetRaster.getRectangle();
-        final int size = rect.height * rect.width;
-        pm.beginTask("Processing frame...", size);
+        pm.beginTask("Processing frame...", rect.height);
         try {
         	Map<Decision, Raster> rasterMap = new HashMap<Decision, Raster>(dds.length);
         	for (int i = 0; i < dds.length; i++) {

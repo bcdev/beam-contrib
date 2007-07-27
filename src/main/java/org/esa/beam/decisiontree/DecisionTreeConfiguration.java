@@ -32,9 +32,12 @@ public class DecisionTreeConfiguration {
         Classification[] theClasses = parseClasses(classesDom);
         setClasses(theClasses);
         
-        Xpp3Dom[] variablesDom = dom.getChild("variables").getChildren();
-        DecisionVariable[] variables = parseVariables(variablesDom);
-        setVariables(variables);
+        Xpp3Dom variablesDom = dom.getChild("variables");
+        if (variables != null) {
+        	Xpp3Dom[] variableDoms = variablesDom.getChildren();
+        	DecisionVariable[] variables = parseVariables(variableDoms);
+        	setVariables(variables);
+        }
         
         Xpp3Dom decisionDom = dom.getChild("decision");
         Decision decision = parseDecisions(decisionDom);
