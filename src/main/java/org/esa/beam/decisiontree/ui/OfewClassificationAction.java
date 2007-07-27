@@ -15,17 +15,13 @@
  */
 package org.esa.beam.decisiontree.ui;
 
-import java.awt.Dialog;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.logging.Level;
-
-import javax.media.jai.ROI;
-
+import com.bc.ceres.core.ProgressMonitor;
+import com.bc.ceres.core.SubProgressMonitor;
+import com.bc.ceres.swing.progress.DialogProgressMonitor;
+import com.bc.jexp.EvalEnv;
+import com.bc.jexp.EvalException;
+import com.bc.jexp.Symbol;
+import com.bc.jexp.impl.AbstractSymbol;
 import org.esa.beam.decisiontree.Decision;
 import org.esa.beam.decisiontree.DecisionTreeConfiguration;
 import org.esa.beam.framework.datamodel.Band;
@@ -45,13 +41,15 @@ import org.esa.beam.unmixing.Endmember;
 import org.esa.beam.unmixing.SpectralUnmixingOp;
 import org.esa.beam.visat.VisatApp;
 
-import com.bc.ceres.core.ProgressMonitor;
-import com.bc.ceres.core.SubProgressMonitor;
-import com.bc.ceres.swing.progress.DialogProgressMonitor;
-import com.bc.jexp.EvalEnv;
-import com.bc.jexp.EvalException;
-import com.bc.jexp.Symbol;
-import com.bc.jexp.impl.AbstractSymbol;
+import javax.media.jai.ROI;
+import java.awt.Dialog;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.logging.Level;
 
 /**
  * Noise reduction action.
@@ -77,7 +75,7 @@ public class OfewClassificationAction extends ExecCommand {
                 "OFEW Klassifikation",
                 ModalDialog.ID_OK_CANCEL_HELP,
                 "ofewClassificationTool");
-        
+
         DecisionTreeConfiguration configuration;
         try {
         	InputStream inputStream = this.getClass().getResourceAsStream("ofew_dt.xml");
@@ -88,7 +86,7 @@ public class OfewClassificationAction extends ExecCommand {
             VisatApp.getApp().getLogger().log(Level.SEVERE, e.getMessage(), e);
             return;
         }
-        
+
         final OfewClassificationPresenter presenter = new OfewClassificationPresenter(selectedProduct, configuration);
         OfewClassificationPanel ofewClassificationPanel = new OfewClassificationPanel(presenter);
 		dialog.setContent(ofewClassificationPanel);
@@ -127,7 +125,7 @@ public class OfewClassificationAction extends ExecCommand {
             throws OperatorException {
         try {
             pm.beginTask("Performing OFEW Classification", 30);
-            
+
             Map<String, Object> unmixingParameter = getUnmixingParameter();
             final Product endmemberProduct = GPF.createProduct("SpectralUnmixing",
 					unmixingParameter, presenter.getInputProduct(),
@@ -142,7 +140,7 @@ public class OfewClassificationAction extends ExecCommand {
 					indexParameter, indexInputProducts,
 					new SubProgressMonitor(pm, 10));
             indexProduct.setName(panel.getIndexProductName());
-            
+
             Map<String, Object> classificationParameter = getClassificationParameter(presenter, panel.getRoiBandName());
             Map<String, Product> classificationInputProducts = new HashMap<String, Product>();
             classificationInputProducts.put("f3", presenter.getInputProduct());
@@ -153,7 +151,7 @@ public class OfewClassificationAction extends ExecCommand {
 					new SubProgressMonitor(pm, 10));
             classificationProduct.setName(panel.getClassificationProductName());
 
-            
+
             VisatApp.getApp().addProduct(endmemberProduct);
             VisatApp.getApp().addProduct(indexProduct);
             VisatApp.getApp().addProduct(classificationProduct);
@@ -171,17 +169,17 @@ public class OfewClassificationAction extends ExecCommand {
 		bandDesc[0].name = "ndvi";
 		bandDesc[0].expression = "($l5.band4 - $l5.band3)/($l5.band4 + $l5.band3)";
 		bandDesc[0].type = ProductData.TYPESTRING_FLOAT32;
-		
+
 		bandDesc[1] = new BandArithmeticOp.BandDescriptor();
 		bandDesc[1].name = "Steigung_3_4";
 		bandDesc[1].expression = "($l5.band3 - $l5.band4)/(0.66-0.835)";
 		bandDesc[1].type = ProductData.TYPESTRING_FLOAT32;
-		
+
 		bandDesc[2] = new BandArithmeticOp.BandDescriptor();
 		bandDesc[2].name = "Steigung_4_5";
 		bandDesc[2].expression = "($l5.band4 - $l5.band5)/(0.835-1.65)";
 		bandDesc[2].type = ProductData.TYPESTRING_FLOAT32;
-		
+
 		bandDesc[3] = new BandArithmeticOp.BandDescriptor();
 		bandDesc[3].name = "schlick_corr";
 		bandDesc[3].expression = "($em.Sand_wc < 0.0) ? $em.Sand_wc + $em.schlick : $em.schlick";
@@ -197,13 +195,13 @@ public class OfewClassificationAction extends ExecCommand {
 		DiagramGraph[] diagramGraphs = DiagramGraphIO.readGraphs(reader);
         Endmember[] endmembers = SpectralUnmixingOp.convertGraphsToEndmembers(diagramGraphs);
         parameter.put("endmembers", endmembers);
-        
+
 		parameter.put("sourceBandNames", sourceBandNames);
 		parameter.put("unmixingModelName", "Constrained LSU");
 		parameter.put("targetBandNameSuffix", "");
 		return parameter;
 	}
-	
+
 	private Map<String, Object> getClassificationParameter(OfewClassificationPresenter presenter, String roiBandName) throws OperatorException {
 		Map<String, Object> parameter = new HashMap<String, Object>();
 		DecisionTreeConfiguration configuration = presenter.getConfiguration();
@@ -217,7 +215,7 @@ public class OfewClassificationAction extends ExecCommand {
 		parameter.put("configuration", configuration);
 		return parameter;
 	}
-	
+
 	private void registerRoiSymbol(Band band, ProgressMonitor pm) throws OperatorException {
 		if (band.isROIUsable()) {
 			final String symbolName = "inROI";
