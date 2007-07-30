@@ -25,10 +25,13 @@ import org.esa.beam.decisiontree.DecisionTreeConfiguration;
 import org.esa.beam.decisiontree.DecisionVariable;
 import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.Product;
+import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.ParameterDefinitionFactory;
 
 import com.bc.ceres.binding.Factory;
 import com.bc.ceres.binding.ValueContainer;
+import com.bc.ceres.binding.ValueDefinition;
+import com.bc.ceres.binding.ValueSet;
 
 /**
  * Created by marcoz.
@@ -38,20 +41,29 @@ import com.bc.ceres.binding.ValueContainer;
  */
 public class OfewClassificationModel {
 
-	private final Product inputProduct;
+	@Parameter
+	private String classification;
+	@Parameter
+	private String index;
+	@Parameter
+	private String endmember;
+	@Parameter
+	private String roiBandName;
+	@Parameter
+	private boolean useRoi;
 	private final DecisionTreeConfiguration configuration;
-	private final String classificationProductName;
-	private final String indexProductName;
-	private final String endmemberProductName;
-	private ValueContainer[] variableValueContainer;
+	private final Product inputProduct;
+	
+	private ValueContainer[] variableVC;
+	private ValueContainer modelVC;
 
 	public OfewClassificationModel(Product selectedProduct, Reader reader) throws IOException {
 		inputProduct = selectedProduct;
 		configuration = loadDecisionTreeConfiguration(reader);
+		classification = inputProduct.getName() + "_klassifikation";
+		index = inputProduct.getName() + "_indizes";
+		endmember = inputProduct.getName() + "_entmischung";
 		initValueContainers();
-		classificationProductName = inputProduct.getName() + "_klassifikation";
-		indexProductName = inputProduct.getName() + "_indizes";
-		endmemberProductName = inputProduct.getName() + "_entmischung";
 	}
 	
 	private DecisionTreeConfiguration loadDecisionTreeConfiguration(Reader reader) throws IOException {
@@ -66,14 +78,23 @@ public class OfewClassificationModel {
 	private void initValueContainers() {
         final Factory factory = new Factory(new ParameterDefinitionFactory());
         DecisionVariable[] variables = configuration.getVariables();
-        variableValueContainer = new ValueContainer[variables.length];
+        variableVC = new ValueContainer[variables.length];
         
         for (int i = 0; i < variables.length; i++) {
-        	variableValueContainer[i] = factory.createObjectBackedValueContainer(variables[i]);
+        	variableVC[i] = factory.createObjectBackedValueContainer(variables[i]);
+		}
+        modelVC = factory.createObjectBackedValueContainer(this);
+        
+        String[] bandsWithRoi = getBandsWithRoi();
+		ValueSet valueSet = new ValueSet(bandsWithRoi); 
+        ValueDefinition valueDefinition = modelVC.getValueDefinition("roiBandName");
+		valueDefinition.setValueSet(valueSet);
+		if (useRoi) {
+			valueDefinition.setDefaultValue(roiBandName);
 		}
     }
 	
-	public String[] getBandsWithRoi() {
+	private String[] getBandsWithRoi() {
 		Band[] bands = inputProduct.getBands();
 		List<String> nameList = new ArrayList<String>(bands.length);
 		for (Band band : bands) {
@@ -81,32 +102,48 @@ public class OfewClassificationModel {
 				nameList.add(band.getName());
 			}
 		}
+		if (nameList.size() > 0) {
+			useRoi = true;
+			roiBandName = nameList.get(0);
+		}
 		return nameList.toArray(new String[nameList.size()]);
 	}
 
 	public ValueContainer getParamValueContainer(String name) {
-		for (ValueContainer valueContainer : variableValueContainer) {
+		for (ValueContainer valueContainer : variableVC) {
 			if (valueContainer.getValue("name").equals(name)) {
 				return valueContainer;
 			}
 		}
 		return null;
 	}
+	
+	public ValueContainer getOutputProductNamesValueContainer() {
+		return modelVC;
+	}
 
 	public Product getInputProduct() {
 		return inputProduct;
 	}
 	
-	public String getClassificationProductNameSuggestion() {
-		return classificationProductName;
+	public String getClassificationProductName() {
+		return classification;
 	}
 	
-	public String getEndmemberProductNameSuggestion() {
-		return endmemberProductName;
+	public String getEndmemberProductName() {
+		return endmember;
 	}
 
-	public String getIndexProductNameSuggestion() {
-		return indexProductName;
+	public String getIndexProductName() {
+		return index;
+	}
+	
+	public String getRoiBandName() {
+		return roiBandName;
+	}
+	
+	public boolean useRoi() {
+		return useRoi;
 	}
 	
 	public DecisionTreeConfiguration getConfiguration() {
@@ -114,6 +151,6 @@ public class OfewClassificationModel {
 	}
 
 	public ValueContainer[] getVariableValueContainers() {
-		return variableValueContainer;
+		return variableVC;
 	}
 }

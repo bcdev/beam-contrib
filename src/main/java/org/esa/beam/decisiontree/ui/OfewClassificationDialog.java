@@ -68,7 +68,7 @@ public class OfewClassificationDialog extends ModalDialog {
 	private final String[] sourceBandNames = new String[] { "band1", "band2", "band3", "band4",
 			"band5", "band6" };
 
-	private final OfewClassificationModel presenter;
+	private final OfewClassificationModel model;
 	private final OfewClassificationForm form;
 
 	
@@ -80,8 +80,8 @@ public class OfewClassificationDialog extends ModalDialog {
 		InputStream inputStream = this.getClass().getResourceAsStream(OFEW_DT_XML);
 		Reader reader = new InputStreamReader(inputStream);
 
-		presenter = new OfewClassificationModel(inputProduct, reader);
-		form = new OfewClassificationForm(presenter);
+		model = new OfewClassificationModel(inputProduct, reader);
+		form = new OfewClassificationForm(model);
 	}
 
 	@Override
@@ -115,29 +115,29 @@ public class OfewClassificationDialog extends ModalDialog {
 
 			Map<String, Object> unmixingParameter = getUnmixingParameter();
 			final Product endmemberProduct = GPF.createProduct(
-					"SpectralUnmixing", unmixingParameter, presenter
+					"SpectralUnmixing", unmixingParameter, model
 							.getInputProduct(), new SubProgressMonitor(pm, 10));
-			endmemberProduct.setName(form.getEndmemberProductName());
+			endmemberProduct.setName(model.getEndmemberProductName());
 
 			Map<String, Object> indexParameter = getIndexParameter();
 			Map<String, Product> indexInputProducts = new HashMap<String, Product>();
-			indexInputProducts.put("l5", presenter.getInputProduct());
+			indexInputProducts.put("l5", model.getInputProduct());
 			indexInputProducts.put("em", endmemberProduct);
 			final Product indexProduct = GPF.createProduct("BandArithmetic",
 					indexParameter, indexInputProducts, new SubProgressMonitor(
 							pm, 10));
-			indexProduct.setName(form.getIndexProductName());
+			indexProduct.setName(model.getIndexProductName());
 
-			Map<String, Object> classificationParameter = getClassificationParameter(form.getRoiBandName());
+			Map<String, Object> classificationParameter = getClassificationParameter();
 			Map<String, Product> classificationInputProducts = new HashMap<String, Product>();
-			classificationInputProducts.put("f3", presenter.getInputProduct());
+			classificationInputProducts.put("f3", model.getInputProduct());
 			classificationInputProducts.put("f1", endmemberProduct);
 			classificationInputProducts.put("f2", indexProduct);
 			final Product classificationProduct = GPF
 					.createProduct("DecisionTree", classificationParameter,
 							classificationInputProducts,
 							new SubProgressMonitor(pm, 10));
-			classificationProduct.setName(form.getClassificationProductName());
+			classificationProduct.setName(model.getClassificationProductName());
 
 			VisatApp.getApp().addProduct(endmemberProduct);
 			VisatApp.getApp().addProduct(indexProduct);
@@ -189,11 +189,11 @@ public class OfewClassificationDialog extends ModalDialog {
 		return parameter;
 	}
 
-	private Map<String, Object> getClassificationParameter(String roiBandName) throws OperatorException {
+	private Map<String, Object> getClassificationParameter() throws OperatorException {
 		Map<String, Object> parameter = new HashMap<String, Object>();
-		DecisionTreeConfiguration configuration = presenter.getConfiguration();
-		if (roiBandName.length()>0) {
-			registerRoiSymbol(presenter.getInputProduct().getBand(roiBandName), ProgressMonitor.NULL);
+		DecisionTreeConfiguration configuration = model.getConfiguration();
+		if (model.useRoi()) {
+			registerRoiSymbol(model.getInputProduct().getBand(model.getRoiBandName()), ProgressMonitor.NULL);
 			Decision inRoiDecision = new Decision("inRoi", "inROI");
 			inRoiDecision.setYesDecision(configuration.getRootDecisions());
 			inRoiDecision.setNoClass(configuration.getClass("nodata"));

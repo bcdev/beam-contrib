@@ -21,7 +21,8 @@ import com.bc.ceres.binding.swing.SwingBindingContext;
 class OfewClassificationForm extends JPanel {
 
     private JTextField[] variablesTextFields;
-	private ValueContainer[] valueContainers;
+	private ValueContainer[] variablesVC;
+	private ValueContainer outputProductNamesVC;
 	private JComboBox roiCombo;
 	private JCheckBox roiCheckBox;
 	private JTextField indexProductName;
@@ -29,11 +30,11 @@ class OfewClassificationForm extends JPanel {
 	private JTextField classifyProductName;
     
 
-	public OfewClassificationForm(OfewClassificationModel presenter) {
-		valueContainers = presenter.getVariableValueContainers();
-		variablesTextFields = new JTextField[valueContainers.length];
+	public OfewClassificationForm(OfewClassificationModel model) {
+		variablesVC = model.getVariableValueContainers();
+		outputProductNamesVC = model.getOutputProductNamesValueContainer();
 		
-		initComponents(presenter);
+		initComponents(model);
 		bindComponents();
     }
 	
@@ -41,37 +42,27 @@ class OfewClassificationForm extends JPanel {
 		for (JTextField textField : variablesTextFields) {
 			textField.postActionEvent();
 		}
+		indexProductName.postActionEvent();
+		endmemberProductName.postActionEvent();
+		classifyProductName.postActionEvent();
 	}
 	
-	public String getRoiBandName() {
-		if (roiCheckBox != null && roiCheckBox.isEnabled() && roiCheckBox.isSelected()) {
-			String name = (String) roiCombo.getSelectedItem();
-			return name;
-		}
-		return "";
-	}
-	
-	public String getClassificationProductName() {
-		return classifyProductName.getText();
-	}
-	
-	public String getEndmemberProductName() {
-		return endmemberProductName.getText();
-	}
-
-	public String getIndexProductName() {
-		return indexProductName.getText();
-	}
-
     private void bindComponents() {
-    	for (int i = 0; i < valueContainers.length; i++) {
-    		ValueContainer container = valueContainers[i];
+    	for (int i = 0; i < variablesVC.length; i++) {
+    		ValueContainer container = variablesVC[i];
     		SwingBindingContext bindingContext = new SwingBindingContext(container);
     		bindingContext.bind(variablesTextFields[i], "value");
 		}
+    	SwingBindingContext bindingContext = new SwingBindingContext(outputProductNamesVC);
+		bindingContext.bind(classifyProductName, "classification");
+		bindingContext.bind(indexProductName, "index");
+		bindingContext.bind(endmemberProductName, "endmember");
+		
+		bindingContext.bind(roiCombo, "roiBandName");
+		bindingContext.bind(roiCheckBox, "useRoi");
     }
 
-    private void initComponents(OfewClassificationModel presenter) {
+    private void initComponents(OfewClassificationModel model) {
         TableLayout tableLayout = new TableLayout(1);
 		setLayout(tableLayout);
         tableLayout.setTableAnchor(TableLayout.Anchor.LINE_START);
@@ -93,18 +84,16 @@ class OfewClassificationForm extends JPanel {
                                                                 new Font("Tahoma", 0, 11),
                                                                 new Color(0, 70, 213)));
         inputPanel.add(new JLabel("Eingabe-Produkt:"));
-        JTextField inputProductTextField = new JTextField(presenter.getInputProduct().getName(), 40);
+        JTextField inputProductTextField = new JTextField(model.getInputProduct().getName(), 40);
         inputProductTextField.setEditable(false);
 		inputPanel.add(inputProductTextField);
 		
-		String[] bandsWithRoi = presenter.getBandsWithRoi();
-
 		roiCheckBox = new JCheckBox("Nur in der ROI von ", true);
 		inputPanel.add(roiCheckBox);
-		roiCombo = new JComboBox(bandsWithRoi);
+		roiCombo = new JComboBox();
 		inputPanel.add(roiCombo);
 
-		if (bandsWithRoi.length > 0) {
+		if (model.useRoi()) {
 			roiCheckBox.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					roiCombo.setEnabled(roiCheckBox.isSelected());
@@ -116,7 +105,7 @@ class OfewClassificationForm extends JPanel {
 		}
 		add(inputPanel);
 		
-        if (valueContainers.length != 0) {
+        if (variablesVC.length != 0) {
         	TableLayout paramTableLayout = new TableLayout(2);
         	paramTableLayout.setTableAnchor(TableLayout.Anchor.LINE_START);
         	paramTableLayout.setTableFill(TableLayout.Fill.HORIZONTAL);
@@ -130,8 +119,9 @@ class OfewClassificationForm extends JPanel {
                                                                 TitledBorder.DEFAULT_POSITION,
                                                                 new Font("Tahoma", 0, 11),
                                                                 new Color(0, 70, 213)));
-        	for (int i = 0; i < valueContainers.length; i++) {
-        		paramPanel.add(new JLabel((String) valueContainers[i].getValue("description") + ":"));
+        	variablesTextFields = new JTextField[variablesVC.length];
+        	for (int i = 0; i < variablesVC.length; i++) {
+        		paramPanel.add(new JLabel((String) variablesVC[i].getValue("description") + ":"));
         		
         		JTextField textField = new JTextField(4);
         		textField.setHorizontalAlignment(JTextField.RIGHT);
@@ -157,13 +147,13 @@ class OfewClassificationForm extends JPanel {
                                                                 new Font("Tahoma", 0, 11),
                                                                 new Color(0, 70, 213)));
 		outputPanel.add(new JLabel("Klassifikations-Produkt:"));
-		classifyProductName = new JTextField(presenter.getClassificationProductNameSuggestion(), 40);
+		classifyProductName = new JTextField(40);
 		outputPanel.add(classifyProductName);
 		outputPanel.add(new JLabel("Entmischungs-Produkt:"));
-		endmemberProductName = new JTextField(presenter.getEndmemberProductNameSuggestion(), 40);
+		endmemberProductName = new JTextField(40);
 		outputPanel.add(endmemberProductName);
 		outputPanel.add(new JLabel("Index-Produkt:"));
-		indexProductName = new JTextField(presenter.getIndexProductNameSuggestion(), 40);
+		indexProductName = new JTextField(40);
 		outputPanel.add(indexProductName);
         add(outputPanel);
     }
