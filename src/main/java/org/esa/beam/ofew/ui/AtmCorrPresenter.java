@@ -1,10 +1,10 @@
 package org.esa.beam.ofew.ui;
 
-import org.esa.beam.framework.datamodel.Product;
-import org.esa.beam.framework.gpf.annotations.ParameterDefinitionFactory;
-import org.esa.beam.framework.gpf.annotations.Parameter;
 import com.bc.ceres.binding.Factory;
+import com.bc.ceres.binding.ValidationException;
 import com.bc.ceres.binding.ValueContainer;
+import org.esa.beam.framework.gpf.annotations.Parameter;
+import org.esa.beam.framework.gpf.annotations.ParameterDefinitionFactory;
 
 /**
  * Created by IntelliJ IDEA.
@@ -14,69 +14,72 @@ import com.bc.ceres.binding.ValueContainer;
  */
 class AtmCorrPresenter {
 
-    private static class Coefficients {
-        @Parameter(defaultValue = "0.0")
+    private static class CoefficientPair {
+
+        @Parameter(defaultValue = "1.0")
         Double a;
         @Parameter(defaultValue = "0.0")
         Double b;
+
     }
 
-    private Product inputProduct;
+    private static class Product {
+
+        @Parameter
+        String name;
+    }
+
+    private String inputProduct;
     private String[] bandNames;
 
-    private ValueContainer[] coefficientContainers;
+    private ValueContainer[] coefficientPairContainers;
+    private ValueContainer outputProductContainer;
 
-    public AtmCorrPresenter(Product inputProduct) {
+    public AtmCorrPresenter(String inputProduct, String[] bandNames) throws ValidationException {
         this.inputProduct = inputProduct;
+        this.bandNames = bandNames;
 
-        bandNames = inputProduct.getBandNames();
-
-        initValueContainers();
-    }
-
-    private void initValueContainers() {
         final Factory factory = new Factory(new ParameterDefinitionFactory());
-        coefficientContainers = new ValueContainer[bandNames.length];
 
+        coefficientPairContainers = new ValueContainer[bandNames.length];
         for (int i = 0; i < bandNames.length; i++) {
-            coefficientContainers[i] = factory.createObjectBackedValueContainer(new Coefficients());
+            coefficientPairContainers[i] = factory.createObjectBackedValueContainer(new CoefficientPair());
         }
+
+        outputProductContainer = factory.createObjectBackedValueContainer(new Product());
+        outputProductContainer.setValue("name", inputProduct + "_atmo");
     }
 
-    public Product getInputProduct() {
+    public String getInputProduct() {
         return inputProduct;
     }
 
-    public String[] getBandNames() {
-        return bandNames;
+    public String getOutputProduct() {
+        return (String) outputProductContainer.getValue("name");
     }
 
-    public String getBandName(int i) {
-        return bandNames[i];
+    public ValueContainer getOutputProductContainer() {
+        return outputProductContainer;
+    }
+
+    public ValueContainer getCoefficientPairContainer(int i) {
+        return coefficientPairContainers[i];
+    }
+
+    public double getCoefficientA(int i) {
+        return (Double) coefficientPairContainers[i].getValue("a");
+    }
+
+    public double getCoefficientB(int i) {
+        return (Double) coefficientPairContainers[i].getValue("b");
     }
 
     public int getBandCount() {
         return bandNames.length;
     }
 
-    public String getOutputProductName() {
-        return inputProduct.getName() + "_atmo";
-    }
-
-    public double getSlope(int i) {
-        return Double.parseDouble(coefficientContainers[i].getModel("a").getValue().toString());
-    }
-
-    public double getIntercept(int i) {
-        return Double.parseDouble(coefficientContainers[i].getModel("b").getValue().toString());
-    }
-
-    public ValueContainer[] getCoefficientContainers() {
-        return coefficientContainers;
-    }
-
-    public ValueContainer getCoefficientContainer(int i) {
-        return coefficientContainers[i];
+    public String getBandName(int i) {
+        return bandNames[i];
     }
 
     public String getDisplayBandName(int i) {
@@ -92,4 +95,5 @@ class AtmCorrPresenter {
 
         return name;
     }
+
 }

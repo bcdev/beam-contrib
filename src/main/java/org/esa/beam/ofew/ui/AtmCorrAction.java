@@ -2,6 +2,8 @@ package org.esa.beam.ofew.ui;
 
 import com.bc.ceres.core.SubProgressMonitor;
 import com.bc.ceres.swing.progress.DialogProgressMonitor;
+import com.bc.ceres.binding.ValidationException;
+import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.framework.gpf.GPF;
@@ -26,6 +28,8 @@ import java.util.logging.Level;
  */
 public class AtmCorrAction extends ExecCommand {
 
+    private final double[] wavelengths = {490.0, 560.0, 660.0, 830.0, 1670.0, 2240.0};
+
     @Override
     public void actionPerformed(CommandEvent commandEvent) {
         final Product selectedProduct = VisatApp.getApp().getSelectedProduct();
@@ -36,7 +40,12 @@ public class AtmCorrAction extends ExecCommand {
                                 ModalDialog.ID_OK_CANCEL_HELP,
                                 "ofewAtmCorrTool");
 
-        final AtmCorrPresenter presenter = new AtmCorrPresenter(selectedProduct);
+        AtmCorrPresenter presenter = null;
+        try {
+            presenter = new AtmCorrPresenter(selectedProduct.getName(), findSpectralBands(selectedProduct));
+        } catch (ValidationException e) {
+            // todo - action
+        }
         JPanel ofewAtmCorrPanel = new AtmCorrPanel(presenter);
         dialog.setContent(ofewAtmCorrPanel);
 
@@ -55,7 +64,7 @@ public class AtmCorrAction extends ExecCommand {
 
                 final Product indexProduct = GPF.createProduct("BandArithmetic",
                                                                getBandDescriptorMap(presenter),
-                                                               presenter.getInputProduct(),
+                                                               selectedProduct,
                                                                new SubProgressMonitor(pm, 10));
 
                 VisatApp.getApp().addProduct(indexProduct);
@@ -71,7 +80,41 @@ public class AtmCorrAction extends ExecCommand {
     @Override
     public void updateState() {
         final Product product = VisatApp.getApp().getSelectedProduct();
-        setEnabled(product != null && product.getNumBands() == 6);
+        setEnabled(product != null && verifySpectralWavelengths(product));
+    }
+
+    private boolean verifySpectralWavelengths(Product product) {
+        search:
+        for (double wavelength : wavelengths) {
+            for (final Band band : product.getBands()) {
+                if (band.getSpectralBandIndex() != -1) {
+                    if (wavelength == band.getSpectralWavelength()) {
+                        continue search;
+                    }
+                }
+            }
+            return false;
+        }
+
+        return true;
+    }
+
+    private String[] findSpectralBands(Product product) {
+        final String[] bandNames = new String[wavelengths.length];
+
+        search:
+        for (int i = 0; i < wavelengths.length; i++) {
+            for (final Band band : product.getBands()) {
+                if (band.getSpectralBandIndex() != -1) {
+                    if (wavelengths[i] == band.getSpectralWavelength()) {
+                        bandNames[i] = band.getName();
+                        continue search;
+                    }
+                }
+            }
+        }
+
+        return bandNames;
     }
 
     private static Map<String, Object> getBandDescriptorMap(AtmCorrPresenter presenter) {
@@ -81,8 +124,8 @@ public class AtmCorrAction extends ExecCommand {
 
         for (int i = 0; i < presenter.getBandCount(); ++i) {
             final BandDescriptor bandDescriptor = new BandDescriptor();
-            final double a = presenter.getSlope(i);
-            final double b = presenter.getIntercept(i);
+            final double a = presenter.getCoefficientA(i);
+            final double b = presenter.getCoefficientB(i);
 
             bandDescriptor.name = presenter.getBandName(i);
             bandDescriptor.expression = a + " * " + presenter.getBandName(i) + " + " + b;
