@@ -18,7 +18,7 @@ import org.esa.beam.framework.ui.TableLayout;
 import com.bc.ceres.binding.ValueContainer;
 import com.bc.ceres.binding.swing.SwingBindingContext;
 
-class OfewClassificationPanel extends JPanel {
+class OfewClassificationForm extends JPanel {
 
     private JTextField[] variablesTextFields;
 	private ValueContainer[] valueContainers;
@@ -29,7 +29,7 @@ class OfewClassificationPanel extends JPanel {
 	private JTextField classifyProductName;
     
 
-	public OfewClassificationPanel(OfewClassificationPresenter presenter) {
+	public OfewClassificationForm(OfewClassificationModel presenter) {
 		valueContainers = presenter.getVariableValueContainers();
 		variablesTextFields = new JTextField[valueContainers.length];
 		
@@ -71,7 +71,7 @@ class OfewClassificationPanel extends JPanel {
 		}
     }
 
-    private void initComponents(OfewClassificationPresenter presenter) {
+    private void initComponents(OfewClassificationModel presenter) {
         TableLayout tableLayout = new TableLayout(1);
 		setLayout(tableLayout);
         tableLayout.setTableAnchor(TableLayout.Anchor.LINE_START);

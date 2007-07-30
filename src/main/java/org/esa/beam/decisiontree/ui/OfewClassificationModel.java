@@ -16,6 +16,8 @@
  */
 package org.esa.beam.decisiontree.ui;
 
+import java.io.IOException;
+import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,17 +36,31 @@ import com.bc.ceres.binding.ValueContainer;
  * @author marcoz
  * @version $Revision: $ $Date: $
  */
-public class OfewClassificationPresenter {
+public class OfewClassificationModel {
 
 	private final Product inputProduct;
 	private final DecisionTreeConfiguration configuration;
+	private final String classificationProductName;
+	private final String indexProductName;
+	private final String endmemberProductName;
 	private ValueContainer[] variableValueContainer;
 
-	public OfewClassificationPresenter(Product selectedProduct, DecisionTreeConfiguration configuration) {
-		this.inputProduct = selectedProduct;
-		this.configuration = configuration;
-		
+	public OfewClassificationModel(Product selectedProduct, Reader reader) throws IOException {
+		inputProduct = selectedProduct;
+		configuration = loadDecisionTreeConfiguration(reader);
 		initValueContainers();
+		classificationProductName = inputProduct.getName() + "_klassifikation";
+		indexProductName = inputProduct.getName() + "_indizes";
+		endmemberProductName = inputProduct.getName() + "_entmischung";
+	}
+	
+	private DecisionTreeConfiguration loadDecisionTreeConfiguration(Reader reader) throws IOException {
+      	DecisionTreeConfiguration newConfiguration = DecisionTreeConfiguration.fromXML(reader);
+      	if (newConfiguration == null) {
+      		throw new IOException("Could not read DecisionTreeConfiguration config file.");
+      	} else {
+      		return newConfiguration;
+      	}
 	}
 	
 	private void initValueContainers() {
@@ -82,15 +98,15 @@ public class OfewClassificationPresenter {
 	}
 	
 	public String getClassificationProductNameSuggestion() {
-		return inputProduct.getName() + "_klassifikation";
+		return classificationProductName;
 	}
 	
 	public String getEndmemberProductNameSuggestion() {
-		return inputProduct.getName() + "_entmischung";
+		return endmemberProductName;
 	}
 
 	public String getIndexProductNameSuggestion() {
-		return inputProduct.getName() + "_indizes";
+		return indexProductName;
 	}
 	
 	public DecisionTreeConfiguration getConfiguration() {

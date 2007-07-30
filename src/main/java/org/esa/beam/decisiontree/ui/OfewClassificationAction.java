@@ -15,41 +15,15 @@
  */
 package org.esa.beam.decisiontree.ui;
 
-import com.bc.ceres.core.ProgressMonitor;
-import com.bc.ceres.core.SubProgressMonitor;
-import com.bc.ceres.swing.progress.DialogProgressMonitor;
-import com.bc.jexp.EvalEnv;
-import com.bc.jexp.EvalException;
-import com.bc.jexp.Symbol;
-import com.bc.jexp.impl.AbstractSymbol;
-import org.esa.beam.decisiontree.Decision;
-import org.esa.beam.decisiontree.DecisionTreeConfiguration;
-import org.esa.beam.framework.datamodel.Band;
+import java.io.IOException;
+import java.util.logging.Level;
+
+import javax.swing.JOptionPane;
+
 import org.esa.beam.framework.datamodel.Product;
-import org.esa.beam.framework.datamodel.ProductData;
-import org.esa.beam.framework.dataop.barithm.BandArithmetic;
-import org.esa.beam.framework.dataop.barithm.RasterDataEvalEnv;
-import org.esa.beam.framework.gpf.GPF;
-import org.esa.beam.framework.gpf.OperatorException;
-import org.esa.beam.framework.gpf.operators.common.BandArithmeticOp;
-import org.esa.beam.framework.ui.ModalDialog;
 import org.esa.beam.framework.ui.command.CommandEvent;
 import org.esa.beam.framework.ui.command.ExecCommand;
-import org.esa.beam.framework.ui.diagram.DiagramGraph;
-import org.esa.beam.framework.ui.diagram.DiagramGraphIO;
-import org.esa.beam.unmixing.Endmember;
-import org.esa.beam.unmixing.SpectralUnmixingOp;
 import org.esa.beam.visat.VisatApp;
-
-import javax.media.jai.ROI;
-import java.awt.Dialog;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.logging.Level;
 
 /**
  * Noise reduction action.
@@ -71,38 +45,15 @@ public class OfewClassificationAction extends ExecCommand {
     public void actionPerformed(CommandEvent commandEvent) {
         final Product selectedProduct = VisatApp.getApp().getSelectedProduct();
 
-        final ModalDialog dialog = new ModalDialog(VisatApp.getApp().getMainFrame(),
-                "OFEW Klassifikation",
-                ModalDialog.ID_OK_CANCEL_HELP,
-                "ofewClassificationTool");
-
-        DecisionTreeConfiguration configuration;
         try {
-        	InputStream inputStream = this.getClass().getResourceAsStream("ofew_dt.xml");
-        	Reader reader = new InputStreamReader(inputStream);
-        	configuration = new DecisionTreeConfiguration(reader);
-        } catch (Exception e) {
-        	dialog.showErrorDialog(e.getMessage());
-            VisatApp.getApp().getLogger().log(Level.SEVERE, e.getMessage(), e);
-            return;
-        }
-
-        final OfewClassificationPresenter presenter = new OfewClassificationPresenter(selectedProduct, configuration);
-        OfewClassificationPanel ofewClassificationPanel = new OfewClassificationPanel(presenter);
-		dialog.setContent(ofewClassificationPanel);
-
-        if (dialog.show() == ModalDialog.ID_OK) {
-            final DialogProgressMonitor pm = new DialogProgressMonitor(VisatApp.getApp().getMainFrame(),
-                                                                       "OFEW Klassifikation",
-                                                                       Dialog.ModalityType.APPLICATION_MODAL);
-
-            ofewClassificationPanel.postActionEvent();
-            try {
-                performOfewAction(presenter, ofewClassificationPanel, pm);
-            } catch (OperatorException e) {
-                dialog.showErrorDialog(e.getMessage());
-                VisatApp.getApp().getLogger().log(Level.SEVERE, e.getMessage(), e);
-            }
+        	final OfewClassificationDialog dialog = new OfewClassificationDialog(
+        		VisatApp.getApp().getMainFrame(), selectedProduct);
+        	dialog.show();
+        } catch (IOException e) {
+        	JOptionPane.showMessageDialog(VisatApp.getApp().getMainFrame(),
+        			e.getMessage(), OfewClassificationDialog.TITLE, JOptionPane.ERROR_MESSAGE);
+        	VisatApp.getApp().getLogger().log(Level.SEVERE, e.getMessage(), e);
+        	return;
         }
     }
 
@@ -120,117 +71,4 @@ public class OfewClassificationAction extends ExecCommand {
         }
         setEnabled(enabled);
     }
-
-    private void performOfewAction(OfewClassificationPresenter presenter, OfewClassificationPanel panel, ProgressMonitor pm)
-            throws OperatorException {
-        try {
-            pm.beginTask("Performing OFEW Classification", 30);
-
-            Map<String, Object> unmixingParameter = getUnmixingParameter();
-            final Product endmemberProduct = GPF.createProduct("SpectralUnmixing",
-					unmixingParameter, presenter.getInputProduct(),
-					new SubProgressMonitor(pm, 10));
-            endmemberProduct.setName(panel.getEndmemberProductName());
-
-            Map<String, Object> indexParameter = getIndexParameter();
-            Map<String, Product> indexInputProducts = new HashMap<String, Product>();
-            indexInputProducts.put("l5", presenter.getInputProduct());
-            indexInputProducts.put("em", endmemberProduct);
-            final Product indexProduct = GPF.createProduct("BandArithmetic",
-					indexParameter, indexInputProducts,
-					new SubProgressMonitor(pm, 10));
-            indexProduct.setName(panel.getIndexProductName());
-
-            Map<String, Object> classificationParameter = getClassificationParameter(presenter, panel.getRoiBandName());
-            Map<String, Product> classificationInputProducts = new HashMap<String, Product>();
-            classificationInputProducts.put("f3", presenter.getInputProduct());
-            classificationInputProducts.put("f1", endmemberProduct);
-            classificationInputProducts.put("f2", indexProduct);
-            final Product classificationProduct = GPF.createProduct("DecisionTree",
-            		classificationParameter, classificationInputProducts,
-					new SubProgressMonitor(pm, 10));
-            classificationProduct.setName(panel.getClassificationProductName());
-
-
-            VisatApp.getApp().addProduct(endmemberProduct);
-            VisatApp.getApp().addProduct(indexProduct);
-            VisatApp.getApp().addProduct(classificationProduct);
-        } catch (IOException e) {
-			throw new OperatorException(e);
-		} finally {
-            pm.done();
-        }
-    }
-
-	private Map<String, Object> getIndexParameter() {
-		Map<String, Object> parameter = new HashMap<String, Object>();
-		BandArithmeticOp.BandDescriptor[] bandDesc = new BandArithmeticOp.BandDescriptor[4];
-		bandDesc[0] = new BandArithmeticOp.BandDescriptor();
-		bandDesc[0].name = "ndvi";
-		bandDesc[0].expression = "($l5.band4 - $l5.band3)/($l5.band4 + $l5.band3)";
-		bandDesc[0].type = ProductData.TYPESTRING_FLOAT32;
-
-		bandDesc[1] = new BandArithmeticOp.BandDescriptor();
-		bandDesc[1].name = "Steigung_3_4";
-		bandDesc[1].expression = "($l5.band3 - $l5.band4)/(0.66-0.835)";
-		bandDesc[1].type = ProductData.TYPESTRING_FLOAT32;
-
-		bandDesc[2] = new BandArithmeticOp.BandDescriptor();
-		bandDesc[2].name = "Steigung_4_5";
-		bandDesc[2].expression = "($l5.band4 - $l5.band5)/(0.835-1.65)";
-		bandDesc[2].type = ProductData.TYPESTRING_FLOAT32;
-
-		bandDesc[3] = new BandArithmeticOp.BandDescriptor();
-		bandDesc[3].name = "schlick_corr";
-		bandDesc[3].expression = "($em.Sand_wc < 0.0) ? $em.Sand_wc + $em.schlick : $em.schlick";
-		bandDesc[3].type = ProductData.TYPESTRING_FLOAT32;
-		parameter.put("bandDescriptors", bandDesc);
-		return parameter;
-	}
-
-	private Map<String, Object> getUnmixingParameter() throws IOException {
-		Map<String, Object> parameter = new HashMap<String, Object>();
-		InputStream inputStream = this.getClass().getResourceAsStream("em.csv");
-		InputStreamReader reader = new InputStreamReader(inputStream);
-		DiagramGraph[] diagramGraphs = DiagramGraphIO.readGraphs(reader);
-        Endmember[] endmembers = SpectralUnmixingOp.convertGraphsToEndmembers(diagramGraphs);
-        parameter.put("endmembers", endmembers);
-
-		parameter.put("sourceBandNames", sourceBandNames);
-		parameter.put("unmixingModelName", "Constrained LSU");
-		parameter.put("targetBandNameSuffix", "");
-		return parameter;
-	}
-
-	private Map<String, Object> getClassificationParameter(OfewClassificationPresenter presenter, String roiBandName) throws OperatorException {
-		Map<String, Object> parameter = new HashMap<String, Object>();
-		DecisionTreeConfiguration configuration = presenter.getConfiguration();
-		if (roiBandName.length()>0) {
-			registerRoiSymbol(presenter.getInputProduct().getBand(roiBandName), ProgressMonitor.NULL);
-			Decision inRoiDecision = new Decision("inRoi", "inROI");
-			inRoiDecision.setYesDecision(configuration.getRootDecisions());
-			inRoiDecision.setNoClass(configuration.getClass("nodata"));
-			configuration.setRootDecisions(inRoiDecision);
-		}
-		parameter.put("configuration", configuration);
-		return parameter;
-	}
-
-	private void registerRoiSymbol(Band band, ProgressMonitor pm) throws OperatorException {
-		if (band.isROIUsable()) {
-			final String symbolName = "inROI";
-			try {
-				final ROI roi = band.createROI(pm);
-				Symbol s = new AbstractSymbol.B(symbolName) {
-					public boolean evalB(EvalEnv env) throws EvalException {
-						RasterDataEvalEnv eEnv = (RasterDataEvalEnv) env;
-						return roi.contains(eEnv.getPixelX(), eEnv.getPixelY());
-					}
-				};
-				BandArithmetic.registerSymbol(s);
-			} catch (IOException e) {
-				throw new OperatorException("Couldn't create ROI", e);
-			}
-		}
-	}
 }
