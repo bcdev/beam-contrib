@@ -6,7 +6,7 @@ import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.framework.gpf.GPF;
 import org.esa.beam.framework.gpf.OperatorException;
-import org.esa.beam.framework.gpf.operators.common.BandArithmeticOp;
+import org.esa.beam.framework.gpf.operators.common.BandArithmeticOp.BandDescriptor;
 import org.esa.beam.framework.ui.ModalDialog;
 import org.esa.beam.framework.ui.command.CommandEvent;
 import org.esa.beam.framework.ui.command.ExecCommand;
@@ -47,6 +47,10 @@ public class AtmCorrAction extends ExecCommand {
                                               Dialog.ModalityType.APPLICATION_MODAL);
 
             try {
+                BandDescriptor[] bds = (BandDescriptor[]) getBandDescriptorMap(presenter).get("bandDescriptors");
+                for (BandDescriptor bd : bds) {
+                    System.out.println(bd.expression);
+                }
                 pm.beginTask("Performing OFEW atmospheric correction", 42);
 
                 final Product indexProduct = GPF.createProduct("BandArithmetic",
@@ -72,13 +76,13 @@ public class AtmCorrAction extends ExecCommand {
 
     private static Map<String, Object> getBandDescriptorMap(AtmCorrPresenter presenter) {
         final Map<String, Object> map = new HashMap<String, Object>();
-        final BandArithmeticOp.BandDescriptor[] bandDescriptors =
-                new BandArithmeticOp.BandDescriptor[presenter.getBandCount()];
+        final BandDescriptor[] bandDescriptors =
+                new BandDescriptor[presenter.getBandCount()];
 
         for (int i = 0; i < presenter.getBandCount(); ++i) {
-            final BandArithmeticOp.BandDescriptor bandDescriptor = new BandArithmeticOp.BandDescriptor();
-            final double a = presenter.getA(i);
-            final double b = presenter.getB(i);
+            final BandDescriptor bandDescriptor = new BandDescriptor();
+            final double a = presenter.getSlope(i);
+            final double b = presenter.getIntercept(i);
 
             bandDescriptor.name = presenter.getBandName(i);
             bandDescriptor.expression = a + " * " + presenter.getBandName(i) + " + " + b;

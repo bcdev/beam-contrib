@@ -1,5 +1,6 @@
 package org.esa.beam.ofew.ui;
 
+import com.bc.ceres.binding.swing.SwingBindingContext;
 import org.esa.beam.framework.ui.TableLayout;
 
 import javax.swing.BorderFactory;
@@ -30,6 +31,7 @@ class AtmCorrPanel extends JPanel {
         this.presenter = presenter;
 
         initComponents();
+        bindComponents();
     }
 
     private void initComponents() {
@@ -78,14 +80,12 @@ class AtmCorrPanel extends JPanel {
         textFieldsB = new JFormattedTextField[presenter.getBandCount()];
         final DecimalFormat format = new DecimalFormat("#.########");
         for (int i = 0; i < presenter.getBandCount(); i++) {
-            parameterPanel.add(new JLabel(presenter.getShortBandName(i) + ":"));
+            parameterPanel.add(new JLabel(presenter.getDisplayBandName(i) + ":"));
 
             textFieldsA[i] = new JFormattedTextField(format);
-            textFieldsA[i].setColumns(10);
             parameterPanel.add(textFieldsA[i]);
 
             textFieldsB[i] = new JFormattedTextField(format);
-            textFieldsB[i].setColumns(10);
             parameterPanel.add(textFieldsB[i]);
         }
         add(parameterPanel, BorderLayout.CENTER);
@@ -108,6 +108,14 @@ class AtmCorrPanel extends JPanel {
         outputProductTextField.setColumns(40);
         outputPanel.add(outputProductTextField);
         add(outputPanel, BorderLayout.SOUTH);
+    }
+
+    private void bindComponents() {
+        for (int i = 0; i < presenter.getCoefficientContainers().length; i++) {
+            final SwingBindingContext bindingContext = new SwingBindingContext(presenter.getCoefficientContainer(i));
+            bindingContext.bind(textFieldsA[i], "a");
+            bindingContext.bind(textFieldsB[i], "b");
+        }
     }
 
 }
