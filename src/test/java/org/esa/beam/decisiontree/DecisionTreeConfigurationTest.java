@@ -30,7 +30,7 @@ import java.io.StringReader;
 public class DecisionTreeConfigurationTest extends TestCase {
 
 	/**
-	 * Test method for {@link org.esa.beam.decisiontree.DecisionTreeConfiguration#DecisionTreeConfiguration(java.io.Reader)}.
+	 * Test method for {@link org.esa.beam.decisiontree.DecisionTreeConfiguration#fromXML(java.io.Reader)}.
 	 * @throws Exception 
 	 */
 	public void testConstructorFromXML() throws Exception {
@@ -46,7 +46,7 @@ public class DecisionTreeConfigurationTest extends TestCase {
 						
 		StringReader reader = new StringReader(xml);
 		
-		DecisionTreeConfiguration configuration = new DecisionTreeConfiguration(reader);
+		DecisionTreeConfiguration configuration = DecisionTreeConfiguration.fromXML(reader);
 		assertNotNull(configuration);
 		assertEquals("WAQSomat", configuration.getName());
 		

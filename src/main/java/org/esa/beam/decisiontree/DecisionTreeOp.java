@@ -72,12 +72,13 @@ public class DecisionTreeOp extends AbstractOperator {
         
         if (StringUtils.isNotNullAndNotEmpty(decisionConfigFile)) {
         	try {
-        	FileReader reader = new FileReader(decisionConfigFile);
-        	configuration = new DecisionTreeConfiguration(reader);
+        		FileReader reader = new FileReader(decisionConfigFile);
+        		configuration = DecisionTreeConfiguration.fromXML(reader);
+        		if (configuration == null) {
+        			throw new OperatorException("Could not parse config file: "+decisionConfigFile);
+        		}
         	} catch (FileNotFoundException e) {
 				throw new OperatorException("Could not open config file: "+decisionConfigFile, e);
-			} catch (Exception e) {
-				throw new OperatorException("Could not parse config file: "+decisionConfigFile, e);
 			}
         }
         

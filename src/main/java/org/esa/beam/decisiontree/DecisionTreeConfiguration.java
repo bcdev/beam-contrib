@@ -21,31 +21,40 @@ public class DecisionTreeConfiguration {
 	private DecisionVariable[] variables;
 	private Decision rootDecisions;
 	
-	public DecisionTreeConfiguration(Reader inputReader) throws Exception {
-        Xpp3Dom dom = Xpp3DomBuilder.build(inputReader);
+
+	public static DecisionTreeConfiguration fromXML(Reader inputReader) {
+		Xpp3Dom dom;
+		try {
+			dom = Xpp3DomBuilder.build(inputReader);
+		} catch (Exception e) {
+			return null;
+		}
         
+		DecisionTreeConfiguration configuration = new DecisionTreeConfiguration();
         String decisionName = dom.getAttribute("name");
-        setName(decisionName);
+        configuration.setName(decisionName);
         
         Xpp3Dom[] classesDom = dom.getChild("classes").getChildren();
         Classification[] theClasses = parseClasses(classesDom);
-        setClasses(theClasses);
+        configuration.setClasses(theClasses);
         
         Xpp3Dom allVariablesDom = dom.getChild("variables");
         if (allVariablesDom != null) {
         	Xpp3Dom[] variableDoms = allVariablesDom.getChildren();
         	DecisionVariable[] theVariables = parseVariables(variableDoms);
-        	setVariables(theVariables);
+        	configuration.setVariables(theVariables);
         }
         
         Xpp3Dom decisionDom = dom.getChild("decision");
-        Decision decision = parseDecisions(decisionDom);
-        setRootDecisions(decision);
+        Decision decision = parseDecisions(configuration, decisionDom);
+        configuration.setRootDecisions(decision);
+        
+        return configuration;
 	}
 
 
 
-	private Decision parseDecisions(Xpp3Dom decisionDom) {
+	private static Decision parseDecisions(DecisionTreeConfiguration configuration, Xpp3Dom decisionDom) {
 		String decisionName = decisionDom.getAttribute("name");
 		String term = decisionDom.getAttribute("term");
 		Xpp3Dom yesDom = decisionDom.getChild("yes");
@@ -53,18 +62,18 @@ public class DecisionTreeConfiguration {
 		Decision decisions = new Decision(decisionName, term);
 		if (yesDom.getChildCount() == 0) {
 			String yesClassName = yesDom.getValue();
-			Classification yesClass = getClass(yesClassName);
+			Classification yesClass = configuration.getClass(yesClassName);
 			decisions.setYesClass(yesClass);
 		} else {
-			Decision yesDecision = parseDecisions(yesDom.getChild("decision"));
+			Decision yesDecision = parseDecisions(configuration, yesDom.getChild("decision"));
 			decisions.setYesDecision(yesDecision);
 		}
 		if (noDom.getChildCount() == 0) {
 			String noClassName = noDom.getValue();
-			Classification noClass = getClass(noClassName);
+			Classification noClass = configuration.getClass(noClassName);
 			decisions.setNoClass(noClass);
 		} else {
-			Decision noDecision = parseDecisions(noDom.getChild("decision"));
+			Decision noDecision = parseDecisions(configuration, noDom.getChild("decision"));
 			decisions.setNoDecision(noDecision);
 		}
 		
@@ -72,7 +81,7 @@ public class DecisionTreeConfiguration {
 		
 	}
 
-	private DecisionVariable[] parseVariables(Xpp3Dom[] variableDoms) {
+	private static DecisionVariable[] parseVariables(Xpp3Dom[] variableDoms) {
 		DecisionVariable[] theVariables = new DecisionVariable[variableDoms.length];
 		int i = 0;
 		for (Xpp3Dom variableDom : variableDoms) {
@@ -86,7 +95,7 @@ public class DecisionTreeConfiguration {
 		return theVariables;
 	}
 	
-	private Classification[] parseClasses(Xpp3Dom[] classesDoms) {
+	private static Classification[] parseClasses(Xpp3Dom[] classesDoms) {
 		Classification[] classifications = new Classification[classesDoms.length];
 		int i = 0;
 		for (Xpp3Dom classDom : classesDoms) {
