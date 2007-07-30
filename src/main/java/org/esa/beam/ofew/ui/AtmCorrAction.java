@@ -62,12 +62,13 @@ public class AtmCorrAction extends ExecCommand {
                 }
                 pm.beginTask("Performing OFEW atmospheric correction", 42);
 
-                final Product indexProduct = GPF.createProduct("BandArithmetic",
+                final Product atmCorrProduct = GPF.createProduct("BandArithmetic",
                                                                getBandDescriptorMap(presenter),
                                                                selectedProduct,
                                                                new SubProgressMonitor(pm, 10));
+                atmCorrProduct.setName(presenter.getOutputProduct());
 
-                VisatApp.getApp().addProduct(indexProduct);
+                VisatApp.getApp().addProduct(atmCorrProduct);
             } catch (OperatorException e) {
                 dialog.showErrorDialog(e.getMessage());
                 VisatApp.getApp().getLogger().log(Level.SEVERE, e.getMessage(), e);
