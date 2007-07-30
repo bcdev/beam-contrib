@@ -28,7 +28,7 @@ import java.util.logging.Level;
  */
 public class AtmCorrAction extends ExecCommand {
 
-    private final double[] wavelengths = {490.0, 560.0, 660.0, 830.0, 1670.0, 2240.0};
+    private final double[] wavelengths = {478.0, 560.0, 660.0, 835.0, 1650.0, 2208.0};
 
     @Override
     public void actionPerformed(CommandEvent commandEvent) {
