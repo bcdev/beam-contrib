@@ -90,6 +90,11 @@ public class OfewClassificationDialog extends ModalDialog {
 		// form.outputProductName.requestFocus();
 		return super.show();
 	}
+	
+	@Override
+	protected boolean verifyUserInput() {
+		return form.hasValidValues();
+	}
 
 	@Override
 	protected void onOK() {
@@ -98,7 +103,6 @@ public class OfewClassificationDialog extends ModalDialog {
 				.getApp().getMainFrame(), TITLE,
 				Dialog.ModalityType.APPLICATION_MODAL);
 
-		form.postActionEvent();
 		try {
 			performClassification(pm);
 		} catch (OperatorException e) {
@@ -200,6 +204,7 @@ public class OfewClassificationDialog extends ModalDialog {
 			configuration.setRootDecisions(inRoiDecision);
 		}
 		parameter.put("configuration", configuration);
+		parameter.put("bandName", "Klassifikation");
 		return parameter;
 	}
 

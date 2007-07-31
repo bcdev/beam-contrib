@@ -27,10 +27,13 @@ import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.ParameterDefinitionFactory;
+import org.esa.beam.ofew.ProductNamenValidator;
 
 import com.bc.ceres.binding.Factory;
+import com.bc.ceres.binding.ValidationException;
 import com.bc.ceres.binding.ValueContainer;
 import com.bc.ceres.binding.ValueDefinition;
+import com.bc.ceres.binding.ValueModel;
 import com.bc.ceres.binding.ValueSet;
 
 /**
@@ -41,11 +44,11 @@ import com.bc.ceres.binding.ValueSet;
  */
 public class OfewClassificationModel {
 
-	@Parameter
+	@Parameter(validator=ProductNamenValidator.class, label="Klassifikations-Product")
 	private String classification;
-	@Parameter
+	@Parameter(validator=ProductNamenValidator.class, label="Index-Product")
 	private String index;
-	@Parameter
+	@Parameter(validator=ProductNamenValidator.class, label="Endmember-Product")
 	private String endmember;
 	@Parameter
 	private String roiBandName;
@@ -118,7 +121,7 @@ public class OfewClassificationModel {
 		return null;
 	}
 	
-	public ValueContainer getOutputProductNamesValueContainer() {
+	public ValueContainer getModelValueContainer() {
 		return modelVC;
 	}
 
@@ -153,4 +156,6 @@ public class OfewClassificationModel {
 	public ValueContainer[] getVariableValueContainers() {
 		return variableVC;
 	}
+
+	
 }

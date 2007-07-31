@@ -4,48 +4,44 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.text.DecimalFormat;
 
 import javax.swing.BorderFactory;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
+import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.border.TitledBorder;
 
 import org.esa.beam.framework.ui.TableLayout;
+import org.esa.beam.visat.VisatApp;
 
+import com.bc.ceres.binding.ValidationException;
 import com.bc.ceres.binding.ValueContainer;
 import com.bc.ceres.binding.swing.SwingBindingContext;
 
 class OfewClassificationForm extends JPanel {
 
-    private JTextField[] variablesTextFields;
+    private JFormattedTextField[] variablesTextFields;
 	private ValueContainer[] variablesVC;
-	private ValueContainer outputProductNamesVC;
+	private ValueContainer modelVC;
 	private JComboBox roiCombo;
 	private JCheckBox roiCheckBox;
-	private JTextField indexProductName;
-	private JTextField endmemberProductName;
-	private JTextField classifyProductName;
+	private JFormattedTextField indexProductName;
+	private JFormattedTextField endmemberProductName;
+	private JFormattedTextField classifyProductName;
     
 
 	public OfewClassificationForm(OfewClassificationModel model) {
 		variablesVC = model.getVariableValueContainers();
-		outputProductNamesVC = model.getOutputProductNamesValueContainer();
+		modelVC = model.getModelValueContainer();
 		
 		initComponents(model);
 		bindComponents();
     }
-	
-	public void postActionEvent() {
-		for (JTextField textField : variablesTextFields) {
-			textField.postActionEvent();
-		}
-		indexProductName.postActionEvent();
-		endmemberProductName.postActionEvent();
-		classifyProductName.postActionEvent();
-	}
 	
     private void bindComponents() {
     	for (int i = 0; i < variablesVC.length; i++) {
@@ -53,7 +49,7 @@ class OfewClassificationForm extends JPanel {
     		SwingBindingContext bindingContext = new SwingBindingContext(container);
     		bindingContext.bind(variablesTextFields[i], "value");
 		}
-    	SwingBindingContext bindingContext = new SwingBindingContext(outputProductNamesVC);
+    	SwingBindingContext bindingContext = new SwingBindingContext(modelVC);
 		bindingContext.bind(classifyProductName, "classification");
 		bindingContext.bind(indexProductName, "index");
 		bindingContext.bind(endmemberProductName, "endmember");
@@ -119,11 +115,12 @@ class OfewClassificationForm extends JPanel {
                                                                 TitledBorder.DEFAULT_POSITION,
                                                                 new Font("Tahoma", 0, 11),
                                                                 new Color(0, 70, 213)));
-        	variablesTextFields = new JTextField[variablesVC.length];
+        	variablesTextFields = new JFormattedTextField[variablesVC.length];
+        	final DecimalFormat format = new DecimalFormat("0.000#####");
         	for (int i = 0; i < variablesVC.length; i++) {
         		paramPanel.add(new JLabel((String) variablesVC[i].getValue("description") + ":"));
         		
-        		JTextField textField = new JTextField(4);
+        		JFormattedTextField textField = new JFormattedTextField(format);
         		textField.setHorizontalAlignment(JTextField.RIGHT);
         		paramPanel.add(textField);
         		variablesTextFields[i] = textField;
@@ -147,14 +144,27 @@ class OfewClassificationForm extends JPanel {
                                                                 new Font("Tahoma", 0, 11),
                                                                 new Color(0, 70, 213)));
 		outputPanel.add(new JLabel("Klassifikations-Produkt:"));
-		classifyProductName = new JTextField(40);
+		classifyProductName = new JFormattedTextField();
 		outputPanel.add(classifyProductName);
 		outputPanel.add(new JLabel("Entmischungs-Produkt:"));
-		endmemberProductName = new JTextField(40);
+		endmemberProductName = new JFormattedTextField();
 		outputPanel.add(endmemberProductName);
 		outputPanel.add(new JLabel("Index-Produkt:"));
-		indexProductName = new JTextField(40);
+		indexProductName = new JFormattedTextField();
 		outputPanel.add(indexProductName);
         add(outputPanel);
     }
+
+	public boolean hasValidValues() {
+		try {
+			modelVC.getModel("classification").validate(classifyProductName.getValue());
+			modelVC.getModel("index").validate(indexProductName.getValue());
+			modelVC.getModel("endmember").validate(endmemberProductName.getValue());
+		} catch (ValidationException e) {
+			JOptionPane.showMessageDialog(VisatApp.getApp().getMainFrame(),
+        			e.getMessage(), OfewClassificationDialog.TITLE, JOptionPane.ERROR_MESSAGE);
+			return false;
+		}
+		return true;
+	}
 }
