@@ -64,7 +64,10 @@ public class SpectralBandFinder {
         for (final double wavelength : wavelengths) {
             for (final Band band : product.getBands()) {
                 if (band.getSpectralBandIndex() != -1) {
-                    if (wavelength == band.getSpectralWavelength()) {
+                    float spectralWavelength = band.getSpectralWavelength();
+                    float spectralBandwidth = band.getSpectralBandwidth();
+					if (wavelength >= spectralWavelength - (spectralBandwidth/2) &&
+							wavelength < spectralWavelength + (spectralBandwidth/2)) {
                         bandList.add(band);
                         continue search;
                     }
