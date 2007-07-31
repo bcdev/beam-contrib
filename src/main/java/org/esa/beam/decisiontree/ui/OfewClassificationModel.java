@@ -16,25 +16,22 @@
  */
 package org.esa.beam.decisiontree.ui;
 
-import java.io.IOException;
-import java.io.Reader;
-import java.util.ArrayList;
-import java.util.List;
-
+import com.bc.ceres.binding.Factory;
+import com.bc.ceres.binding.ValueContainer;
+import com.bc.ceres.binding.ValueDefinition;
+import com.bc.ceres.binding.ValueSet;
 import org.esa.beam.decisiontree.DecisionTreeConfiguration;
 import org.esa.beam.decisiontree.DecisionVariable;
 import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.ParameterDefinitionFactory;
-import org.esa.beam.ofew.ProductNamenValidator;
+import org.esa.beam.ofew.ProductNameValidator;
 
-import com.bc.ceres.binding.Factory;
-import com.bc.ceres.binding.ValidationException;
-import com.bc.ceres.binding.ValueContainer;
-import com.bc.ceres.binding.ValueDefinition;
-import com.bc.ceres.binding.ValueModel;
-import com.bc.ceres.binding.ValueSet;
+import java.io.IOException;
+import java.io.Reader;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by marcoz.
@@ -44,11 +41,11 @@ import com.bc.ceres.binding.ValueSet;
  */
 public class OfewClassificationModel {
 
-	@Parameter(validator=ProductNamenValidator.class, label="Klassifikations-Product")
+	@Parameter(validator=ProductNameValidator.class, label="Klassifikations-Product")
 	private String classification;
-	@Parameter(validator=ProductNamenValidator.class, label="Index-Product")
+	@Parameter(validator=ProductNameValidator.class, label="Index-Product")
 	private String index;
-	@Parameter(validator=ProductNamenValidator.class, label="Endmember-Product")
+	@Parameter(validator=ProductNameValidator.class, label="Endmember-Product")
 	private String endmember;
 	@Parameter
 	private String roiBandName;

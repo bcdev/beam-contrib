@@ -21,15 +21,15 @@ import java.text.DecimalFormat;
  * @author Ralf Quast
  * @version $Revision$ $Date$
  */
-class AtmCorrPanel extends JPanel {
+class AtmCorrForm extends JPanel {
 
-    AtmCorrPresenter presenter;
+    AtmCorrFormPresenter presenter;
 
     JFormattedTextField[] textFieldsA;
     JFormattedTextField[] textFieldsB;
     private JFormattedTextField outputProductTextField;
 
-    public AtmCorrPanel(AtmCorrPresenter presenter) {
+    public AtmCorrForm(AtmCorrFormPresenter presenter) {
         this.presenter = presenter;
 
         initComponents();
@@ -53,7 +53,7 @@ class AtmCorrPanel extends JPanel {
                                                               new Font("Tahoma", 0, 11),
                                                               new Color(0, 70, 213)));
         inputPanel.add(new JLabel("Eingabe-Produkt:"));
-        JTextField inputProductTextField = new JTextField(presenter.getInputProduct());
+        JTextField inputProductTextField = new JTextField(presenter.getInputProductName());
         inputProductTextField.setColumns(35);
         inputProductTextField.setEditable(false);
         inputPanel.add(inputProductTextField);
@@ -82,14 +82,14 @@ class AtmCorrPanel extends JPanel {
         parameterPanel.add(labelB);
         textFieldsA = new JFormattedTextField[presenter.getBandCount()];
         textFieldsB = new JFormattedTextField[presenter.getBandCount()];
-        final DecimalFormat format = new DecimalFormat("#.########");
+
         for (int i = 0; i < presenter.getBandCount(); i++) {
             parameterPanel.add(new JLabel(presenter.getDisplayBandName(i) + ":"));
 
-            textFieldsA[i] = new JFormattedTextField(format);
+            textFieldsA[i] = new JFormattedTextField(new DecimalFormat("0.0#######"));
             parameterPanel.add(textFieldsA[i]);
 
-            textFieldsB[i] = new JFormattedTextField(format);
+            textFieldsB[i] = new JFormattedTextField(new DecimalFormat("0.0#######"));
             parameterPanel.add(textFieldsB[i]);
         }
         add(parameterPanel, BorderLayout.CENTER);
@@ -108,19 +108,21 @@ class AtmCorrPanel extends JPanel {
                                                                new Font("Tahoma", 0, 11),
                                                                new Color(0, 70, 213)));
         outputPanel.add(new JLabel("Ausgabe-Produkt:"));
-        outputProductTextField = new JFormattedTextField(presenter.getOutputProduct());
+        outputProductTextField = new JFormattedTextField(presenter.getOutputProductName());
         outputPanel.add(outputProductTextField);
         add(outputPanel, BorderLayout.SOUTH);
     }
 
     private void bindComponents() {
         for (int i = 0; i < presenter.getBandCount(); i++) {
-            final SwingBindingContext bindingContext = new SwingBindingContext(presenter.getCoefficientPairContainer(i));
+            final SwingBindingContext bindingContext = new SwingBindingContext(
+                    presenter.getCoefficientPairContainer(i));
             bindingContext.bind(textFieldsA[i], "a");
             bindingContext.bind(textFieldsB[i], "b");
         }
 
-        new SwingBindingContext(presenter.getOutputProductContainer()).bind(outputProductTextField, "name");
+        new SwingBindingContext(presenter.getOutputProductNameContainer()).
+                bind(outputProductTextField, "outputProductName");
     }
 
 }

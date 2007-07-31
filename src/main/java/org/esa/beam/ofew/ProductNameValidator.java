@@ -28,7 +28,7 @@ import com.bc.ceres.binding.ValueModel;
  * @author marcoz
  * @version $Revision: $ $Date: $
  */
-public class ProductNamenValidator implements Validator {
+public class ProductNameValidator implements Validator {
 
 	public void validateValue(ValueModel valueModel, Object value) throws ValidationException {
         if (value == null ||
