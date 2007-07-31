@@ -40,6 +40,7 @@ import org.esa.beam.ofew.SpectralBandFinder;
 import org.esa.beam.unmixing.Endmember;
 import org.esa.beam.unmixing.SpectralUnmixingOp;
 import org.esa.beam.util.Guardian;
+import org.esa.beam.util.ProductUtils;
 import org.esa.beam.visat.VisatApp;
 
 import javax.media.jai.ROI;
@@ -117,14 +118,14 @@ public class ClassificationDialog extends ModalDialog {
 			pm.beginTask("Performing OFEW Classification", 30);
 
 			Map<String, Object> unmixingParameter = getUnmixingParameter();
+			Product landsatProduct = model.getInputProduct();
 			final Product endmemberProduct = GPF.createProduct(
-					"SpectralUnmixing", unmixingParameter, model
-							.getInputProduct(), new SubProgressMonitor(pm, 10));
+					"SpectralUnmixing", unmixingParameter, landsatProduct, new SubProgressMonitor(pm, 10));
 			endmemberProduct.setName(model.getEndmemberProductName());
 
 			Map<String, Object> indexParameter = getIndexParameter();
 			Map<String, Product> indexInputProducts = new HashMap<String, Product>();
-			indexInputProducts.put("landsat", model.getInputProduct());
+			indexInputProducts.put("landsat", landsatProduct);
 			indexInputProducts.put("unmix", endmemberProduct);
 			final Product indexProduct = GPF.createProduct("BandArithmetic",
 					indexParameter, indexInputProducts, new SubProgressMonitor(
@@ -133,7 +134,7 @@ public class ClassificationDialog extends ModalDialog {
 
 			Map<String, Object> classificationParameter = getClassificationParameter();
 			Map<String, Product> classificationInputProducts = new HashMap<String, Product>();
-			classificationInputProducts.put("f3", model.getInputProduct());
+			classificationInputProducts.put("f3", landsatProduct);
 			classificationInputProducts.put("f1", endmemberProduct);
 			classificationInputProducts.put("f2", indexProduct);
 			final Product classificationProduct = GPF
@@ -142,6 +143,10 @@ public class ClassificationDialog extends ModalDialog {
 							new SubProgressMonitor(pm, 10));
 			classificationProduct.setName(model.getClassificationProductName());
 
+			classificationProduct.setStartTime(landsatProduct.getStartTime());
+			classificationProduct.setEndTime(landsatProduct.getEndTime());
+            ProductUtils.copyElementsAndAttributes(landsatProduct.getMetadataRoot(), classificationProduct.getMetadataRoot());
+            
 			VisatApp.getApp().addProduct(endmemberProduct);
 			VisatApp.getApp().addProduct(indexProduct);
 			VisatApp.getApp().addProduct(classificationProduct);
