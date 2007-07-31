@@ -25,45 +25,45 @@ class AtmCorrFormPresenter {
     }
 
     @Parameter(validator= ProductNameValidator.class, label="Ausgabe-Product")
-    String outputProductName;
+    String targetProductName;
 
-    private Product inputProduct;
-    private Band[] inputBands;
+    private Product sourceProduct;
+    private Band[] sourceBands;
 
     private ValueContainer[] coefficientPairContainers;
-    private ValueContainer outputProductNameContainer;
+    private ValueContainer targetProductNameContainer;
 
-    public AtmCorrFormPresenter(Product inputProduct, Band[] inputBands) {
-        this.inputProduct = inputProduct;
-        this.inputBands = inputBands;
+    public AtmCorrFormPresenter(Product sourceProduct, Band[] sourceBands) {
+        this.sourceProduct = sourceProduct;
+        this.sourceBands = sourceBands;
 
         final Factory factory = new Factory(new ParameterDefinitionFactory());
 
         try {
-            coefficientPairContainers = new ValueContainer[inputBands.length];
-            for (int i = 0; i < inputBands.length; i++) {
+            coefficientPairContainers = new ValueContainer[sourceBands.length];
+            for (int i = 0; i < sourceBands.length; i++) {
                 coefficientPairContainers[i] = factory.createObjectBackedValueContainer(new CoefficientPair());
                 coefficientPairContainers[i].setValue("a", 1.0);
                 coefficientPairContainers[i].setValue("b", 0.0);
             }
 
-            outputProductNameContainer = factory.createObjectBackedValueContainer(this);
-            outputProductNameContainer.setValue("outputProductName", inputProduct.getName() + "_atmo");
+            targetProductNameContainer = factory.createObjectBackedValueContainer(this);
+            targetProductNameContainer.setValue("targetProductName", sourceProduct.getName() + "_atmo");
         } catch (ValidationException e) {
             // ignore, can never happen
         }
     }
 
-    public String getInputProductName() {
-        return inputProduct.getName();
+    public String getSourceProductName() {
+        return sourceProduct.getName();
     }
 
-    public String getOutputProductName() {
-        return (String) outputProductNameContainer.getValue("outputProductName");
+    public String getTargetProductName() {
+        return (String) targetProductNameContainer.getValue("targetProductName");
     }
 
-    public ValueContainer getOutputProductNameContainer() {
-        return outputProductNameContainer;
+    public ValueContainer getTargetProductNameContainer() {
+        return targetProductNameContainer;
     }
 
     public ValueContainer getCoefficientPairContainer(int i) {
@@ -79,15 +79,15 @@ class AtmCorrFormPresenter {
     }
 
     public int getBandCount() {
-        return inputBands.length;
+        return sourceBands.length;
     }
 
     public String getBandName(int i) {
-        return inputBands[i].getName();
+        return sourceBands[i].getName();
     }
 
     public String getDisplayBandName(int i) {
-        String name = inputBands[i].getName();
+        String name = sourceBands[i].getName();
         int pos = name.indexOf("_");
 
         if (pos != -1 && pos < name.length() - 1) {

@@ -16,7 +16,6 @@ import javax.swing.border.TitledBorder;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Font;
-import java.awt.GridLayout;
 import java.text.DecimalFormat;
 
 /**
@@ -31,7 +30,7 @@ class AtmCorrForm extends JPanel {
 
     JFormattedTextField[] textFieldsA;
     JFormattedTextField[] textFieldsB;
-    private JFormattedTextField outputProductTextField;
+    private JFormattedTextField targetProductTextField;
 
     public AtmCorrForm(AtmCorrFormPresenter presenter) {
         this.presenter = presenter;
@@ -42,79 +41,78 @@ class AtmCorrForm extends JPanel {
 
     private void initComponents() {
         setLayout(new BorderLayout());
-//        TableLayout inputTableLayout = new TableLayout(2);
-//        inputTableLayout.setTableAnchor(TableLayout.Anchor.LINE_START);
-//        inputTableLayout.setTableFill(TableLayout.Fill.HORIZONTAL);
-//        inputTableLayout.setColumnWeightX(0, 0.2);
-//        inputTableLayout.setColumnWeightX(1, 0.8);
-//        inputTableLayout.setTablePadding(2, 2);
-        GridLayout gridLayout = new GridLayout(1, 2);
-        JPanel inputPanel = new JPanel(gridLayout);
 
-        inputPanel.setBorder(BorderFactory.createTitledBorder(null, "Eingabe",
-                                                              TitledBorder.DEFAULT_JUSTIFICATION,
-                                                              TitledBorder.DEFAULT_POSITION,
-                                                              new Font("Tahoma", 0, 11),
-                                                              new Color(0, 70, 213)));
-        inputPanel.add(new JLabel("Eingabe-Produkt:"));
-        JTextField inputProductTextField = new JTextField(presenter.getInputProductName());
-        inputProductTextField.setColumns(35);
-        inputProductTextField.setEditable(false);
-        inputPanel.add(inputProductTextField);
-        add(inputPanel, BorderLayout.NORTH);
+        final TableLayout layout1 = new TableLayout(2);
+        layout1.setTableAnchor(TableLayout.Anchor.LINE_START);
+        layout1.setTableFill(TableLayout.Fill.HORIZONTAL);
+        layout1.setColumnWeightX(0, 0.0);
+        layout1.setColumnWeightX(1, 1.0);
+        layout1.setTablePadding(2, 2);
 
-        TableLayout parameterTableLayout = new TableLayout(3);
-        parameterTableLayout.setTableAnchor(TableLayout.Anchor.LINE_START);
-        parameterTableLayout.setTableFill(TableLayout.Fill.HORIZONTAL);
-        parameterTableLayout.setColumnWeightX(0, 0.2);
-        parameterTableLayout.setColumnWeightX(1, 0.4);
-        parameterTableLayout.setColumnWeightX(2, 0.4);
-        parameterTableLayout.setTablePadding(2, 2);
-        GridLayout parameterGridLayout = new GridLayout(presenter.getBandCount() + 1, 3, 2, 2);
-        JPanel parameterPanel = new JPanel(parameterGridLayout);
+        final JPanel sourceProductPanel = new JPanel(layout1);
+        sourceProductPanel.setBorder(BorderFactory.createTitledBorder(null, "Eingabe",
+                                                                      TitledBorder.DEFAULT_JUSTIFICATION,
+                                                                      TitledBorder.DEFAULT_POSITION,
+                                                                      new Font("Tahoma", 0, 11),
+                                                                      new Color(0, 70, 213)));
+        sourceProductPanel.add(new JLabel("Eingabe-Produkt:"));
+        final JTextField sourceProductTextField = new JTextField(presenter.getSourceProductName());
+        sourceProductTextField.setColumns(35);
+        sourceProductTextField.setEditable(false);
+        sourceProductPanel.add(sourceProductTextField);
+        add(sourceProductPanel, BorderLayout.NORTH);
 
-        parameterPanel.setBorder(BorderFactory.createTitledBorder(null, "Koeffizienten",
-                                                                  TitledBorder.DEFAULT_JUSTIFICATION,
-                                                                  TitledBorder.DEFAULT_POSITION,
-                                                                  new Font("Tahoma", 0, 11),
-                                                                  new Color(0, 70, 213)));
+        final TableLayout layout2 = new TableLayout(3);
+        layout2.setTableAnchor(TableLayout.Anchor.LINE_START);
+        layout2.setTableFill(TableLayout.Fill.HORIZONTAL);
+        layout2.setColumnWeightX(0, 0.0);
+        layout2.setColumnWeightX(1, 1.0);
+        layout2.setColumnWeightX(2, 1.0);
+        layout2.setTablePadding(2, 2);
 
-        parameterPanel.add(new JLabel(""));
+        final JPanel coefficientPanel = new JPanel(layout2);
+        coefficientPanel.setBorder(BorderFactory.createTitledBorder(null, "Koeffizienten",
+                                                                    TitledBorder.DEFAULT_JUSTIFICATION,
+                                                                    TitledBorder.DEFAULT_POSITION,
+                                                                    new Font("Tahoma", 0, 11),
+                                                                    new Color(0, 70, 213)));
+        coefficientPanel.add(new JLabel(""));
         final JLabel labelA = new JLabel("Multiplikator a");
-        parameterPanel.add(labelA);
+        coefficientPanel.add(labelA);
         final JLabel labelB = new JLabel("Summand b");
-        parameterPanel.add(labelB);
+        coefficientPanel.add(labelB);
         textFieldsA = new JFormattedTextField[presenter.getBandCount()];
         textFieldsB = new JFormattedTextField[presenter.getBandCount()];
 
         for (int i = 0; i < presenter.getBandCount(); i++) {
-            parameterPanel.add(new JLabel(presenter.getDisplayBandName(i) + ":"));
+            coefficientPanel.add(new JLabel(presenter.getDisplayBandName(i) + ":"));
 
             textFieldsA[i] = new JFormattedTextField(new DecimalFormat("0.0#######"));
-            parameterPanel.add(textFieldsA[i]);
+            coefficientPanel.add(textFieldsA[i]);
 
             textFieldsB[i] = new JFormattedTextField(new DecimalFormat("0.0#######"));
-            parameterPanel.add(textFieldsB[i]);
+            coefficientPanel.add(textFieldsB[i]);
         }
-        add(parameterPanel, BorderLayout.CENTER);
+        add(coefficientPanel, BorderLayout.CENTER);
 
-//        TableLayout outputTableLayout = new TableLayout(2);
-//        outputTableLayout.setTableAnchor(TableLayout.Anchor.LINE_START);
-//        outputTableLayout.setTableFill(TableLayout.Fill.HORIZONTAL);
-//        outputTableLayout.setColumnWeightX(0, 0.2);
-//        outputTableLayout.setColumnWeightX(1, 0.8);
-//        outputTableLayout.setTablePadding(2, 2);
-        JPanel outputPanel = new JPanel(gridLayout);
+        final TableLayout layout3 = new TableLayout(2);
+        layout3.setTableAnchor(TableLayout.Anchor.LINE_START);
+        layout3.setTableFill(TableLayout.Fill.HORIZONTAL);
+        layout3.setColumnWeightX(0, 0.0);
+        layout3.setColumnWeightX(1, 1.0);
+        layout3.setTablePadding(2, 2);
 
-        outputPanel.setBorder(BorderFactory.createTitledBorder(null, "Ausgabe",
-                                                               TitledBorder.DEFAULT_JUSTIFICATION,
-                                                               TitledBorder.DEFAULT_POSITION,
-                                                               new Font("Tahoma", 0, 11),
-                                                               new Color(0, 70, 213)));
-        outputPanel.add(new JLabel("Ausgabe-Produkt:"));
-        outputProductTextField = new JFormattedTextField(presenter.getOutputProductName());
-        outputPanel.add(outputProductTextField);
-        add(outputPanel, BorderLayout.SOUTH);
+        final JPanel targetProductPanel = new JPanel(layout3);
+        targetProductPanel.setBorder(BorderFactory.createTitledBorder(null, "Ausgabe",
+                                                                      TitledBorder.DEFAULT_JUSTIFICATION,
+                                                                      TitledBorder.DEFAULT_POSITION,
+                                                                      new Font("Tahoma", 0, 11),
+                                                                      new Color(0, 70, 213)));
+        targetProductPanel.add(new JLabel("Ausgabe-Produkt:"));
+        targetProductTextField = new JFormattedTextField(presenter.getTargetProductName());
+        sourceProductTextField.setColumns(35);
+        targetProductPanel.add(targetProductTextField);
+        add(targetProductPanel, BorderLayout.SOUTH);
     }
 
     private void bindComponents() {
@@ -125,17 +123,17 @@ class AtmCorrForm extends JPanel {
             bindingContext.bind(textFieldsB[i], "b");
         }
 
-        new SwingBindingContext(presenter.getOutputProductNameContainer()).
-                bind(outputProductTextField, "outputProductName");
+        new SwingBindingContext(presenter.getTargetProductNameContainer()).
+                bind(targetProductTextField, "targetProductName");
     }
 
     public boolean hasValidValues() {
         try {
-            final ValueModel model = presenter.getOutputProductNameContainer().getModel("outputProductName");
-            model.validate(outputProductTextField.getValue());
+            final ValueModel model = presenter.getTargetProductNameContainer().getModel("targetProductName");
+            model.validate(targetProductTextField.getValue());
         } catch (ValidationException e) {
             JOptionPane.showMessageDialog(VisatApp.getApp().getMainFrame(),
-                    e.getMessage(), AtmCorrDialog.TITLE, JOptionPane.ERROR_MESSAGE);
+                                          e.getMessage(), AtmCorrDialog.TITLE, JOptionPane.ERROR_MESSAGE);
             return false;
         }
         return true;

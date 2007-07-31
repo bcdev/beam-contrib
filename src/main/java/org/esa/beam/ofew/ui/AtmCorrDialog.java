@@ -75,7 +75,7 @@ public class AtmCorrDialog extends ModalDialog {
             pm.beginTask("Performing OFEW atmospheric correction", 10);
 
             final Map<String, Object> parameterMap = new HashMap<String, Object>();
-            parameterMap.put("productName", presenter.getOutputProductName());
+            parameterMap.put("productName", presenter.getTargetProductName());
 
             final BandArithmeticOp.BandDescriptor[] bandDescriptors =
                     new BandArithmeticOp.BandDescriptor[sourceBands.length];
@@ -110,7 +110,7 @@ public class AtmCorrDialog extends ModalDialog {
             }
             ProductUtils.copyBitmaskDefs(sourceProduct, targetProduct);
             ProductUtils.copyElementsAndAttributes(sourceProduct.getMetadataRoot(), targetProduct.getMetadataRoot());
-            
+
             return targetProduct;
         } finally {
             pm.done();

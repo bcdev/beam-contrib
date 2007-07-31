@@ -41,8 +41,8 @@
         <action>
             <id>ofewAtmCorr</id>
             <class>org.esa.beam.ofew.ui.AtmCorrAction</class>
-            <text>OFEW Atmosph�renkorrektur...</text>
-            <shortDescr>Aufruf des OFEW Atmosphärenkorrektur-Werkzeugs</shortDescr>
+            <text>OFEW Atmosph&#xE4;renkorrektur...</text>
+            <shortDescr>Aufruf des OFEW Atmosph&#xE4;renkorrektur-Werkzeugs</shortDescr>
             <mnemonic></mnemonic>
             <parent>tools</parent>
             <helpID>ofewAtmCorrTool</helpID>
