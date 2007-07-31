@@ -86,7 +86,7 @@ public class DecisionTreeConfiguration {
 		int i = 0;
 		for (Xpp3Dom variableDom : variableDoms) {
 			String varName = variableDom.getAttribute("name");
-			String value = variableDom.getAttribute("value");
+			double value = Double.parseDouble(variableDom.getAttribute("value"));
 			String description = variableDom.getAttribute("description");
 			DecisionVariable decisionVariable = new DecisionVariable(varName, value, description);
 			theVariables[i] = decisionVariable;

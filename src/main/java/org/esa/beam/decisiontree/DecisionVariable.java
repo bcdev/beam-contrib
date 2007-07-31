@@ -29,11 +29,11 @@ public class DecisionVariable {
 	@Parameter
 	private String name;
 	@Parameter
-	private String value;
+	private double value;
 	@Parameter
 	private String description;
 	
-	public DecisionVariable(String name, String value, String description) {
+	public DecisionVariable(String name, double value, String description) {
 		this.name = name;
 		this.value = value;
 		this.description = description;
@@ -47,7 +47,7 @@ public class DecisionVariable {
 		return name;
 	}
 
-	public String getValue() {
+	public double getValue() {
 		return value;
 	}
 }

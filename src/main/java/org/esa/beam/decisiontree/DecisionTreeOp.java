@@ -53,6 +53,8 @@ public class DecisionTreeOp extends AbstractOperator {
     private String decisionConfigFile;
     @Parameter
     private DecisionTreeConfiguration configuration;
+    @Parameter
+    private String bandName = CLASSIFICATION_BAND;
 
 	private DecisionData[] dds;
 	
@@ -82,8 +84,7 @@ public class DecisionTreeOp extends AbstractOperator {
 			}
         }
         
-        Band classBand = targetProduct.addBand(CLASSIFICATION_BAND, ProductData.TYPE_UINT8);
-        classBand.setDescription("decisions");
+        targetProduct.addBand(bandName, ProductData.TYPE_UINT8);
         addBitmaskDefs();
 
         
@@ -107,7 +108,7 @@ public class DecisionTreeOp extends AbstractOperator {
 				BandArithmeticOp.Variable variable = new BandArithmeticOp.Variable();
 				variable.name = decisionVariables[i].getName();
 				variable.type = ProductData.TYPESTRING_FLOAT32;
-				variable.value = decisionVariables[i].getValue();
+				variable.value = Double.toString(decisionVariables[i].getValue());
 				variables[i] = variable;
 			}
 			parameters.put("variables", variables);
@@ -137,12 +138,12 @@ public class DecisionTreeOp extends AbstractOperator {
 		BitmaskOverlayInfo bitmaskOverlayInfo = new BitmaskOverlayInfo();
 		for (Classification aClass : classes) {
 			BitmaskDef bitmaskDef = new BitmaskDef(aClass.getName(), "",
-					CLASSIFICATION_BAND + " == " + aClass.getValue(), aClass.getColor(),
+					bandName + " == " + aClass.getValue(), aClass.getColor(),
 					0.0f);
 			targetProduct.addBitmaskDef(bitmaskDef);
 			bitmaskOverlayInfo.addBitmaskDef(bitmaskDef);
 		}
-		targetProduct.getBand(CLASSIFICATION_BAND).setBitmaskOverlayInfo(bitmaskOverlayInfo);
+		targetProduct.getBand(bandName).setBitmaskOverlayInfo(bitmaskOverlayInfo);
 	}
 
 	@Override
