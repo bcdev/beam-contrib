@@ -3,7 +3,7 @@ package org.esa.beam.decisiontree;
 public class Decision {
 
 	private final String name;
-	private final String term;
+	private String term;
 	private Decision yesDecision;
 	private Decision noDecision;
 	private Classification yesClass;
@@ -52,5 +52,9 @@ public class Decision {
 
 	public String getTerm() {
 		return term;
+	}
+
+	public void setTerm(String term) {
+		this.term = term;
 	}
 }
