@@ -29,7 +29,7 @@
     <extension point="beam-visat:actions">
         <action>
             <id>ofewClassification</id>
-            <class>org.esa.beam.decisiontree.ui.OfewClassificationAction</class>
+            <class>org.esa.beam.ofew.ui.OfewClassificationAction</class>
             <text>OFEW Klassifikation...</text>
             <shortDescr>Aufruf des OFEW Klassifikations-Werkzeugs</shortDescr>
             <mnemonic></mnemonic>
@@ -41,8 +41,8 @@
         <action>
             <id>ofewAtmCorr</id>
             <class>org.esa.beam.ofew.ui.AtmCorrAction</class>
-            <text>OFEW Atmosphärenkorrektur...</text>
-            <shortDescr>Aufruf des OFEW Atmosphärenkorrektur-Werkzeugs</shortDescr>
+            <text>OFEW Atmosphï¿½renkorrektur...</text>
+            <shortDescr>Aufruf des OFEW Atmosphï¿½renkorrektur-Werkzeugs</shortDescr>
             <mnemonic></mnemonic>
             <parent>tools</parent>
             <helpID>ofewAtmCorrTool</helpID>
