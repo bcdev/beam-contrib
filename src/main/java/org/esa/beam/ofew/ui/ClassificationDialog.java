@@ -187,7 +187,17 @@ public class ClassificationDialog extends ModalDialog {
 		InputStreamReader reader = new InputStreamReader(inputStream);
 		DiagramGraph[] diagramGraphs = DiagramGraphIO.readGraphs(reader);
         Endmember[] endmembers = SpectralUnmixingOp.convertGraphsToEndmembers(diagramGraphs);
-        parameter.put("endmembers", endmembers);
+        Endmember[] realEndmembers = new Endmember[endmembers.length];
+        double[] realWavelengths = new double[bandFinder.getBandCount()];
+        for (int i = 0; i < realWavelengths.length; i++) {
+			Band band = bandFinder.getBand(i);
+			realWavelengths[i] = band.getSpectralWavelength();
+		}
+        for (int i = 0; i < endmembers.length; i++) {
+			Endmember endmember = endmembers[i];
+			realEndmembers[i] = new Endmember(endmember.getName(), realWavelengths, endmember.getRadiations());
+		}
+        parameter.put("endmembers", realEndmembers);
 
 		parameter.put("sourceBandNames", bandFinder.getBandNames());
 		parameter.put("unmixingModelName", "Constrained LSU");
