@@ -1,10 +1,10 @@
 package org.esa.beam.ofew.ui;
 
-import java.awt.Color;
-import java.awt.Font;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.text.DecimalFormat;
+import com.bc.ceres.binding.ValidationException;
+import com.bc.ceres.binding.ValueContainer;
+import com.bc.ceres.binding.swing.SwingBindingContext;
+import org.esa.beam.framework.ui.TableLayout;
+import org.esa.beam.visat.VisatApp;
 
 import javax.swing.BorderFactory;
 import javax.swing.JCheckBox;
@@ -15,13 +15,11 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.border.TitledBorder;
-
-import org.esa.beam.framework.ui.TableLayout;
-import org.esa.beam.visat.VisatApp;
-
-import com.bc.ceres.binding.ValidationException;
-import com.bc.ceres.binding.ValueContainer;
-import com.bc.ceres.binding.swing.SwingBindingContext;
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.text.DecimalFormat;
 
 class ClassificationForm extends JPanel {
 

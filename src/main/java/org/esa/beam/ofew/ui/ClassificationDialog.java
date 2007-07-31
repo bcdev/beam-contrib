@@ -16,18 +16,13 @@
  */
 package org.esa.beam.ofew.ui;
 
-import java.awt.Dialog;
-import java.awt.Window;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.logging.Level;
-
-import javax.media.jai.ROI;
-
+import com.bc.ceres.core.ProgressMonitor;
+import com.bc.ceres.core.SubProgressMonitor;
+import com.bc.ceres.swing.progress.DialogProgressMonitor;
+import com.bc.jexp.EvalEnv;
+import com.bc.jexp.EvalException;
+import com.bc.jexp.Symbol;
+import com.bc.jexp.impl.AbstractSymbol;
 import org.esa.beam.decisiontree.Decision;
 import org.esa.beam.decisiontree.DecisionTreeConfiguration;
 import org.esa.beam.framework.datamodel.Band;
@@ -47,17 +42,20 @@ import org.esa.beam.unmixing.SpectralUnmixingOp;
 import org.esa.beam.util.Guardian;
 import org.esa.beam.visat.VisatApp;
 
-import com.bc.ceres.core.ProgressMonitor;
-import com.bc.ceres.core.SubProgressMonitor;
-import com.bc.ceres.swing.progress.DialogProgressMonitor;
-import com.bc.jexp.EvalEnv;
-import com.bc.jexp.EvalException;
-import com.bc.jexp.Symbol;
-import com.bc.jexp.impl.AbstractSymbol;
+import javax.media.jai.ROI;
+import java.awt.Dialog;
+import java.awt.Window;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.logging.Level;
 
 /**
  * Created by marcoz.
- * 
+ *
  * @author marcoz
  * @version $Revision: $ $Date: $
  */
@@ -71,7 +69,7 @@ public class ClassificationDialog extends ModalDialog {
 	private final ClassificationForm form;
 	private final SpectralBandFinder bandFinder;
 
-	
+
 	public ClassificationDialog(final Window parent,
 			final Product inputProduct) throws IOException {
 		super(parent, TITLE, ModalDialog.ID_OK_CANCEL, null);
@@ -82,7 +80,7 @@ public class ClassificationDialog extends ModalDialog {
 
 		model = new ClassificationModel(inputProduct, reader);
 		form = new ClassificationForm(model);
-		bandFinder = new SpectralBandFinder(inputProduct, SpectralBandFinder.OFEW_SPECTRA);
+		bandFinder = new SpectralBandFinder(inputProduct, SpectralBandFinder.OFEW_WAVELENGTHS);
 	}
 
 	@Override
@@ -91,7 +89,7 @@ public class ClassificationDialog extends ModalDialog {
 		// form.outputProductName.requestFocus();
 		return super.show();
 	}
-	
+
 	@Override
 	protected boolean verifyUserInput() {
 		return form.hasValidValues();

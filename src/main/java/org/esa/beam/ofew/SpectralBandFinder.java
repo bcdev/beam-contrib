@@ -13,9 +13,9 @@ import java.util.ArrayList;
  * @version $Revision$ $Date$
  */
 public class SpectralBandFinder {
-	
-	public static final double[] OFEW_SPECTRA = {478.0, 560.0, 660.0, 835.0, 1650.0, 2208.0};
-	
+
+	public static final double[] OFEW_WAVELENGTHS = {478.0, 560.0, 660.0, 835.0, 1650.0, 2208.0};
+
 	private final double[] wavelengths;
     private final List<Band> bandList;
 
@@ -46,7 +46,7 @@ public class SpectralBandFinder {
     public Band[] getBands() {
         return bandList.toArray(new Band[bandList.size()]);
     }
-    
+
     public String[] getBandNames() {
     	String[] bandNames = new String[bandList.size()];
     	for (int i = 0; i < bandNames.length; i++) {

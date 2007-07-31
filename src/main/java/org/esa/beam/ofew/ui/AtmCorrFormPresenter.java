@@ -3,14 +3,14 @@ package org.esa.beam.ofew.ui;
 import com.bc.ceres.binding.Factory;
 import com.bc.ceres.binding.ValidationException;
 import com.bc.ceres.binding.ValueContainer;
-import com.bc.ceres.binding.validators.NotEmptyValidator;
 import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.ParameterDefinitionFactory;
+import org.esa.beam.ofew.ProductNameValidator;
 
 /**
- * Created by IntelliJ IDEA.
+ * Presenter for OFEW atmospheric correction form.
  *
  * @author Ralf Quast
  * @version $Revision$ $Date$
@@ -24,7 +24,7 @@ class AtmCorrFormPresenter {
         double b;
     }
 
-    @Parameter(validator = NotEmptyValidator.class)
+    @Parameter(validator= ProductNameValidator.class, label="Ausgabe-Product")
     String outputProductName;
 
     private Product inputProduct;

@@ -1,11 +1,15 @@
 package org.esa.beam.ofew.ui;
 
+import com.bc.ceres.binding.ValidationException;
+import com.bc.ceres.binding.ValueModel;
 import com.bc.ceres.binding.swing.SwingBindingContext;
 import org.esa.beam.framework.ui.TableLayout;
+import org.esa.beam.visat.VisatApp;
 
 import javax.swing.BorderFactory;
 import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.border.TitledBorder;
@@ -16,7 +20,7 @@ import java.awt.GridLayout;
 import java.text.DecimalFormat;
 
 /**
- * Created by IntelliJ IDEA.
+ * Form for OFEW atmospheric correction dialog.
  *
  * @author Ralf Quast
  * @version $Revision$ $Date$
@@ -123,6 +127,18 @@ class AtmCorrForm extends JPanel {
 
         new SwingBindingContext(presenter.getOutputProductNameContainer()).
                 bind(outputProductTextField, "outputProductName");
+    }
+
+    public boolean hasValidValues() {
+        try {
+            final ValueModel model = presenter.getOutputProductNameContainer().getModel("outputProductName");
+            model.validate(outputProductTextField.getValue());
+        } catch (ValidationException e) {
+            JOptionPane.showMessageDialog(VisatApp.getApp().getMainFrame(),
+                    e.getMessage(), AtmCorrDialog.TITLE, JOptionPane.ERROR_MESSAGE);
+            return false;
+        }
+        return true;
     }
 
 }

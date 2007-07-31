@@ -17,7 +17,7 @@ public class AtmCorrAction extends ExecCommand {
     @Override
     public void actionPerformed(CommandEvent commandEvent) {
         final Product selectedProduct = VisatApp.getApp().getSelectedProduct();
-        final SpectralBandFinder bandFinder = new SpectralBandFinder(selectedProduct, SpectralBandFinder.OFEW_SPECTRA);
+        final SpectralBandFinder bandFinder = new SpectralBandFinder(selectedProduct, SpectralBandFinder.OFEW_WAVELENGTHS);
 
         new AtmCorrDialog(VisatApp.getApp().getMainFrame(), selectedProduct, bandFinder.getBands()).show();
     }
@@ -25,6 +25,6 @@ public class AtmCorrAction extends ExecCommand {
     @Override
     public void updateState() {
         final Product product = VisatApp.getApp().getSelectedProduct();
-        setEnabled(product != null && new SpectralBandFinder(product, SpectralBandFinder.OFEW_SPECTRA).hasFoundAll());
+        setEnabled(product != null && new SpectralBandFinder(product, SpectralBandFinder.OFEW_WAVELENGTHS).hasFoundAll());
     }
 }

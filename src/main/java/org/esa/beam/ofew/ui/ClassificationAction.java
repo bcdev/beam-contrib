@@ -15,16 +15,15 @@
  */
 package org.esa.beam.ofew.ui;
 
-import java.io.IOException;
-import java.util.logging.Level;
-
-import javax.swing.JOptionPane;
-
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.ui.command.CommandEvent;
 import org.esa.beam.framework.ui.command.ExecCommand;
 import org.esa.beam.ofew.SpectralBandFinder;
 import org.esa.beam.visat.VisatApp;
+
+import javax.swing.JOptionPane;
+import java.io.IOException;
+import java.util.logging.Level;
 
 /**
  * OFEW Classification Action
@@ -54,6 +53,6 @@ public class ClassificationAction extends ExecCommand {
     @Override
     public void updateState() {
         final Product selectedProduct = VisatApp.getApp().getSelectedProduct();
-        setEnabled(selectedProduct != null && new SpectralBandFinder(selectedProduct, SpectralBandFinder.OFEW_SPECTRA).hasFoundAll());
+        setEnabled(selectedProduct != null && new SpectralBandFinder(selectedProduct, SpectralBandFinder.OFEW_WAVELENGTHS).hasFoundAll());
     }
 }
