@@ -23,23 +23,17 @@ import javax.swing.JOptionPane;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.ui.command.CommandEvent;
 import org.esa.beam.framework.ui.command.ExecCommand;
+import org.esa.beam.ofew.SpectralBandFinder;
 import org.esa.beam.visat.VisatApp;
 
 /**
- * Noise reduction action.
+ * OFEW Classification Action
  *
- * @author Marco Peters
+ * @author Marco Zuehlke
  * @author Ralf Quast
  * @version $Revision:$ $Date:$
  */
 public class ClassificationAction extends ExecCommand {
-
-    private final String[] sourceBandNames;
-
-	public ClassificationAction() {
-		sourceBandNames = new String[] { "band1", "band2", "band3", "band4",
-				"band5", "band6" };
-	}
 
 	@Override
     public void actionPerformed(CommandEvent commandEvent) {
@@ -60,15 +54,6 @@ public class ClassificationAction extends ExecCommand {
     @Override
     public void updateState() {
         final Product selectedProduct = VisatApp.getApp().getSelectedProduct();
-        boolean enabled = false;
-        if (selectedProduct != null) {
-        	enabled = true;
-        	for (String bandName : sourceBandNames) {
-        		if (!selectedProduct.containsBand(bandName)) {
-        			enabled = false;
-        		}
-			}
-        }
-        setEnabled(enabled);
+        setEnabled(selectedProduct != null && new SpectralBandFinder(selectedProduct, SpectralBandFinder.OFEW_SPECTRA).hasFoundAll());
     }
 }

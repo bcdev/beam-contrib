@@ -13,17 +13,17 @@ import java.util.ArrayList;
  * @version $Revision$ $Date$
  */
 public class SpectralBandFinder {
-
-    final Product product;
-    final double[] wavelengths;
-    final List<Band> bandList;
+	
+	public static final double[] OFEW_SPECTRA = {478.0, 560.0, 660.0, 835.0, 1650.0, 2208.0};
+	
+	private final double[] wavelengths;
+    private final List<Band> bandList;
 
     public SpectralBandFinder(Product product, double[] wavelengths) {
-        this.product = product;
         this.wavelengths = wavelengths;
 
         bandList = new ArrayList<Band>(wavelengths.length);
-        findSpectralBands();
+        findSpectralBands(product);
     }
 
     public int getBandCount() {
@@ -46,12 +46,20 @@ public class SpectralBandFinder {
     public Band[] getBands() {
         return bandList.toArray(new Band[bandList.size()]);
     }
+    
+    public String[] getBandNames() {
+    	String[] bandNames = new String[bandList.size()];
+    	for (int i = 0; i < bandNames.length; i++) {
+			bandNames[i] = bandList.get(i).getName();
+		}
+        return bandNames;
+    }
 
     public Band getBand(int i) {
         return bandList.get(i);
     }
 
-    private void findSpectralBands() {
+    private void findSpectralBands(Product product) {
         search:
         for (final double wavelength : wavelengths) {
             for (final Band band : product.getBands()) {

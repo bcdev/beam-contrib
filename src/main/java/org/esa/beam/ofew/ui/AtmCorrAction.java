@@ -14,12 +14,10 @@ import org.esa.beam.visat.VisatApp;
  */
 public class AtmCorrAction extends ExecCommand {
 
-    private final double[] wavelengths = {478.0, 560.0, 660.0, 835.0, 1650.0, 2208.0};
-
     @Override
     public void actionPerformed(CommandEvent commandEvent) {
         final Product selectedProduct = VisatApp.getApp().getSelectedProduct();
-        final SpectralBandFinder bandFinder = new SpectralBandFinder(selectedProduct, wavelengths);
+        final SpectralBandFinder bandFinder = new SpectralBandFinder(selectedProduct, SpectralBandFinder.OFEW_SPECTRA);
 
         new AtmCorrDialog(VisatApp.getApp().getMainFrame(), selectedProduct, bandFinder.getBands()).show();
     }
@@ -27,7 +25,6 @@ public class AtmCorrAction extends ExecCommand {
     @Override
     public void updateState() {
         final Product product = VisatApp.getApp().getSelectedProduct();
-        setEnabled(product != null && new SpectralBandFinder(product, wavelengths).hasFoundAll());
+        setEnabled(product != null && new SpectralBandFinder(product, SpectralBandFinder.OFEW_SPECTRA).hasFoundAll());
     }
-
 }

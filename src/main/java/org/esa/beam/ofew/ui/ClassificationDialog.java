@@ -41,6 +41,7 @@ import org.esa.beam.framework.gpf.operators.common.BandArithmeticOp;
 import org.esa.beam.framework.ui.ModalDialog;
 import org.esa.beam.framework.ui.diagram.DiagramGraph;
 import org.esa.beam.framework.ui.diagram.DiagramGraphIO;
+import org.esa.beam.ofew.SpectralBandFinder;
 import org.esa.beam.unmixing.Endmember;
 import org.esa.beam.unmixing.SpectralUnmixingOp;
 import org.esa.beam.util.Guardian;
@@ -65,11 +66,10 @@ public class ClassificationDialog extends ModalDialog {
 	public static final String TITLE = "OFEW Klassifikation";
 	private static final String EM_CSV = "em.csv";
 	private static final String OFEW_DT_XML = "ofew_dt.xml";
-	private final String[] sourceBandNames = new String[] { "band1", "band2", "band3", "band4",
-			"band5", "band6" };
 
 	private final ClassificationModel model;
 	private final ClassificationForm form;
+	private final SpectralBandFinder bandFinder;
 
 	
 	public ClassificationDialog(final Window parent,
@@ -82,6 +82,7 @@ public class ClassificationDialog extends ModalDialog {
 
 		model = new ClassificationModel(inputProduct, reader);
 		form = new ClassificationForm(model);
+		bandFinder = new SpectralBandFinder(inputProduct, SpectralBandFinder.OFEW_SPECTRA);
 	}
 
 	@Override
@@ -125,8 +126,8 @@ public class ClassificationDialog extends ModalDialog {
 
 			Map<String, Object> indexParameter = getIndexParameter();
 			Map<String, Product> indexInputProducts = new HashMap<String, Product>();
-			indexInputProducts.put("l5", model.getInputProduct());
-			indexInputProducts.put("em", endmemberProduct);
+			indexInputProducts.put("landsat", model.getInputProduct());
+			indexInputProducts.put("unmix", endmemberProduct);
 			final Product indexProduct = GPF.createProduct("BandArithmetic",
 					indexParameter, indexInputProducts, new SubProgressMonitor(
 							pm, 10));
@@ -154,26 +155,29 @@ public class ClassificationDialog extends ModalDialog {
 	}
 
 	private Map<String, Object> getIndexParameter() {
+		String band3 = bandFinder.getBand(2).getName();
+		String band4 = bandFinder.getBand(3).getName();
+		String band5 = bandFinder.getBand(4).getName();
 		Map<String, Object> parameter = new HashMap<String, Object>();
 		BandArithmeticOp.BandDescriptor[] bandDesc = new BandArithmeticOp.BandDescriptor[4];
 		bandDesc[0] = new BandArithmeticOp.BandDescriptor();
 		bandDesc[0].name = "ndvi";
-		bandDesc[0].expression = "($l5.band4 - $l5.band3)/($l5.band4 + $l5.band3)";
+		bandDesc[0].expression = "($landsat."+band4+" - $landsat."+band3+")/($landsat."+band4+" + $landsat."+band3+")";
 		bandDesc[0].type = ProductData.TYPESTRING_FLOAT32;
 
 		bandDesc[1] = new BandArithmeticOp.BandDescriptor();
 		bandDesc[1].name = "Steigung_3_4";
-		bandDesc[1].expression = "($l5.band3 - $l5.band4)/(0.66-0.835)";
+		bandDesc[1].expression = "($landsat."+band3+" - $landsat."+band4+")/(0.66-0.835)";
 		bandDesc[1].type = ProductData.TYPESTRING_FLOAT32;
 
 		bandDesc[2] = new BandArithmeticOp.BandDescriptor();
 		bandDesc[2].name = "Steigung_4_5";
-		bandDesc[2].expression = "($l5.band4 - $l5.band5)/(0.835-1.65)";
+		bandDesc[2].expression = "($landsat."+band4+" - $landsat."+band5+")/(0.835-1.65)";
 		bandDesc[2].type = ProductData.TYPESTRING_FLOAT32;
 
 		bandDesc[3] = new BandArithmeticOp.BandDescriptor();
 		bandDesc[3].name = "schlick_corr";
-		bandDesc[3].expression = "($em.Sand_wc < 0.0) ? $em.Sand_wc + $em.schlick : $em.schlick";
+		bandDesc[3].expression = "($unmix.Sand_wc < 0.0) ? $unmix.Sand_wc + $unmix.schlick : $unmix.schlick";
 		bandDesc[3].type = ProductData.TYPESTRING_FLOAT32;
 		parameter.put("bandDescriptors", bandDesc);
 		return parameter;
@@ -187,7 +191,7 @@ public class ClassificationDialog extends ModalDialog {
         Endmember[] endmembers = SpectralUnmixingOp.convertGraphsToEndmembers(diagramGraphs);
         parameter.put("endmembers", endmembers);
 
-		parameter.put("sourceBandNames", sourceBandNames);
+		parameter.put("sourceBandNames", bandFinder.getBandNames());
 		parameter.put("unmixingModelName", "Constrained LSU");
 		parameter.put("targetBandNameSuffix", "");
 		return parameter;
@@ -203,9 +207,20 @@ public class ClassificationDialog extends ModalDialog {
 			inRoiDecision.setNoClass(configuration.getClass("nodata"));
 			configuration.setRootDecisions(inRoiDecision);
 		}
+		replaceBandNamesinTerms(configuration.getAllDecisions());
 		parameter.put("configuration", configuration);
 		parameter.put("bandName", "Klassifikation");
 		return parameter;
+	}
+
+	private void replaceBandNamesinTerms(Decision[] allDecisions) {
+		for (Decision decision : allDecisions) {
+			String term = decision.getTerm();
+			for (int i = 0; i < 6; i++) {
+				term = term.replace("band"+(i+1), bandFinder.getBand(i).getName());
+			}
+			decision.setTerm(term);
+		}
 	}
 
 	private void registerRoiSymbol(Band band, ProgressMonitor pm) throws OperatorException {
