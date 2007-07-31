@@ -60,7 +60,7 @@ import com.bc.jexp.impl.AbstractSymbol;
  * @author marcoz
  * @version $Revision: $ $Date: $
  */
-public class OfewClassificationDialog extends ModalDialog {
+public class ClassificationDialog extends ModalDialog {
 
 	public static final String TITLE = "OFEW Klassifikation";
 	private static final String EM_CSV = "em.csv";
@@ -68,11 +68,11 @@ public class OfewClassificationDialog extends ModalDialog {
 	private final String[] sourceBandNames = new String[] { "band1", "band2", "band3", "band4",
 			"band5", "band6" };
 
-	private final OfewClassificationModel model;
-	private final OfewClassificationForm form;
+	private final ClassificationModel model;
+	private final ClassificationForm form;
 
 	
-	public OfewClassificationDialog(final Window parent,
+	public ClassificationDialog(final Window parent,
 			final Product inputProduct) throws IOException {
 		super(parent, TITLE, ModalDialog.ID_OK_CANCEL, null);
 		Guardian.assertNotNull("inputProduct", inputProduct);
@@ -80,8 +80,8 @@ public class OfewClassificationDialog extends ModalDialog {
 		InputStream inputStream = this.getClass().getResourceAsStream(OFEW_DT_XML);
 		Reader reader = new InputStreamReader(inputStream);
 
-		model = new OfewClassificationModel(inputProduct, reader);
-		form = new OfewClassificationForm(model);
+		model = new ClassificationModel(inputProduct, reader);
+		form = new ClassificationForm(model);
 	}
 
 	@Override

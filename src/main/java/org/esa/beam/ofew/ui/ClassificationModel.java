@@ -39,7 +39,7 @@ import java.util.List;
  * @author marcoz
  * @version $Revision: $ $Date: $
  */
-public class OfewClassificationModel {
+public class ClassificationModel {
 
 	@Parameter(validator=ProductNameValidator.class, label="Klassifikations-Product")
 	private String classification;
@@ -57,7 +57,7 @@ public class OfewClassificationModel {
 	private ValueContainer[] variableVC;
 	private ValueContainer modelVC;
 
-	public OfewClassificationModel(Product selectedProduct, Reader reader) throws IOException {
+	public ClassificationModel(Product selectedProduct, Reader reader) throws IOException {
 		inputProduct = selectedProduct;
 		configuration = loadDecisionTreeConfiguration(reader);
 		classification = inputProduct.getName() + "_klassifikation";

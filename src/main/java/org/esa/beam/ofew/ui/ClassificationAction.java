@@ -32,11 +32,11 @@ import org.esa.beam.visat.VisatApp;
  * @author Ralf Quast
  * @version $Revision:$ $Date:$
  */
-public class OfewClassificationAction extends ExecCommand {
+public class ClassificationAction extends ExecCommand {
 
     private final String[] sourceBandNames;
 
-	public OfewClassificationAction() {
+	public ClassificationAction() {
 		sourceBandNames = new String[] { "band1", "band2", "band3", "band4",
 				"band5", "band6" };
 	}
@@ -46,12 +46,12 @@ public class OfewClassificationAction extends ExecCommand {
         final Product selectedProduct = VisatApp.getApp().getSelectedProduct();
 
         try {
-        	final OfewClassificationDialog dialog = new OfewClassificationDialog(
+        	final ClassificationDialog dialog = new ClassificationDialog(
         		VisatApp.getApp().getMainFrame(), selectedProduct);
         	dialog.show();
         } catch (IOException e) {
         	JOptionPane.showMessageDialog(VisatApp.getApp().getMainFrame(),
-        			e.getMessage(), OfewClassificationDialog.TITLE, JOptionPane.ERROR_MESSAGE);
+        			e.getMessage(), ClassificationDialog.TITLE, JOptionPane.ERROR_MESSAGE);
         	VisatApp.getApp().getLogger().log(Level.SEVERE, e.getMessage(), e);
         	return;
         }

@@ -23,7 +23,7 @@ import com.bc.ceres.binding.ValidationException;
 import com.bc.ceres.binding.ValueContainer;
 import com.bc.ceres.binding.swing.SwingBindingContext;
 
-class OfewClassificationForm extends JPanel {
+class ClassificationForm extends JPanel {
 
     private JFormattedTextField[] variablesTextFields;
 	private ValueContainer[] variablesVC;
@@ -35,7 +35,7 @@ class OfewClassificationForm extends JPanel {
 	private JFormattedTextField classifyProductName;
     
 
-	public OfewClassificationForm(OfewClassificationModel model) {
+	public ClassificationForm(ClassificationModel model) {
 		variablesVC = model.getVariableValueContainers();
 		modelVC = model.getModelValueContainer();
 		
@@ -58,7 +58,7 @@ class OfewClassificationForm extends JPanel {
 		bindingContext.bind(roiCheckBox, "useRoi");
     }
 
-    private void initComponents(OfewClassificationModel model) {
+    private void initComponents(ClassificationModel model) {
         TableLayout tableLayout = new TableLayout(1);
 		setLayout(tableLayout);
         tableLayout.setTableAnchor(TableLayout.Anchor.LINE_START);
@@ -162,7 +162,7 @@ class OfewClassificationForm extends JPanel {
 			modelVC.getModel("endmember").validate(endmemberProductName.getValue());
 		} catch (ValidationException e) {
 			JOptionPane.showMessageDialog(VisatApp.getApp().getMainFrame(),
-        			e.getMessage(), OfewClassificationDialog.TITLE, JOptionPane.ERROR_MESSAGE);
+        			e.getMessage(), ClassificationDialog.TITLE, JOptionPane.ERROR_MESSAGE);
 			return false;
 		}
 		return true;
