@@ -126,7 +126,7 @@ public class ClassificationDialog extends ModalDialog {
 			Map<String, Object> indexParameter = getIndexParameter();
 			Map<String, Product> indexInputProducts = new HashMap<String, Product>();
 			indexInputProducts.put("landsat", landsatProduct);
-			indexInputProducts.put("unmix", endmemberProduct);
+			indexInputProducts.put("endmember", endmemberProduct);
 			final Product indexProduct = GPF.createProduct("BandArithmetic",
 					indexParameter, indexInputProducts, new SubProgressMonitor(
 							pm, 10));
@@ -134,9 +134,9 @@ public class ClassificationDialog extends ModalDialog {
 
 			Map<String, Object> classificationParameter = getClassificationParameter();
 			Map<String, Product> classificationInputProducts = new HashMap<String, Product>();
-			classificationInputProducts.put("f3", landsatProduct);
-			classificationInputProducts.put("f1", endmemberProduct);
-			classificationInputProducts.put("f2", indexProduct);
+			classificationInputProducts.put("landsat", landsatProduct);
+			classificationInputProducts.put("endmember", endmemberProduct);
+			classificationInputProducts.put("index", indexProduct);
 			final Product classificationProduct = GPF
 					.createProduct("DecisionTree", classificationParameter,
 							classificationInputProducts,
@@ -164,7 +164,7 @@ public class ClassificationDialog extends ModalDialog {
 		Map<String, Object> parameter = new HashMap<String, Object>();
 		BandArithmeticOp.BandDescriptor[] bandDesc = new BandArithmeticOp.BandDescriptor[4];
 		bandDesc[0] = new BandArithmeticOp.BandDescriptor();
-		bandDesc[0].name = "ndvi";
+		bandDesc[0].name = "NDVI";
 		bandDesc[0].expression = "($landsat."+band4+" - $landsat."+band3+")/($landsat."+band4+" + $landsat."+band3+")";
 		bandDesc[0].type = ProductData.TYPESTRING_FLOAT32;
 
@@ -179,8 +179,8 @@ public class ClassificationDialog extends ModalDialog {
 		bandDesc[2].type = ProductData.TYPESTRING_FLOAT32;
 
 		bandDesc[3] = new BandArithmeticOp.BandDescriptor();
-		bandDesc[3].name = "schlick_corr";
-		bandDesc[3].expression = "($unmix.Sand_wc < 0.0) ? $unmix.Sand_wc + $unmix.schlick : $unmix.schlick";
+		bandDesc[3].name = "Schlick_corr";
+		bandDesc[3].expression = "($endmember.Sand_wc < 0.0) ? $endmember.Sand_wc + $endmember.Schlick : $endmember.Schlick";
 		bandDesc[3].type = ProductData.TYPESTRING_FLOAT32;
 		parameter.put("bandDescriptors", bandDesc);
 		return parameter;
