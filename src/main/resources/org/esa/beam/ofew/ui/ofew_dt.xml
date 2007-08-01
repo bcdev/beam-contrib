@@ -1,38 +1,38 @@
 <decisionTree name="OFEW">
     <classes>
         <class name="nodata" value="0" color="0,0,0"/>
-        <class name="Sand" value="1" color="255,255,75"/>
-        <class name="Misch" value="2" color="55,215,0"/>
-        <class name="Misch2" value="3" color="238,154,0"/>
-        <class name="Schlick" value="4" color="125,38,205"/>
-        <class name="Schlick-tr" value="5" color="162,88,167"/>
-        <class name="Veg1" value="6" color="0,255,0"/>
-        <class name="Veg2" value="7" color="46,139,87"/>
+        <class name="Sand" value="1" color="255,245,79"/>
+        <class name="Misch" value="2" color="255,201,0"/>
+        <class name="Misch2" value="3" color="255,153,0"/>
+        <class name="Schlick" value="4" color="223,115,255"/>
+        <class name="Schlick-tr" value="5" color="232,190,255"/>
+        <class name="Veg1" value="6" color="130,215,0"/>
+        <class name="Veg2" value="7" color="56,168,0"/>
         <class name="Muschel" value="8" color="255,0,0"/>
-        <class name="Strand" value="9" color="230,230,230"/>
+        <class name="Strand" value="9" color="225,225,225"/>
     </classes>
     
     <inputProducts>
-        <inputProduct name="f1"/>
-        <inputProduct name="f2"/>
-        <inputProduct name="f3"/>
+        <inputProduct name="endmember"/>
+        <inputProduct name="index"/>
+        <inputProduct name="landsat"/>
     </inputProducts>
     
     <variables>
-        <variable name="offset_sed" value="0.02" description="Sedimente"/>
-        <variable name="offset_veg" value="0.02" description="Vegetation"/>
-        <variable name="offset_musch" value="0.02" description="Muscheln"/>
+        <variable name="offset_sed" value="0.0" description="Sedimente"/>
+        <variable name="offset_veg" value="0.0" description="Vegetation"/>
+        <variable name="offset_musch" value="0.0" description="Muscheln"/>
     </variables>
 
-    <decision name="nodata?" term="$f2.ndvi &lt; 0">
+    <decision name="nodata?" term="$index.NDVI &lt; 0 or ($landsat.band1 + $landsat.band2 + $landsat.band3 + $landsat.band4) &lt; 0.12 or $index.NDVI &gt; 0.8">
         <yes>nodata</yes>
         <no>
-            <decision name="Vegetation?" term="(($f2.ndvi &gt; 0.3 + offset_veg) or (($f2.Steigung_3_4 &gt; 0.3) and ($f2.ndvi &gt; 0.28 + offset_veg)) and ($f2.ndvi &lt; 0.45)) or ($f2.ndvi &gt; 0.4)">
+            <decision name="Vegetation?" term="(($index.NDVI &gt; 0.3 - offset_veg) or (($index.Steigung_3_4 &gt; 0.3) and ($index.NDVI &gt; 0.28 - offset_veg)) and ($index.NDVI &lt; 0.45)) or ($index.NDVI &gt; 0.4)">
                 <yes>
-                    <decision name="Muschel?" term="(($f3.band4 + $f3.band3 / 0.175 * $f3.band3) &gt; 0.06 + offset_musch) and ($f2.ndvi &lt; 0.5) and ($f2.Steigung_4_5 &lt; -0.05)">
+                    <decision name="Muschel?" term="((($landsat.band4 + $landsat.band3) / 0.175 * $landsat.band3) &gt; 0.06 - offset_musch) and ($index.NDVI &lt; 0.5) and ($index.Steigung_4_5 &lt; -0.05)">
                         <yes>Muschel</yes>
                         <no>
-                            <decision name ="dicht?" term="$f2.ndvi &gt; 0.45 + offset_veg">
+                            <decision name ="dicht?" term="$index.NDVI &gt; 0.45 - offset_veg">
                                 <yes>Veg2</yes>
                                 <no>Veg1</no>
                             </decision>
@@ -40,19 +40,19 @@
                     </decision>
                 </yes>
                 <no>
-                    <decision name="Strand?" term= "($f1.Sand_tr &gt; 1.1) or ($f1.schlick &lt; -0.1)">
+                    <decision name="Strand?" term= "($endmember.Sand_tr &gt; 1.1) or ($endmember.Schlick &lt; -0.1)">
                         <yes>Strand</yes>
                         <no>
-                            <decision name="Sand?" term="$f2.schlick_corr &lt; 0.35 + offset_sed">
+                            <decision name="Sand?" term="$index.Schlick_corr &lt; 0.35 + offset_sed">
                                 <yes>Sand</yes>
                                 <no>
-                                    <decision name="Misch?" term="$f2.schlick_corr &lt; 0.45 + offset_sed">
+                                    <decision name="Misch?" term="$index.Schlick_corr &lt; 0.45 + offset_sed">
                                         <yes>Misch</yes>
                                         <no>
-                                            <decision name="Misch2?" term="$f2.schlick_corr &lt; 0.52 + offset_sed">
+                                            <decision name="Misch2?" term="$index.Schlick_corr &lt; 0.52 + offset_sed">
                                                 <yes>Misch2</yes>
                                                 <no>
-                                                    <decision name="Schlick?" term="$f2.schlick_corr &lt; 0.8 + offset_sed">
+                                                    <decision name="Schlick?" term="$index.Schlick_corr &lt; 0.8 + offset_sed">
                                                         <yes>Schlick</yes>
                                                         <no>Schlick-tr</no>
                                                     </decision >
