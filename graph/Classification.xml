@@ -1,0 +1,156 @@
+<graph>
+    <id>Classification</id>
+
+    <node>
+        <id>landsat</id>
+        <operator>org.esa.beam.framework.gpf.operators.common.ReadProductOp$Spi</operator>
+        <parameters>
+            <filePath>${inputFile1}</filePath>
+        </parameters>
+    </node>
+
+    <node>
+        <id>endmember</id>
+        <operator>org.esa.beam.unmixing.SpectralUnmixingOp$Spi</operator>
+        <sources>
+            <sourceProduct>landsat</sourceProduct>
+        </sources>
+        <parameters>
+            <alterSourceProduct>false</alterSourceProduct>
+            <unmixingModelName>Constrained LSU</unmixingModelName>
+            <targetBandNameSuffix></targetBandNameSuffix>
+            <sourceBands>
+                <band>band1</band>
+                <band>band2</band>
+                <band>band3</band>
+                <band>band4</band>
+                <band>band5</band>
+                <band>band6</band>
+            </sourceBands>
+            <endmembers>
+                <wavelengths>
+                    478.0,
+                    560.0,
+                    660.0,
+                    835.0,
+                    1650.0,
+                    2208.0
+                </wavelengths>
+                <endmember>
+                    <name>Sand_tr</name>
+                    <radiations>
+                        0.12783,
+                        0.16872,
+                        0.18912,
+                        0.24637,
+                        0.28869,
+                        0.18307
+                    </radiations>
+                </endmember>
+                <endmember>
+                    <name>Sand_wc</name>
+                    <radiations>
+                        0.079916,
+                        0.105176,
+                        0.114564,
+                        0.15044,
+                        0.016139,
+                        0.006698
+                    </radiations>
+                </endmember>
+                <endmember>
+                    <name>Schlick</name>
+                    <radiations>
+                        0.001,
+                        0.001,
+                        0.001,
+                        0.001,
+                        0.001,
+                        0.001
+                    </radiations>
+                </endmember>
+            </endmembers>
+        </parameters>
+    </node>
+
+    <node>
+        <id>index</id>
+        <operator>org.esa.beam.framework.gpf.operators.common.BandArithmeticOp$Spi</operator>
+        <sources>
+            <landsat>landsat</landsat>
+            <endmember>endmember</endmember>
+        </sources>
+        <parameters>
+                <bandDescriptor>
+            		<name>NDVI</name>
+            		<expression>($landsat.band4 - $landsat.band3)/($landsat.band4 + $landsat.band3)</expression>
+            		<type>float32</type>
+                </bandDescriptor>
+                <bandDescriptor>
+            		<name>Steigung_3_4</name>
+            		<expression>($landsat.band3 - $landsat.band4)/(0.66-0.835)</expression>
+            		<type>float32</type>
+                </bandDescriptor>
+                <bandDescriptor>
+            		<name>Steigung_4_5</name>
+            		<expression>($landsat.band4 - $landsat.band5)/(0.835-1.65)</expression>
+            		<type>float32</type>
+                </bandDescriptor>
+                <bandDescriptor>
+            		<name>Schlick_corr</name>
+            		<expression>($endmember.Sand_wc &lt; 0.0) ? $endmember.Sand_wc + $endmember.Schlick : $endmember.Schlick</expression>
+            		<type>float32</type>
+                </bandDescriptor>
+        </parameters>
+    </node>
+
+    <node>
+        <id>classy</id>
+        <operator>org.esa.beam.decisiontree.DecisionTreeOp$Spi</operator>
+        <sources>
+            <landsat>landsat</landsat>
+            <endmember>endmember</endmember>
+            <index>index</index>
+        </sources>
+        <parameters>
+        	<decisionConfigFile>C:\Workspace\Beam41\beam-4.x-contrib\beam-ofew\src\main\resources\org\esa\beam\ofew\ui\ofew_dt.xml</decisionConfigFile>
+        </parameters>
+    </node>
+    
+    <node>
+        <id>write</id>
+        <operator>org.esa.beam.framework.gpf.operators.common.WriteProductOp$Spi</operator>
+        <sources>
+            <input>classy</input>
+        </sources>
+        <parameters>
+            <filePath>${outputFile1}</filePath>
+            <formatName>BEAM-DIMAP</formatName>
+        </parameters>
+    </node>
+    
+    <node>
+        <id>write2</id>
+        <operator>org.esa.beam.framework.gpf.operators.common.WriteProductOp$Spi</operator>
+        <sources>
+            <input>index</input>
+        </sources>
+        <parameters>
+            <filePath>${outputFile2}</filePath>
+            <formatName>BEAM-DIMAP</formatName>
+        </parameters>
+    </node>
+    
+    <node>
+        <id>write3</id>
+        <operator>org.esa.beam.framework.gpf.operators.common.WriteProductOp$Spi</operator>
+        <sources>
+            <input>endmember</input>
+        </sources>
+        <parameters>
+            <filePath>${outputFile3}</filePath>
+            <formatName>BEAM-DIMAP</formatName>
+        </parameters>
+    </node>
+
+</graph>
