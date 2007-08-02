@@ -99,7 +99,7 @@ public class AtmCorrDialog extends ModalDialog {
 
             final Product targetProduct = GPF.createProduct("BandArithmetic", parameterMap, sourceProduct, pm);
             targetProduct.setStartTime(sourceProduct.getStartTime());
-            targetProduct.setEndTime(sourceProduct.getEndTime());
+    		targetProduct.setEndTime(sourceProduct.getEndTime());
             ProductUtils.copyFlagCodings(sourceProduct, targetProduct);
 
             for (final Band sourceBand : sourceProduct.getBands()) {
@@ -110,11 +110,11 @@ public class AtmCorrDialog extends ModalDialog {
             }
             ProductUtils.copyBitmaskDefs(sourceProduct, targetProduct);
             ProductUtils.copyElementsAndAttributes(sourceProduct.getMetadataRoot(), targetProduct.getMetadataRoot());
+            sourceProduct.transferGeoCodingTo(targetProduct, null);
 
             return targetProduct;
         } finally {
             pm.done();
         }
     }
-
 }

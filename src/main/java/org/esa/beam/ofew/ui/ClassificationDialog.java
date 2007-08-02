@@ -122,6 +122,7 @@ public class ClassificationDialog extends ModalDialog {
 			final Product endmemberProduct = GPF.createProduct(
 					"SpectralUnmixing", unmixingParameter, landsatProduct, new SubProgressMonitor(pm, 10));
 			endmemberProduct.setName(model.getEndmemberProductName());
+			copyMetaDataAndGeoCoding(landsatProduct, endmemberProduct);
 
 			Map<String, Object> indexParameter = getIndexParameter();
 			Map<String, Product> indexInputProducts = new HashMap<String, Product>();
@@ -131,6 +132,7 @@ public class ClassificationDialog extends ModalDialog {
 					indexParameter, indexInputProducts, new SubProgressMonitor(
 							pm, 10));
 			indexProduct.setName(model.getIndexProductName());
+			copyMetaDataAndGeoCoding(landsatProduct, indexProduct);
 
 			Map<String, Object> classificationParameter = getClassificationParameter();
 			Map<String, Product> classificationInputProducts = new HashMap<String, Product>();
@@ -142,10 +144,7 @@ public class ClassificationDialog extends ModalDialog {
 							classificationInputProducts,
 							new SubProgressMonitor(pm, 10));
 			classificationProduct.setName(model.getClassificationProductName());
-
-			classificationProduct.setStartTime(landsatProduct.getStartTime());
-			classificationProduct.setEndTime(landsatProduct.getEndTime());
-            ProductUtils.copyElementsAndAttributes(landsatProduct.getMetadataRoot(), classificationProduct.getMetadataRoot());
+			copyMetaDataAndGeoCoding(landsatProduct, classificationProduct);
             
 			VisatApp.getApp().addProduct(endmemberProduct);
 			VisatApp.getApp().addProduct(indexProduct);
@@ -155,6 +154,13 @@ public class ClassificationDialog extends ModalDialog {
 		} finally {
 			pm.done();
 		}
+	}
+	
+	private void copyMetaDataAndGeoCoding(Product sourceProduct, Product targetProduct) {
+		targetProduct.setStartTime(sourceProduct.getStartTime());
+		targetProduct.setEndTime(sourceProduct.getEndTime());
+        ProductUtils.copyElementsAndAttributes(sourceProduct.getMetadataRoot(), targetProduct.getMetadataRoot());
+        sourceProduct.transferGeoCodingTo(targetProduct, null);
 	}
 
 	private Map<String, Object> getIndexParameter() {
