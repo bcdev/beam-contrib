@@ -15,7 +15,7 @@ import org.esa.beam.ofew.ProductNameValidator;
  * @author Ralf Quast
  * @version $Revision$ $Date$
  */
-class AtmCorrFormModel {
+class AtmCorrModel {
 
 	public static class Session {
 		private CoefficientPair[] values;
@@ -59,7 +59,7 @@ class AtmCorrFormModel {
     private ValueContainer targetProductNameContainer;
     private Session session;
 
-    public AtmCorrFormModel(Product sourceProduct, Band[] sourceBands, Session session) {
+    public AtmCorrModel(Product sourceProduct, Band[] sourceBands, Session session) {
         this.sourceProduct = sourceProduct;
         this.sourceBands = sourceBands;
 		this.session = session;

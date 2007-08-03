@@ -26,13 +26,13 @@ import java.text.DecimalFormat;
  */
 class AtmCorrForm extends JPanel {
 
-    AtmCorrFormModel model;
+    AtmCorrModel model;
 
     JFormattedTextField[] textFieldsA;
     JFormattedTextField[] textFieldsB;
     private JFormattedTextField targetProductTextField;
 
-    public AtmCorrForm(AtmCorrFormModel model) {
+    public AtmCorrForm(AtmCorrModel model) {
         this.model = model;
 
         initComponents();

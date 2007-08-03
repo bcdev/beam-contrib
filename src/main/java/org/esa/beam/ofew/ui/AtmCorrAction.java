@@ -17,16 +17,16 @@ import org.esa.beam.visat.VisatApp;
  */
 public class AtmCorrAction extends ExecCommand {
 	
-	private Map<String,AtmCorrFormModel.Session> sessionMap = new HashMap<String, AtmCorrFormModel.Session>();
+	private Map<String,AtmCorrModel.Session> sessionMap = new HashMap<String, AtmCorrModel.Session>();
 
     @Override
     public void actionPerformed(CommandEvent commandEvent) {
         final Product selectedProduct = VisatApp.getApp().getSelectedProduct();
         final SpectralBandFinder bandFinder = new SpectralBandFinder(selectedProduct, SpectralBandFinder.OFEW_WAVELENGTHS);
 
-        AtmCorrFormModel.Session session = sessionMap.get(selectedProduct.getName());
+        AtmCorrModel.Session session = sessionMap.get(selectedProduct.getName());
         if (session == null) {
-        	session = new AtmCorrFormModel.Session();
+        	session = new AtmCorrModel.Session();
         	sessionMap.put(selectedProduct.getName(), session);
         }
 

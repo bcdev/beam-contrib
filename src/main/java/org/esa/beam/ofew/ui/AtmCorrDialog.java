@@ -12,7 +12,7 @@ import org.esa.beam.framework.gpf.GPF;
 import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.operators.common.BandArithmeticOp;
 import org.esa.beam.framework.ui.ModalDialog;
-import org.esa.beam.ofew.ui.AtmCorrFormModel.Session;
+import org.esa.beam.ofew.ui.AtmCorrModel.Session;
 import org.esa.beam.util.ProductUtils;
 import org.esa.beam.visat.VisatApp;
 
@@ -32,7 +32,7 @@ public class AtmCorrDialog extends ModalDialog {
 
     public static final String TITLE = "OFEW Atmosphärenkorrektur";
 
-    private final AtmCorrFormModel model;
+    private final AtmCorrModel model;
     private final AtmCorrForm form;
 
     private final Product sourceProduct;
@@ -44,7 +44,7 @@ public class AtmCorrDialog extends ModalDialog {
         this.sourceProduct = sourceProduct;
         this.sourceBands = sourceBands;
 
-        model = new AtmCorrFormModel(sourceProduct, sourceBands, session);
+        model = new AtmCorrModel(sourceProduct, sourceBands, session);
         form = new AtmCorrForm(model);
     }
 
