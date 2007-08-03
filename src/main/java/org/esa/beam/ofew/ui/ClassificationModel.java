@@ -16,10 +16,11 @@
  */
 package org.esa.beam.ofew.ui;
 
-import com.bc.ceres.binding.Factory;
-import com.bc.ceres.binding.ValueContainer;
-import com.bc.ceres.binding.ValueDefinition;
-import com.bc.ceres.binding.ValueSet;
+import java.io.IOException;
+import java.io.Reader;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.esa.beam.decisiontree.DecisionTreeConfiguration;
 import org.esa.beam.decisiontree.DecisionVariable;
 import org.esa.beam.framework.datamodel.Band;
@@ -28,10 +29,11 @@ import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.ParameterDefinitionFactory;
 import org.esa.beam.ofew.ProductNameValidator;
 
-import java.io.IOException;
-import java.io.Reader;
-import java.util.ArrayList;
-import java.util.List;
+import com.bc.ceres.binding.Factory;
+import com.bc.ceres.binding.ValidationException;
+import com.bc.ceres.binding.ValueContainer;
+import com.bc.ceres.binding.ValueDefinition;
+import com.bc.ceres.binding.ValueSet;
 
 /**
  * Created by marcoz.
@@ -40,6 +42,10 @@ import java.util.List;
  * @version $Revision: $ $Date: $
  */
 public class ClassificationModel {
+
+	public static class Session {
+		private double[] values;
+	}
 
 	@Parameter(validator=ProductNameValidator.class, label="Klassifikations-Product")
 	private String classification;
@@ -56,9 +62,11 @@ public class ClassificationModel {
 	
 	private ValueContainer[] variableVC;
 	private ValueContainer modelVC;
+	private Session session;
 
-	public ClassificationModel(Product selectedProduct, Reader reader) throws IOException {
+	public ClassificationModel(Product selectedProduct, Reader reader, Session session) throws IOException {
 		inputProduct = selectedProduct;
+		this.session = session;
 		configuration = loadDecisionTreeConfiguration(reader);
 		classification = inputProduct.getName() + "_klassifikation";
 		index = inputProduct.getName() + "_indizes";
@@ -83,6 +91,17 @@ public class ClassificationModel {
         for (int i = 0; i < variables.length; i++) {
         	variableVC[i] = factory.createObjectBackedValueContainer(variables[i]);
 		}
+        if (session.values == null) {
+        	session.values = new double[variables.length];
+        } else {
+        	for (int i = 0; i < variables.length; i++) {
+        		try {
+					variableVC[i].setValue("value", session.values[i]);
+				} catch (ValidationException e) {
+					//ignore
+				}
+        	}
+        }
         modelVC = factory.createObjectBackedValueContainer(this);
         
         String[] bandsWithRoi = getBandsWithRoi();
@@ -152,6 +171,13 @@ public class ClassificationModel {
 
 	public ValueContainer[] getVariableValueContainers() {
 		return variableVC;
+	}
+
+	public void persistSession() {
+		DecisionVariable[] variables = configuration.getVariables();
+		for (int i = 0; i < variables.length; i++) {
+			session.values[i] = variables[i].getValue();
+        }
 	}
 
 	

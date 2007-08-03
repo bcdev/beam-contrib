@@ -25,7 +25,10 @@ import com.bc.jexp.Symbol;
 import com.bc.jexp.impl.AbstractSymbol;
 import org.esa.beam.decisiontree.Decision;
 import org.esa.beam.decisiontree.DecisionTreeConfiguration;
+import org.esa.beam.decisiontree.DecisionVariable;
 import org.esa.beam.framework.datamodel.Band;
+import org.esa.beam.framework.datamodel.MetadataAttribute;
+import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.framework.dataop.barithm.BandArithmetic;
@@ -37,6 +40,7 @@ import org.esa.beam.framework.ui.ModalDialog;
 import org.esa.beam.framework.ui.diagram.DiagramGraph;
 import org.esa.beam.framework.ui.diagram.DiagramGraphIO;
 import org.esa.beam.ofew.SpectralBandFinder;
+import org.esa.beam.ofew.ui.ClassificationModel.Session;
 import org.esa.beam.unmixing.Endmember;
 import org.esa.beam.unmixing.SpectralUnmixingOp;
 import org.esa.beam.util.Guardian;
@@ -72,14 +76,14 @@ public class ClassificationDialog extends ModalDialog {
 
 
 	public ClassificationDialog(final Window parent,
-			final Product inputProduct) throws IOException {
+			final Product inputProduct, Session session) throws IOException {
 		super(parent, TITLE, ModalDialog.ID_OK_CANCEL, null);
 		Guardian.assertNotNull("inputProduct", inputProduct);
 
 		InputStream inputStream = this.getClass().getResourceAsStream(OFEW_DT_XML);
 		Reader reader = new InputStreamReader(inputStream);
 
-		model = new ClassificationModel(inputProduct, reader);
+		model = new ClassificationModel(inputProduct, reader, session);
 		form = new ClassificationForm(model);
 		bandFinder = new SpectralBandFinder(inputProduct, SpectralBandFinder.OFEW_WAVELENGTHS);
 	}
@@ -104,6 +108,7 @@ public class ClassificationDialog extends ModalDialog {
 				Dialog.ModalityType.APPLICATION_MODAL);
 
 		try {
+			model.persistSession();
 			performClassification(pm);
 		} catch (OperatorException e) {
 			showErrorDialog(e.getMessage());
@@ -145,6 +150,16 @@ public class ClassificationDialog extends ModalDialog {
 							new SubProgressMonitor(pm, 10));
 			classificationProduct.setName(model.getClassificationProductName());
 			copyMetaDataAndGeoCoding(landsatProduct, classificationProduct);
+			
+			MetadataElement metadataElement = new MetadataElement("Variablen");
+			for (DecisionVariable variable : model.getConfiguration().getVariables()) {
+				String name = variable.getName();
+            	ProductData data = ProductData.createInstance(new double[]{variable.getValue()});
+            	MetadataAttribute attribute = new MetadataAttribute(name, data, true);
+            	attribute.setDescription(variable.getDescription());
+            	metadataElement.addAttribute(attribute);
+			}
+            classificationProduct.getMetadataRoot().addElement(metadataElement);
             
 			VisatApp.getApp().addProduct(endmemberProduct);
 			VisatApp.getApp().addProduct(indexProduct);

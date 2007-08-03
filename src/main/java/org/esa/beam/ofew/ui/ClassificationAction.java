@@ -15,15 +15,18 @@
  */
 package org.esa.beam.ofew.ui;
 
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.logging.Level;
+
+import javax.swing.JOptionPane;
+
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.ui.command.CommandEvent;
 import org.esa.beam.framework.ui.command.ExecCommand;
 import org.esa.beam.ofew.SpectralBandFinder;
 import org.esa.beam.visat.VisatApp;
-
-import javax.swing.JOptionPane;
-import java.io.IOException;
-import java.util.logging.Level;
 
 /**
  * OFEW Classification Action
@@ -34,13 +37,20 @@ import java.util.logging.Level;
  */
 public class ClassificationAction extends ExecCommand {
 
+	private Map<String, ClassificationModel.Session> sessionMap = new HashMap<String, ClassificationModel.Session>();
+	
 	@Override
     public void actionPerformed(CommandEvent commandEvent) {
         final Product selectedProduct = VisatApp.getApp().getSelectedProduct();
 
+        ClassificationModel.Session session = sessionMap.get(selectedProduct.getName());
+        if (session == null) {
+        	session = new ClassificationModel.Session();
+        	sessionMap.put(selectedProduct.getName(), session);
+        }
         try {
         	final ClassificationDialog dialog = new ClassificationDialog(
-        		VisatApp.getApp().getMainFrame(), selectedProduct);
+        		VisatApp.getApp().getMainFrame(), selectedProduct, session);
         	dialog.show();
         } catch (IOException e) {
         	JOptionPane.showMessageDialog(VisatApp.getApp().getMainFrame(),
