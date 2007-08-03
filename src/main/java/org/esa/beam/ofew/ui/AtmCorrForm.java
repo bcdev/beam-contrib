@@ -26,14 +26,14 @@ import java.text.DecimalFormat;
  */
 class AtmCorrForm extends JPanel {
 
-    AtmCorrFormPresenter presenter;
+    AtmCorrFormModel model;
 
     JFormattedTextField[] textFieldsA;
     JFormattedTextField[] textFieldsB;
     private JFormattedTextField targetProductTextField;
 
-    public AtmCorrForm(AtmCorrFormPresenter presenter) {
-        this.presenter = presenter;
+    public AtmCorrForm(AtmCorrFormModel model) {
+        this.model = model;
 
         initComponents();
         bindComponents();
@@ -56,7 +56,7 @@ class AtmCorrForm extends JPanel {
                                                                       new Font("Tahoma", 0, 11),
                                                                       new Color(0, 70, 213)));
         sourceProductPanel.add(new JLabel("Eingabe-Produkt:"));
-        final JTextField sourceProductTextField = new JTextField(presenter.getSourceProductName());
+        final JTextField sourceProductTextField = new JTextField(model.getSourceProductName());
         sourceProductTextField.setColumns(35);
         sourceProductTextField.setEditable(false);
         sourceProductPanel.add(sourceProductTextField);
@@ -81,11 +81,11 @@ class AtmCorrForm extends JPanel {
         coefficientPanel.add(labelA);
         final JLabel labelB = new JLabel("Summand b");
         coefficientPanel.add(labelB);
-        textFieldsA = new JFormattedTextField[presenter.getBandCount()];
-        textFieldsB = new JFormattedTextField[presenter.getBandCount()];
+        textFieldsA = new JFormattedTextField[model.getBandCount()];
+        textFieldsB = new JFormattedTextField[model.getBandCount()];
 
-        for (int i = 0; i < presenter.getBandCount(); i++) {
-            coefficientPanel.add(new JLabel(presenter.getDisplayBandName(i) + ":"));
+        for (int i = 0; i < model.getBandCount(); i++) {
+            coefficientPanel.add(new JLabel(model.getDisplayBandName(i) + ":"));
 
             textFieldsA[i] = new JFormattedTextField(new DecimalFormat("0.0#######"));
             coefficientPanel.add(textFieldsA[i]);
@@ -109,28 +109,28 @@ class AtmCorrForm extends JPanel {
                                                                       new Font("Tahoma", 0, 11),
                                                                       new Color(0, 70, 213)));
         targetProductPanel.add(new JLabel("Ausgabe-Produkt:"));
-        targetProductTextField = new JFormattedTextField(presenter.getTargetProductName());
+        targetProductTextField = new JFormattedTextField(model.getTargetProductName());
         sourceProductTextField.setColumns(35);
         targetProductPanel.add(targetProductTextField);
         add(targetProductPanel, BorderLayout.SOUTH);
     }
 
     private void bindComponents() {
-        for (int i = 0; i < presenter.getBandCount(); i++) {
+        for (int i = 0; i < model.getBandCount(); i++) {
             final SwingBindingContext bindingContext = new SwingBindingContext(
-                    presenter.getCoefficientPairContainer(i));
+                    model.getCoefficientPairContainer(i));
             bindingContext.bind(textFieldsA[i], "a");
             bindingContext.bind(textFieldsB[i], "b");
         }
 
-        new SwingBindingContext(presenter.getTargetProductNameContainer()).
+        new SwingBindingContext(model.getTargetProductNameContainer()).
                 bind(targetProductTextField, "targetProductName");
     }
 
     public boolean hasValidValues() {
         try {
-            final ValueModel model = presenter.getTargetProductNameContainer().getModel("targetProductName");
-            model.validate(targetProductTextField.getValue());
+            final ValueModel valueModel = model.getTargetProductNameContainer().getModel("targetProductName");
+            valueModel.validate(targetProductTextField.getValue());
         } catch (ValidationException e) {
             JOptionPane.showMessageDialog(VisatApp.getApp().getMainFrame(),
                                           e.getMessage(), AtmCorrDialog.TITLE, JOptionPane.ERROR_MESSAGE);

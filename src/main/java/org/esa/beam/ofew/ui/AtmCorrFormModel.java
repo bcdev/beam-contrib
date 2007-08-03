@@ -15,13 +15,38 @@ import org.esa.beam.ofew.ProductNameValidator;
  * @author Ralf Quast
  * @version $Revision$ $Date$
  */
-class AtmCorrFormPresenter {
+class AtmCorrFormModel {
 
-    private static class CoefficientPair {
+	public static class Session {
+		private CoefficientPair[] values;
+		
+		private double getCoefficientA(int i) {
+			return values[i].a;
+		}
+		
+		private double getCoefficientB(int i) {
+			return values[i].b;
+		}
+		
+		private void setCoefficientA(int i, double value) {
+			values[i].a = value;
+		}
+		
+		private void setCoefficientB(int i, double value) {
+			values[i].b = value;
+		}
+	}
+
+	private static class CoefficientPair {
         @Parameter
         double a;
         @Parameter
         double b;
+        
+		public CoefficientPair(double a, double b) {
+			this.a = a;
+			this.b = b;
+		}
     }
 
     @Parameter(validator= ProductNameValidator.class, label="Ausgabe-Product")
@@ -32,21 +57,29 @@ class AtmCorrFormPresenter {
 
     private ValueContainer[] coefficientPairContainers;
     private ValueContainer targetProductNameContainer;
+    private Session session;
 
-    public AtmCorrFormPresenter(Product sourceProduct, Band[] sourceBands) {
+    public AtmCorrFormModel(Product sourceProduct, Band[] sourceBands, Session session) {
         this.sourceProduct = sourceProduct;
         this.sourceBands = sourceBands;
+		this.session = session;
 
         final Factory factory = new Factory(new ParameterDefinitionFactory());
 
         try {
             coefficientPairContainers = new ValueContainer[sourceBands.length];
-            for (int i = 0; i < sourceBands.length; i++) {
-                coefficientPairContainers[i] = factory.createObjectBackedValueContainer(new CoefficientPair());
-                coefficientPairContainers[i].setValue("a", 1.0);
-                coefficientPairContainers[i].setValue("b", 0.0);
+            
+            if (session.values == null) {
+            	session.values = new CoefficientPair[sourceBands.length];
+            	for (int i = 0; i < sourceBands.length; i++) {
+            		session.values[i] = new CoefficientPair(1.0, 0.0);
+            	}
             }
-
+            for (int i = 0; i < sourceBands.length; i++) {
+                CoefficientPair coefficientPair = new CoefficientPair(session.getCoefficientA(i), session.getCoefficientB(i));
+				coefficientPairContainers[i] = factory.createObjectBackedValueContainer(coefficientPair);
+            }
+            
             targetProductNameContainer = factory.createObjectBackedValueContainer(this);
             targetProductNameContainer.setValue("targetProductName", sourceProduct.getName() + "_atmo");
         } catch (ValidationException e) {
@@ -99,5 +132,12 @@ class AtmCorrFormPresenter {
 
         return name;
     }
+
+	public void persistSession() {
+		for (int i = 0; i < sourceBands.length; i++) {
+			session.setCoefficientA(i, getCoefficientA(i));
+			session.setCoefficientB(i, getCoefficientB(i));
+        }
+	}
 
 }

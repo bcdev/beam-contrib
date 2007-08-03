@@ -1,5 +1,8 @@
 package org.esa.beam.ofew.ui;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.ui.command.CommandEvent;
 import org.esa.beam.framework.ui.command.ExecCommand;
@@ -13,13 +16,21 @@ import org.esa.beam.visat.VisatApp;
  * @version $Revision$ $Date$
  */
 public class AtmCorrAction extends ExecCommand {
+	
+	private Map<String,AtmCorrFormModel.Session> sessionMap = new HashMap<String, AtmCorrFormModel.Session>();
 
     @Override
     public void actionPerformed(CommandEvent commandEvent) {
         final Product selectedProduct = VisatApp.getApp().getSelectedProduct();
         final SpectralBandFinder bandFinder = new SpectralBandFinder(selectedProduct, SpectralBandFinder.OFEW_WAVELENGTHS);
 
-        new AtmCorrDialog(VisatApp.getApp().getMainFrame(), selectedProduct, bandFinder.getBands()).show();
+        AtmCorrFormModel.Session session = sessionMap.get(selectedProduct.getName());
+        if (session == null) {
+        	session = new AtmCorrFormModel.Session();
+        	sessionMap.put(selectedProduct.getName(), session);
+        }
+
+        new AtmCorrDialog(VisatApp.getApp().getMainFrame(), selectedProduct, bandFinder.getBands(), session).show();
     }
 
     @Override

@@ -4,12 +4,15 @@ import com.bc.ceres.core.ProgressMonitor;
 import com.bc.ceres.swing.progress.DialogProgressMonitor;
 import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.FlagCoding;
+import org.esa.beam.framework.datamodel.MetadataAttribute;
+import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.framework.gpf.GPF;
 import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.operators.common.BandArithmeticOp;
 import org.esa.beam.framework.ui.ModalDialog;
+import org.esa.beam.ofew.ui.AtmCorrFormModel.Session;
 import org.esa.beam.util.ProductUtils;
 import org.esa.beam.visat.VisatApp;
 
@@ -29,20 +32,20 @@ public class AtmCorrDialog extends ModalDialog {
 
     public static final String TITLE = "OFEW Atmosphärenkorrektur";
 
-    private final AtmCorrFormPresenter presenter;
+    private final AtmCorrFormModel model;
     private final AtmCorrForm form;
 
     private final Product sourceProduct;
     private final Band[] sourceBands;
 
-    AtmCorrDialog(Window parent, Product sourceProduct, Band[] sourceBands) {
+    AtmCorrDialog(Window parent, Product sourceProduct, Band[] sourceBands, Session session) {
         super(parent, TITLE, ModalDialog.ID_OK_CANCEL, null);
 
         this.sourceProduct = sourceProduct;
         this.sourceBands = sourceBands;
 
-        presenter = new AtmCorrFormPresenter(sourceProduct, sourceBands);
-        form = new AtmCorrForm(presenter);
+        model = new AtmCorrFormModel(sourceProduct, sourceBands, session);
+        form = new AtmCorrForm(model);
     }
 
     @Override
@@ -62,6 +65,7 @@ public class AtmCorrDialog extends ModalDialog {
                 VisatApp.getApp().getMainFrame(), TITLE, Dialog.ModalityType.APPLICATION_MODAL);
 
         try {
+        	model.persistSession();
             VisatApp.getApp().addProduct(createTargetProduct(pm));
         } catch (OperatorException e) {
             showErrorDialog(e.getMessage());
@@ -75,15 +79,15 @@ public class AtmCorrDialog extends ModalDialog {
             pm.beginTask("Performing OFEW atmospheric correction", 10);
 
             final Map<String, Object> parameterMap = new HashMap<String, Object>();
-            parameterMap.put("productName", presenter.getTargetProductName());
+            parameterMap.put("productName", model.getTargetProductName());
 
             final BandArithmeticOp.BandDescriptor[] bandDescriptors =
                     new BandArithmeticOp.BandDescriptor[sourceBands.length];
 
             for (int i = 0; i < sourceBands.length; ++i) {
                 final BandArithmeticOp.BandDescriptor bandDescriptor = new BandArithmeticOp.BandDescriptor();
-                final double a = presenter.getCoefficientA(i);
-                final double b = presenter.getCoefficientB(i);
+                final double a = model.getCoefficientA(i);
+                final double b = model.getCoefficientB(i);
 
                 bandDescriptor.name = sourceBands[i].getName();
                 bandDescriptor.expression = a + " * " + sourceBands[i].getName() + " + " + b;
@@ -111,6 +115,20 @@ public class AtmCorrDialog extends ModalDialog {
             ProductUtils.copyBitmaskDefs(sourceProduct, targetProduct);
             ProductUtils.copyElementsAndAttributes(sourceProduct.getMetadataRoot(), targetProduct.getMetadataRoot());
             sourceProduct.transferGeoCodingTo(targetProduct, null);
+            
+            MetadataElement metadataElement = new MetadataElement("Koeffizienten");
+            for (int i = 0; i < model.getBandCount(); i++) {
+            	String nameA = model.getBandName(i) + ": Multiplikator a";
+            	ProductData dataA = ProductData.createInstance(new double[]{model.getCoefficientA(i)});
+            	MetadataAttribute attributeA = new MetadataAttribute(nameA, dataA, true);
+            	metadataElement.addAttribute(attributeA);
+            	
+            	String nameB = model.getBandName(i) + ": Summand b";
+            	ProductData dataB = ProductData.createInstance(new double[]{model.getCoefficientB(i)});
+            	MetadataAttribute attributeB = new MetadataAttribute(nameB, dataB, true);
+            	metadataElement.addAttribute(attributeB);
+			}
+            targetProduct.getMetadataRoot().addElement(metadataElement);
 
             return targetProduct;
         } finally {
