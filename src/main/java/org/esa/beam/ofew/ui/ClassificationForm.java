@@ -14,11 +14,17 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 import javax.swing.border.TitledBorder;
+import javax.swing.text.JTextComponent;
+
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.text.DecimalFormat;
 
 class ClassificationForm extends JPanel {
@@ -57,6 +63,23 @@ class ClassificationForm extends JPanel {
     }
 
     private void initComponents(ClassificationModel model) {
+    	FocusListener focusListener =  new FocusAdapter() {
+            @Override
+            public void focusGained(final FocusEvent e) {
+                final JTextComponent tc = ((JTextComponent) e.getComponent());
+                if (tc instanceof JFormattedTextField) {
+                    final JFormattedTextField ftf = (JFormattedTextField)tc;
+                    SwingUtilities.invokeLater(new Runnable() {
+                        public void run() {
+                            ftf.selectAll();
+                        }
+                    });
+                } else {
+                	tc.selectAll();
+                }
+            }
+        };
+        
         TableLayout tableLayout = new TableLayout(1);
 		setLayout(tableLayout);
         tableLayout.setTableAnchor(TableLayout.Anchor.LINE_START);
@@ -120,6 +143,7 @@ class ClassificationForm extends JPanel {
         		
         		JFormattedTextField textField = new JFormattedTextField(format);
         		textField.setHorizontalAlignment(JTextField.RIGHT);
+        		textField.addFocusListener(focusListener);
         		paramPanel.add(textField);
         		variablesTextFields[i] = textField;
 			}
@@ -143,12 +167,15 @@ class ClassificationForm extends JPanel {
                                                                 new Color(0, 70, 213)));
 		outputPanel.add(new JLabel("Klassifikations-Produkt:"));
 		classifyProductName = new JFormattedTextField();
+		classifyProductName.addFocusListener(focusListener);
 		outputPanel.add(classifyProductName);
 		outputPanel.add(new JLabel("Entmischungs-Produkt:"));
 		endmemberProductName = new JFormattedTextField();
+		endmemberProductName.addFocusListener(focusListener);
 		outputPanel.add(endmemberProductName);
 		outputPanel.add(new JLabel("Index-Produkt:"));
 		indexProductName = new JFormattedTextField();
+		indexProductName.addFocusListener(focusListener);
 		outputPanel.add(indexProductName);
         add(outputPanel);
     }

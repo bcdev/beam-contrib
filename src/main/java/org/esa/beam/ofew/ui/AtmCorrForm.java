@@ -12,10 +12,16 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 import javax.swing.border.TitledBorder;
+import javax.swing.text.JTextComponent;
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.text.DecimalFormat;
 
 /**
@@ -41,6 +47,23 @@ class AtmCorrForm extends JPanel {
 
     private void initComponents() {
         setLayout(new BorderLayout());
+        
+        FocusListener focusListener =  new FocusAdapter() {
+            @Override
+            public void focusGained(final FocusEvent e) {
+                final JTextComponent tc = ((JTextComponent) e.getComponent());
+                if (tc instanceof JFormattedTextField) {
+                    final JFormattedTextField ftf = (JFormattedTextField)tc;
+                    SwingUtilities.invokeLater(new Runnable() {
+                        public void run() {
+                            ftf.selectAll();
+                        }
+                    });
+                } else {
+                	tc.selectAll();
+                }
+            }
+        };
 
         final TableLayout layout1 = new TableLayout(2);
         layout1.setTableAnchor(TableLayout.Anchor.LINE_START);
@@ -88,9 +111,11 @@ class AtmCorrForm extends JPanel {
             coefficientPanel.add(new JLabel(model.getDisplayBandName(i) + ":"));
 
             textFieldsA[i] = new JFormattedTextField(new DecimalFormat("0.0#######"));
+            textFieldsA[i].addFocusListener(focusListener);
             coefficientPanel.add(textFieldsA[i]);
 
             textFieldsB[i] = new JFormattedTextField(new DecimalFormat("0.0#######"));
+            textFieldsB[i].addFocusListener(focusListener);
             coefficientPanel.add(textFieldsB[i]);
         }
         add(coefficientPanel, BorderLayout.CENTER);
@@ -110,6 +135,7 @@ class AtmCorrForm extends JPanel {
                                                                       new Color(0, 70, 213)));
         targetProductPanel.add(new JLabel("Ausgabe-Produkt:"));
         targetProductTextField = new JFormattedTextField(model.getTargetProductName());
+        targetProductTextField.addFocusListener(focusListener);
         sourceProductTextField.setColumns(35);
         targetProductPanel.add(targetProductTextField);
         add(targetProductPanel, BorderLayout.SOUTH);
