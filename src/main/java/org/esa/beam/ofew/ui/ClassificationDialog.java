@@ -125,7 +125,7 @@ public class ClassificationDialog extends ModalDialog {
 			Map<String, Object> unmixingParameter = getUnmixingParameter();
 			Product landsatProduct = model.getInputProduct();
 			final Product endmemberProduct = GPF.createProduct(
-					"SpectralUnmixing", unmixingParameter, landsatProduct, new SubProgressMonitor(pm, 10));
+					"SpectralUnmixing", unmixingParameter, landsatProduct, SubProgressMonitor.create(pm, 10));
 			endmemberProduct.setName(model.getEndmemberProductName());
 			copyMetaDataAndGeoCoding(landsatProduct, endmemberProduct);
 
@@ -134,8 +134,7 @@ public class ClassificationDialog extends ModalDialog {
 			indexInputProducts.put("landsat", landsatProduct);
 			indexInputProducts.put("endmember", endmemberProduct);
 			final Product indexProduct = GPF.createProduct("BandArithmetic",
-					indexParameter, indexInputProducts, new SubProgressMonitor(
-							pm, 10));
+					indexParameter, indexInputProducts, SubProgressMonitor.create(pm, 10));
 			indexProduct.setName(model.getIndexProductName());
 			copyMetaDataAndGeoCoding(landsatProduct, indexProduct);
 
