@@ -147,17 +147,17 @@ public class DecisionTreeOp extends AbstractOperator {
 	}
 
 	@Override
-    public void computeBand(Raster targetRaster,
+    public void computeBand(Band band, Raster targetRaster,
             ProgressMonitor pm) throws OperatorException {
     	
     	Rectangle rect = targetRaster.getRectangle();
         pm.beginTask("Processing frame...", rect.height);
         try {
-        	Map<Decision, Raster> rasterMap = new HashMap<Decision, Raster>(dds.length);
+        	Map<Decision, Raster> sourceRasterMap = new HashMap<Decision, Raster>(dds.length);
         	for (int i = 0; i < dds.length; i++) {
         		DecisionData decisionData = dds[i];
 				Raster raster = getRaster(decisionData.band, rect);
-				rasterMap.put(decisionData.decision, raster);
+				sourceRasterMap.put(decisionData.decision, raster);
         	}
         	
         	for (int y = rect.y; y < rect.y + rect.height; y++) {
@@ -166,7 +166,7 @@ public class DecisionTreeOp extends AbstractOperator {
 				}
 				for (int x = rect.x; x < rect.x+rect.width; x++) {
 					Decision decision = configuration.getRootDecisions();
-					int value = evaluateDecision(x, y, decision, rasterMap);
+					int value = evaluateDecision(x, y, decision, sourceRasterMap);
 					targetRaster.setInt(x, y, value);
 				}
 				pm.worked(1);
