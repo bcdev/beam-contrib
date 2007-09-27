@@ -27,7 +27,7 @@ import org.esa.beam.framework.gpf.AbstractOperatorSpi;
 import org.esa.beam.framework.gpf.GPF;
 import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.OperatorSpi;
-import org.esa.beam.framework.gpf.Raster;
+import org.esa.beam.framework.gpf.Tile;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProducts;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
@@ -63,10 +63,6 @@ public class DecisionTreeOp extends AbstractOperator {
 		Band band;
 	}
     
-    public DecisionTreeOp(OperatorSpi spi) {
-        super(spi);
-    }
-
     @Override
 	protected Product initialize(ProgressMonitor pm) throws OperatorException {
         targetProduct = new Product("name", "type",
@@ -116,7 +112,7 @@ public class DecisionTreeOp extends AbstractOperator {
 		
 		Map<String, Product> products = new HashMap<String, Product>();
 		for (Product product : sourceProducts) {
-			products.put(getContext().getIdForSourceProduct(product), product);	
+			products.put(getContext().getSourceProductId(product), product);	
 		}
 		Product expressionProduct = GPF.createProduct("BandArithmetic", parameters, products, pm);
 		DefaultOperatorContext context = (DefaultOperatorContext) getContext();
@@ -147,17 +143,17 @@ public class DecisionTreeOp extends AbstractOperator {
 	}
 
 	@Override
-    public void computeBand(Band band, Raster targetRaster,
+    public void computeTile(Band band, Tile targetTile,
             ProgressMonitor pm) throws OperatorException {
     	
-    	Rectangle rect = targetRaster.getRectangle();
+    	Rectangle rect = targetTile.getRectangle();
         pm.beginTask("Processing frame...", rect.height);
         try {
-        	Map<Decision, Raster> sourceRasterMap = new HashMap<Decision, Raster>(dds.length);
+        	Map<Decision, Tile> sourceTileMap = new HashMap<Decision, Tile>(dds.length);
         	for (int i = 0; i < dds.length; i++) {
         		DecisionData decisionData = dds[i];
-				Raster raster = getRaster(decisionData.band, rect);
-				sourceRasterMap.put(decisionData.decision, raster);
+				Tile tile = getSourceTile(decisionData.band, rect);
+				sourceTileMap.put(decisionData.decision, tile);
         	}
         	
         	for (int y = rect.y; y < rect.y + rect.height; y++) {
@@ -166,8 +162,8 @@ public class DecisionTreeOp extends AbstractOperator {
 				}
 				for (int x = rect.x; x < rect.x+rect.width; x++) {
 					Decision decision = configuration.getRootDecisions();
-					int value = evaluateDecision(x, y, decision, sourceRasterMap);
-					targetRaster.setInt(x, y, value);
+					int value = evaluateDecision(x, y, decision, sourceTileMap);
+					targetTile.setSample(x, y, value);
 				}
 				pm.worked(1);
 			}
@@ -176,20 +172,20 @@ public class DecisionTreeOp extends AbstractOperator {
         }
     }
 
-	private int evaluateDecision(int x, int y, Decision decision, Map<Decision, Raster> rasterMap) {
-		Raster raster = rasterMap.get(decision);
-		boolean b = raster.getBoolean(x, y);
+	private int evaluateDecision(int x, int y, Decision decision, Map<Decision, Tile> tileMap) {
+		Tile tile = tileMap.get(decision);
+		boolean b = tile.getSampleBoolean(x, y);
 		if (b) {
 			if (decision.getYesDecision() != null) {
 				Decision yesDecision = decision.getYesDecision();
-				return evaluateDecision(x, y, yesDecision, rasterMap);
+				return evaluateDecision(x, y, yesDecision, tileMap);
 			} else {
 				return decision.getYesClass().getValue();
 			}
 		} else {
 			if (decision.getNoDecision() != null) {
 				Decision noDecision = decision.getNoDecision();
-				return evaluateDecision(x, y, noDecision, rasterMap);
+				return evaluateDecision(x, y, noDecision, tileMap);
 			} else {
 				return decision.getNoClass().getValue();
 			}
