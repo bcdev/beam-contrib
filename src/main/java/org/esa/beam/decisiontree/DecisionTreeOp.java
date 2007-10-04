@@ -16,7 +16,12 @@
  */
 package org.esa.beam.decisiontree;
 
-import com.bc.ceres.core.ProgressMonitor;
+import java.awt.Rectangle;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.BitmaskDef;
 import org.esa.beam.framework.datamodel.BitmaskOverlayInfo;
@@ -26,7 +31,6 @@ import org.esa.beam.framework.gpf.AbstractOperator;
 import org.esa.beam.framework.gpf.AbstractOperatorSpi;
 import org.esa.beam.framework.gpf.GPF;
 import org.esa.beam.framework.gpf.OperatorException;
-import org.esa.beam.framework.gpf.OperatorSpi;
 import org.esa.beam.framework.gpf.Tile;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProducts;
@@ -35,11 +39,8 @@ import org.esa.beam.framework.gpf.internal.DefaultOperatorContext;
 import org.esa.beam.framework.gpf.operators.common.BandArithmeticOp;
 import org.esa.beam.util.StringUtils;
 
-import java.awt.Rectangle;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.util.HashMap;
-import java.util.Map;
+import com.bc.ceres.core.ProgressMonitor;
+
 
 public class DecisionTreeOp extends AbstractOperator {
 
@@ -64,7 +65,7 @@ public class DecisionTreeOp extends AbstractOperator {
 	}
     
     @Override
-	protected Product initialize(ProgressMonitor pm) throws OperatorException {
+	protected Product initialize() throws OperatorException {
         targetProduct = new Product("name", "type",
         		sourceProducts[0].getSceneRasterWidth(), sourceProducts[0].getSceneRasterHeight());
         
@@ -114,7 +115,7 @@ public class DecisionTreeOp extends AbstractOperator {
 		for (Product product : sourceProducts) {
 			products.put(getContext().getSourceProductId(product), product);	
 		}
-		Product expressionProduct = GPF.createProduct("BandArithmetic", parameters, products, pm);
+		Product expressionProduct = GPF.createProduct("BandArithmetic", parameters, products, createProgressMonitor());
 		DefaultOperatorContext context = (DefaultOperatorContext) getContext();
 		context.addSourceProduct("x", expressionProduct);
 		
@@ -143,10 +144,10 @@ public class DecisionTreeOp extends AbstractOperator {
 	}
 
 	@Override
-    public void computeTile(Band band, Tile targetTile,
-            ProgressMonitor pm) throws OperatorException {
+    public void computeTile(Band band, Tile targetTile) throws OperatorException {
     	
     	Rectangle rect = targetTile.getRectangle();
+    	ProgressMonitor pm = createProgressMonitor();
         pm.beginTask("Processing frame...", rect.height);
         try {
         	Map<Decision, Tile> sourceTileMap = new HashMap<Decision, Tile>(dds.length);
