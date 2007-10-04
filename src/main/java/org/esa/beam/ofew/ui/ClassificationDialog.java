@@ -16,13 +16,17 @@
  */
 package org.esa.beam.ofew.ui;
 
-import com.bc.ceres.core.ProgressMonitor;
-import com.bc.ceres.core.SubProgressMonitor;
-import com.bc.ceres.swing.progress.DialogProgressMonitor;
-import com.bc.jexp.EvalEnv;
-import com.bc.jexp.EvalException;
-import com.bc.jexp.Symbol;
-import com.bc.jexp.impl.AbstractSymbol;
+import java.awt.Window;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.logging.Level;
+
+import javax.media.jai.ROI;
+
 import org.esa.beam.decisiontree.Decision;
 import org.esa.beam.decisiontree.DecisionTreeConfiguration;
 import org.esa.beam.decisiontree.DecisionVariable;
@@ -47,16 +51,11 @@ import org.esa.beam.util.Guardian;
 import org.esa.beam.util.ProductUtils;
 import org.esa.beam.visat.VisatApp;
 
-import javax.media.jai.ROI;
-import java.awt.Dialog;
-import java.awt.Window;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.logging.Level;
+import com.bc.ceres.core.ProgressMonitor;
+import com.bc.jexp.EvalEnv;
+import com.bc.jexp.EvalException;
+import com.bc.jexp.Symbol;
+import com.bc.jexp.impl.AbstractSymbol;
 
 /**
  * Created by marcoz.
@@ -103,71 +102,58 @@ public class ClassificationDialog extends ModalDialog {
 	@Override
 	protected void onOK() {
 
-		final DialogProgressMonitor pm = new DialogProgressMonitor(VisatApp
-				.getApp().getMainFrame(), TITLE,
-				Dialog.ModalityType.APPLICATION_MODAL);
-
 		try {
 			model.persistSession();
-			performClassification(pm);
-		} catch (OperatorException e) {
+			performClassification();
+		} catch (Exception e) {
 			showErrorDialog(e.getMessage());
 			VisatApp.getApp().getLogger().log(Level.SEVERE, e.getMessage(), e);
 		}
 		super.onOK();
 	}
 
-	private void performClassification(ProgressMonitor pm)
-			throws OperatorException {
-		try {
-			pm.beginTask("Performing OFEW Classification", 30);
+	private void performClassification() throws Exception {
 
-			Map<String, Object> unmixingParameter = getUnmixingParameter();
-			Product landsatProduct = model.getInputProduct();
-			final Product endmemberProduct = GPF.createProduct(
-					"SpectralUnmixing", unmixingParameter, landsatProduct, SubProgressMonitor.create(pm, 10));
-			endmemberProduct.setName(model.getEndmemberProductName());
-			copyMetaDataAndGeoCoding(landsatProduct, endmemberProduct);
+	    Map<String, Object> unmixingParameter = getUnmixingParameter();
+	    Product landsatProduct = model.getInputProduct();
+	    final Product endmemberProduct = GPF.createProduct(
+					"SpectralUnmixing", unmixingParameter, landsatProduct);
+	    endmemberProduct.setName(model.getEndmemberProductName());
+	    copyMetaDataAndGeoCoding(landsatProduct, endmemberProduct);
 
-			Map<String, Object> indexParameter = getIndexParameter();
-			Map<String, Product> indexInputProducts = new HashMap<String, Product>();
-			indexInputProducts.put("landsat", landsatProduct);
-			indexInputProducts.put("endmember", endmemberProduct);
-			final Product indexProduct = GPF.createProduct("BandArithmetic",
-					indexParameter, indexInputProducts, SubProgressMonitor.create(pm, 10));
-			indexProduct.setName(model.getIndexProductName());
-			copyMetaDataAndGeoCoding(landsatProduct, indexProduct);
+	    Map<String, Object> indexParameter = getIndexParameter();
+	    Map<String, Product> indexInputProducts = new HashMap<String, Product>();
+	    indexInputProducts.put("landsat", landsatProduct);
+	    indexInputProducts.put("endmember", endmemberProduct);
+	    final Product indexProduct = GPF.createProduct("BandArithmetic",
+					indexParameter, indexInputProducts);
+	    indexProduct.setName(model.getIndexProductName());
+	    copyMetaDataAndGeoCoding(landsatProduct, indexProduct);
 
-			Map<String, Object> classificationParameter = getClassificationParameter();
-			Map<String, Product> classificationInputProducts = new HashMap<String, Product>();
-			classificationInputProducts.put("landsat", landsatProduct);
-			classificationInputProducts.put("endmember", endmemberProduct);
-			classificationInputProducts.put("index", indexProduct);
-			final Product classificationProduct = GPF
+	    Map<String, Object> classificationParameter = getClassificationParameter();
+	    Map<String, Product> classificationInputProducts = new HashMap<String, Product>();
+	    classificationInputProducts.put("landsat", landsatProduct);
+	    classificationInputProducts.put("endmember", endmemberProduct);
+	    classificationInputProducts.put("index", indexProduct);
+	    final Product classificationProduct = GPF
 					.createProduct("DecisionTree", classificationParameter,
-							classificationInputProducts,
-							new SubProgressMonitor(pm, 10));
-			classificationProduct.setName(model.getClassificationProductName());
-			copyMetaDataAndGeoCoding(landsatProduct, classificationProduct);
+							classificationInputProducts);
+	    classificationProduct.setName(model.getClassificationProductName());
+	    copyMetaDataAndGeoCoding(landsatProduct, classificationProduct);
 			
-			MetadataElement metadataElement = new MetadataElement("Variablen");
-			for (DecisionVariable variable : model.getConfiguration().getVariables()) {
-				String name = variable.getName();
-            	ProductData data = ProductData.createInstance(new double[]{variable.getValue()});
-            	MetadataAttribute attribute = new MetadataAttribute(name, data, true);
-            	attribute.setDescription(variable.getDescription());
-            	metadataElement.addAttribute(attribute);
-			}
-            classificationProduct.getMetadataRoot().addElement(metadataElement);
+	    MetadataElement metadataElement = new MetadataElement("Variablen");
+	    for (DecisionVariable variable : model.getConfiguration().getVariables()) {
+	        String name = variable.getName();
+	        ProductData data = ProductData.createInstance(new double[]{variable.getValue()});
+	        MetadataAttribute attribute = new MetadataAttribute(name, data, true);
+	        attribute.setDescription(variable.getDescription());
+	        metadataElement.addAttribute(attribute);
+	    }
+	    classificationProduct.getMetadataRoot().addElement(metadataElement);
             
-			VisatApp.getApp().addProduct(endmemberProduct);
-			VisatApp.getApp().addProduct(indexProduct);
-			VisatApp.getApp().addProduct(classificationProduct);
-		} catch (IOException e) {
-			throw new OperatorException(e);
-		} finally {
-			pm.done();
-		}
+	    VisatApp.getApp().addProduct(endmemberProduct);
+	    VisatApp.getApp().addProduct(indexProduct);
+	    VisatApp.getApp().addProduct(classificationProduct);
 	}
 	
 	private void copyMetaDataAndGeoCoding(Product sourceProduct, Product targetProduct) {
