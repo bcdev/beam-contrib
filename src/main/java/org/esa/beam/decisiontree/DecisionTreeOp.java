@@ -115,7 +115,7 @@ public class DecisionTreeOp extends AbstractOperator {
 		for (Product product : sourceProducts) {
 			products.put(getContext().getSourceProductId(product), product);	
 		}
-		Product expressionProduct = GPF.createProduct("BandArithmetic", parameters, products, createProgressMonitor());
+		Product expressionProduct = GPF.createProduct("BandArithmetic", parameters, products);
 		DefaultOperatorContext context = (DefaultOperatorContext) getContext();
 		context.addSourceProduct("x", expressionProduct);
 		
