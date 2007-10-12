@@ -27,22 +27,21 @@ import org.esa.beam.framework.datamodel.BitmaskDef;
 import org.esa.beam.framework.datamodel.BitmaskOverlayInfo;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.ProductData;
-import org.esa.beam.framework.gpf.AbstractOperator;
-import org.esa.beam.framework.gpf.AbstractOperatorSpi;
 import org.esa.beam.framework.gpf.GPF;
+import org.esa.beam.framework.gpf.Operator;
 import org.esa.beam.framework.gpf.OperatorException;
+import org.esa.beam.framework.gpf.OperatorSpi;
 import org.esa.beam.framework.gpf.Tile;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProducts;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
-import org.esa.beam.framework.gpf.internal.DefaultOperatorContext;
 import org.esa.beam.framework.gpf.operators.common.BandArithmeticOp;
 import org.esa.beam.util.StringUtils;
 
 import com.bc.ceres.core.ProgressMonitor;
 
 
-public class DecisionTreeOp extends AbstractOperator {
+public class DecisionTreeOp extends Operator {
 
     public static final String CLASSIFICATION_BAND = "classification";
 
@@ -65,7 +64,7 @@ public class DecisionTreeOp extends AbstractOperator {
 	}
     
     @Override
-	protected Product initialize() throws OperatorException {
+	public Product initialize() throws OperatorException {
         targetProduct = new Product("name", "type",
         		sourceProducts[0].getSceneRasterWidth(), sourceProducts[0].getSceneRasterHeight());
         
@@ -113,11 +112,10 @@ public class DecisionTreeOp extends AbstractOperator {
 		
 		Map<String, Product> products = new HashMap<String, Product>();
 		for (Product product : sourceProducts) {
-			products.put(getContext().getSourceProductId(product), product);	
+			products.put(getSourceProductId(product), product);	
 		}
 		Product expressionProduct = GPF.createProduct("BandArithmetic", parameters, products);
-		DefaultOperatorContext context = (DefaultOperatorContext) getContext();
-		context.addSourceProduct("x", expressionProduct);
+		addSourceProduct("x", expressionProduct);
 		
 		dds = new DecisionData[decisions.length];
 		for (int i = 0; i < decisions.length; i++) {
@@ -194,7 +192,7 @@ public class DecisionTreeOp extends AbstractOperator {
 	}
 
 	
-	public static class Spi extends AbstractOperatorSpi {
+	public static class Spi extends OperatorSpi {
         public Spi() {
             super(DecisionTreeOp.class, "DecisionTree");
         }
