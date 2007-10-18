@@ -142,16 +142,15 @@ public class DecisionTreeOp extends Operator {
 	}
 
 	@Override
-    public void computeTile(Band band, Tile targetTile) throws OperatorException {
+    public void computeTile(Band band, Tile targetTile, ProgressMonitor pm) throws OperatorException {
     	
     	Rectangle rect = targetTile.getRectangle();
-    	ProgressMonitor pm = createProgressMonitor();
         pm.beginTask("Processing frame...", rect.height);
         try {
         	Map<Decision, Tile> sourceTileMap = new HashMap<Decision, Tile>(dds.length);
         	for (int i = 0; i < dds.length; i++) {
         		DecisionData decisionData = dds[i];
-				Tile tile = getSourceTile(decisionData.band, rect);
+				Tile tile = getSourceTile(decisionData.band, rect, pm);
 				sourceTileMap.put(decisionData.decision, tile);
         	}
         	
