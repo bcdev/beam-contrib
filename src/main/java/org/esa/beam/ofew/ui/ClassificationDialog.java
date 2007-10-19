@@ -159,7 +159,7 @@ public class ClassificationDialog extends ModalDialog {
 	private void copyMetaDataAndGeoCoding(Product sourceProduct, Product targetProduct) {
 		targetProduct.setStartTime(sourceProduct.getStartTime());
 		targetProduct.setEndTime(sourceProduct.getEndTime());
-        ProductUtils.copyElementsAndAttributes(sourceProduct.getMetadataRoot(), targetProduct.getMetadataRoot());
+        ProductUtils.copyMetadata(sourceProduct.getMetadataRoot(), targetProduct.getMetadataRoot());
         sourceProduct.transferGeoCodingTo(targetProduct, null);
 	}
 

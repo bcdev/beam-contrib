@@ -110,7 +110,7 @@ public class AtmCorrDialog extends ModalDialog {
             }
         }
         ProductUtils.copyBitmaskDefs(sourceProduct, targetProduct);
-        ProductUtils.copyElementsAndAttributes(sourceProduct.getMetadataRoot(), targetProduct.getMetadataRoot());
+        ProductUtils.copyMetadata(sourceProduct.getMetadataRoot(), targetProduct.getMetadataRoot());
         sourceProduct.transferGeoCodingTo(targetProduct, null);
             
         MetadataElement metadataElement = new MetadataElement("Koeffizienten");
