@@ -1,13 +1,14 @@
 package org.esa.beam.ofew.ui;
 
-import com.bc.ceres.binding.Factory;
-import com.bc.ceres.binding.ValidationException;
-import com.bc.ceres.binding.ValueContainer;
 import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.ParameterDefinitionFactory;
 import org.esa.beam.ofew.ProductNameValidator;
+
+import com.bc.ceres.binding.ValidationException;
+import com.bc.ceres.binding.ValueContainer;
+import com.bc.ceres.binding.ValueContainerFactory;
 
 /**
  * Presenter for OFEW atmospheric correction form.
@@ -64,7 +65,7 @@ class AtmCorrModel {
         this.sourceBands = sourceBands;
 		this.session = session;
 
-        final Factory factory = new Factory(new ParameterDefinitionFactory());
+        final ValueContainerFactory factory = new ValueContainerFactory(new ParameterDefinitionFactory());
 
         try {
             coefficientPairContainers = new ValueContainer[sourceBands.length];

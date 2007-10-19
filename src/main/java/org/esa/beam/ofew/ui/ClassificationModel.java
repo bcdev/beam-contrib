@@ -29,9 +29,9 @@ import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.ParameterDefinitionFactory;
 import org.esa.beam.ofew.ProductNameValidator;
 
-import com.bc.ceres.binding.Factory;
 import com.bc.ceres.binding.ValidationException;
 import com.bc.ceres.binding.ValueContainer;
+import com.bc.ceres.binding.ValueContainerFactory;
 import com.bc.ceres.binding.ValueDefinition;
 import com.bc.ceres.binding.ValueSet;
 
@@ -84,7 +84,7 @@ public class ClassificationModel {
 	}
 	
 	private void initValueContainers() {
-        final Factory factory = new Factory(new ParameterDefinitionFactory());
+        final ValueContainerFactory factory = new ValueContainerFactory(new ParameterDefinitionFactory());
         DecisionVariable[] variables = configuration.getVariables();
         variableVC = new ValueContainer[variables.length];
         
