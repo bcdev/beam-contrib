@@ -95,7 +95,7 @@ public class DecisionTreeOp extends Operator {
 			bandDescriptor.type = ProductData.TYPESTRING_BOOLEAN;
 			bandDescriptions[i] = bandDescriptor;
     	}
-		parameters.put("bandDescriptors", bandDescriptions);
+		parameters.put("targetBands", bandDescriptions);
 		
 		DecisionVariable[] decisionVariables = configuration.getVariables();
 		if (decisionVariables != null) {
