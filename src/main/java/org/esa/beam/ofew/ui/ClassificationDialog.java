@@ -188,7 +188,7 @@ public class ClassificationDialog extends ModalDialog {
 		bandDesc[3].name = "Schlick_corr";
 		bandDesc[3].expression = "($endmember.Sand_wc < 0.0) ? $endmember.Sand_wc + $endmember.Schlick : $endmember.Schlick";
 		bandDesc[3].type = ProductData.TYPESTRING_FLOAT32;
-		parameter.put("bandDescriptors", bandDesc);
+		parameter.put("targetBands", bandDesc);
 		return parameter;
 	}
 

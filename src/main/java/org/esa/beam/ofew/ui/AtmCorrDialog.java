@@ -96,7 +96,7 @@ public class AtmCorrDialog extends ModalDialog {
             
             bandDescriptors[i] = bandDescriptor;
         }
-        parameterMap.put("bandDescriptors", bandDescriptors);
+        parameterMap.put("targetBands", bandDescriptors);
 
         final Product targetProduct = GPF.createProduct("BandArithmetic", parameterMap, sourceProduct);
         targetProduct.setStartTime(sourceProduct.getStartTime());
