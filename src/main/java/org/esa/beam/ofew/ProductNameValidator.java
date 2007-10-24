@@ -34,7 +34,7 @@ public class ProductNameValidator implements Validator {
         if (value == null ||
         		value.toString().trim().isEmpty() ||
         		!ProductNode.isValidNodeName(value.toString().trim())) {
-            throw new ValidationException("Kein gültiger Produktname für '" + valueModel.getDefinition().getDisplayName() + "' angegeben.");
+            throw new ValidationException("Kein gültiger Produktname für '" + valueModel.getDescriptor().getDisplayName() + "' angegeben.");
         }
     }
 

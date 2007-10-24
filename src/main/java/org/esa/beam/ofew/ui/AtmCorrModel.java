@@ -3,7 +3,7 @@ package org.esa.beam.ofew.ui;
 import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.gpf.annotations.Parameter;
-import org.esa.beam.framework.gpf.annotations.ParameterDefinitionFactory;
+import org.esa.beam.framework.gpf.annotations.ParameterDescriptorFactory;
 import org.esa.beam.ofew.ProductNameValidator;
 
 import com.bc.ceres.binding.ValidationException;
@@ -65,7 +65,7 @@ class AtmCorrModel {
         this.sourceBands = sourceBands;
 		this.session = session;
 
-        final ValueContainerFactory factory = new ValueContainerFactory(new ParameterDefinitionFactory());
+        final ValueContainerFactory factory = new ValueContainerFactory(new ParameterDescriptorFactory());
 
         try {
             coefficientPairContainers = new ValueContainer[sourceBands.length];

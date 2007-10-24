@@ -26,13 +26,13 @@ import org.esa.beam.decisiontree.DecisionVariable;
 import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.gpf.annotations.Parameter;
-import org.esa.beam.framework.gpf.annotations.ParameterDefinitionFactory;
+import org.esa.beam.framework.gpf.annotations.ParameterDescriptorFactory;
 import org.esa.beam.ofew.ProductNameValidator;
 
 import com.bc.ceres.binding.ValidationException;
 import com.bc.ceres.binding.ValueContainer;
 import com.bc.ceres.binding.ValueContainerFactory;
-import com.bc.ceres.binding.ValueDefinition;
+import com.bc.ceres.binding.ValueDescriptor;
 import com.bc.ceres.binding.ValueSet;
 
 /**
@@ -84,7 +84,7 @@ public class ClassificationModel {
 	}
 	
 	private void initValueContainers() {
-        final ValueContainerFactory factory = new ValueContainerFactory(new ParameterDefinitionFactory());
+        final ValueContainerFactory factory = new ValueContainerFactory(new ParameterDescriptorFactory());
         DecisionVariable[] variables = configuration.getVariables();
         variableVC = new ValueContainer[variables.length];
         
@@ -106,10 +106,10 @@ public class ClassificationModel {
         
         String[] bandsWithRoi = getBandsWithRoi();
 		ValueSet valueSet = new ValueSet(bandsWithRoi); 
-        ValueDefinition valueDefinition = modelVC.getValueDefinition("roiBandName");
-		valueDefinition.setValueSet(valueSet);
+        ValueDescriptor valueDescriptor = modelVC.getValueDescriptor("roiBandName");
+        valueDescriptor.setValueSet(valueSet);
 		if (useRoi) {
-			valueDefinition.setDefaultValue(roiBandName);
+		    valueDescriptor.setDefaultValue(roiBandName);
 		}
     }
 	
