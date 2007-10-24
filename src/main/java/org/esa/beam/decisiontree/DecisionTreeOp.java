@@ -92,7 +92,7 @@ public class DecisionTreeOp extends Operator {
         	BandArithmeticOp.BandDescriptor bandDescriptor = new BandArithmeticOp.BandDescriptor();
         	bandDescriptor.name = "b"+i;
 			bandDescriptor.expression = decisions[i].getTerm();
-			bandDescriptor.type = ProductData.TYPESTRING_BOOLEAN;
+			bandDescriptor.type = ProductData.TYPESTRING_INT8;
 			bandDescriptions[i] = bandDescriptor;
     	}
 		parameters.put("targetBands", bandDescriptions);
