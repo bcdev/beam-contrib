@@ -115,7 +115,7 @@ public class DecisionTreeOp extends Operator {
 			products.put(getSourceProductId(product), product);	
 		}
 		Product expressionProduct = GPF.createProduct("BandArithmetic", parameters, products);
-		addSourceProduct("x", expressionProduct);
+//		addSourceProduct("x", expressionProduct);
 		
 		dds = new DecisionData[decisions.length];
 		for (int i = 0; i < decisions.length; i++) {
