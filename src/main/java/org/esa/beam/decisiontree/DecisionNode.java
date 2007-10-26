@@ -24,8 +24,6 @@ import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.util.StringUtils;
 
-import sun.misc.Regexp;
-
 import com.bc.jexp.ParseException;
 import com.bc.jexp.Term;
 
