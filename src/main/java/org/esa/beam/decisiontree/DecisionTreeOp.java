@@ -64,7 +64,7 @@ public class DecisionTreeOp extends Operator {
 	}
     
     @Override
-	public Product initialize() throws OperatorException {
+	public void initialize() throws OperatorException {
         targetProduct = new Product("name", "type",
         		sourceProducts[0].getSceneRasterWidth(), sourceProducts[0].getSceneRasterHeight());
         
@@ -124,8 +124,6 @@ public class DecisionTreeOp extends Operator {
         	dd.band = expressionProduct.getBand("b"+i);
         	dds[i] = dd;	
 		}
-		
-        return targetProduct;
     }
 
 	private void addBitmaskDefs() {
