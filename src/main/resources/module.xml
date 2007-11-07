@@ -2,8 +2,8 @@
     <manifestVersion>1.0.0</manifestVersion>
     <symbolicName>beam-ofew</symbolicName>
     <version>1.0</version>
-    <name>beam-ofew</name>
-    <description>BEAM ofew tools</description>
+    <name>BEAM OFEW Tools</name>
+    <description>BEAM atmospheric correction and classification tool for OFEW.</description>
 
     <vendor>Brockmann Consult GmbH</vendor>
     <contactAddress>Max Planck Str.2, 21502 Geesthacht (Germany)</contactAddress>
