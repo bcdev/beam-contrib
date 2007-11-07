@@ -29,6 +29,7 @@ import javax.media.jai.ROI;
 
 import org.esa.beam.decisiontree.Decision;
 import org.esa.beam.decisiontree.DecisionTreeConfiguration;
+import org.esa.beam.decisiontree.DecisionTreeOp;
 import org.esa.beam.decisiontree.DecisionVariable;
 import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.MetadataAttribute;
@@ -39,6 +40,7 @@ import org.esa.beam.framework.dataop.barithm.BandArithmetic;
 import org.esa.beam.framework.dataop.barithm.RasterDataEvalEnv;
 import org.esa.beam.framework.gpf.GPF;
 import org.esa.beam.framework.gpf.OperatorException;
+import org.esa.beam.framework.gpf.OperatorSpi;
 import org.esa.beam.framework.gpf.operators.common.BandArithmeticOp;
 import org.esa.beam.framework.ui.ModalDialog;
 import org.esa.beam.framework.ui.diagram.DiagramGraph;
@@ -116,8 +118,9 @@ public class ClassificationDialog extends ModalDialog {
 
 	    Map<String, Object> unmixingParameter = getUnmixingParameter();
 	    Product landsatProduct = model.getInputProduct();
+	    String unmixingAlias = OperatorSpi.getOperatorAlias(SpectralUnmixingOp.class);
 	    final Product endmemberProduct = GPF.createProduct(
-					"SpectralUnmixing", unmixingParameter, landsatProduct);
+	            unmixingAlias, unmixingParameter, landsatProduct);
 	    endmemberProduct.setName(model.getEndmemberProductName());
 	    copyMetaDataAndGeoCoding(landsatProduct, endmemberProduct);
 
@@ -125,22 +128,24 @@ public class ClassificationDialog extends ModalDialog {
 	    Map<String, Product> indexInputProducts = new HashMap<String, Product>();
 	    indexInputProducts.put("landsat", landsatProduct);
 	    indexInputProducts.put("endmember", endmemberProduct);
-	    final Product indexProduct = GPF.createProduct("BandArithmetic",
+	    String bandarithmeticAlias = OperatorSpi.getOperatorAlias(BandArithmeticOp.class);
+	    final Product indexProduct = GPF.createProduct(bandarithmeticAlias,
 					indexParameter, indexInputProducts);
 	    indexProduct.setName(model.getIndexProductName());
 	    copyMetaDataAndGeoCoding(landsatProduct, indexProduct);
-
+	    
 	    Map<String, Object> classificationParameter = getClassificationParameter();
 	    Map<String, Product> classificationInputProducts = new HashMap<String, Product>();
 	    classificationInputProducts.put("landsat", landsatProduct);
 	    classificationInputProducts.put("endmember", endmemberProduct);
 	    classificationInputProducts.put("index", indexProduct);
+	    String decisiontreeAlias = OperatorSpi.getOperatorAlias(DecisionTreeOp.class);
 	    final Product classificationProduct = GPF
-					.createProduct("DecisionTree", classificationParameter,
+					.createProduct(decisiontreeAlias, classificationParameter,
 							classificationInputProducts);
 	    classificationProduct.setName(model.getClassificationProductName());
 	    copyMetaDataAndGeoCoding(landsatProduct, classificationProduct);
-			
+	    
 	    MetadataElement metadataElement = new MetadataElement("Variablen");
 	    for (DecisionVariable variable : model.getConfiguration().getVariables()) {
 	        String name = variable.getName();
@@ -150,7 +155,7 @@ public class ClassificationDialog extends ModalDialog {
 	        metadataElement.addAttribute(attribute);
 	    }
 	    classificationProduct.getMetadataRoot().addElement(metadataElement);
-            
+
 	    VisatApp.getApp().addProduct(endmemberProduct);
 	    VisatApp.getApp().addProduct(indexProduct);
 	    VisatApp.getApp().addProduct(classificationProduct);
@@ -212,7 +217,7 @@ public class ClassificationDialog extends ModalDialog {
 
 		parameter.put("sourceBandNames", bandFinder.getBandNames());
 		parameter.put("unmixingModelName", "Constrained LSU");
-		parameter.put("targetBandNameSuffix", "");
+		parameter.put("abundanceBandNameSuffix", "");
 		return parameter;
 	}
 

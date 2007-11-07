@@ -14,6 +14,7 @@ import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.framework.gpf.GPF;
 import org.esa.beam.framework.gpf.OperatorException;
+import org.esa.beam.framework.gpf.OperatorSpi;
 import org.esa.beam.framework.gpf.operators.common.BandArithmeticOp;
 import org.esa.beam.framework.ui.ModalDialog;
 import org.esa.beam.ofew.ui.AtmCorrModel.Session;
@@ -76,8 +77,6 @@ public class AtmCorrDialog extends ModalDialog {
 
     private Product createTargetProduct() throws OperatorException {
         final Map<String, Object> parameterMap = new HashMap<String, Object>();
-        parameterMap.put("productName", model.getTargetProductName());
-
         final BandArithmeticOp.BandDescriptor[] bandDescriptors =
             new BandArithmeticOp.BandDescriptor[sourceBands.length];
 
@@ -86,8 +85,13 @@ public class AtmCorrDialog extends ModalDialog {
             final double a = model.getCoefficientA(i);
             final double b = model.getCoefficientB(i);
 
-            bandDescriptor.name = sourceBands[i].getName();
-            bandDescriptor.expression = a + " * " + sourceBands[i].getName() + " + " + b;
+            String sourceBandName = sourceBands[i].getName();
+            String targetBandname = sourceBandName;
+            if (targetBandname.startsWith("radiance_")) {
+                targetBandname = targetBandname.replaceFirst("radiance", "reflacatnce");
+            }
+            bandDescriptor.name = targetBandname;
+            bandDescriptor.expression = a + " * " + sourceBandName + " + " + b;
             bandDescriptor.type = ProductData.TYPESTRING_FLOAT32;
             bandDescriptor.validExpression = sourceBands[i].getValidPixelExpression();
             bandDescriptor.spectralBandIndex = i;
@@ -98,19 +102,11 @@ public class AtmCorrDialog extends ModalDialog {
         }
         parameterMap.put("targetBands", bandDescriptors);
 
-        final Product targetProduct = GPF.createProduct("BandArithmetic", parameterMap, sourceProduct);
+        String bandarithmeticAlias = OperatorSpi.getOperatorAlias(BandArithmeticOp.class);
+        final Product targetProduct = GPF.createProduct(bandarithmeticAlias, parameterMap, sourceProduct);
+        targetProduct.setName(model.getTargetProductName());
         targetProduct.setStartTime(sourceProduct.getStartTime());
         targetProduct.setEndTime(sourceProduct.getEndTime());
-        ProductUtils.copyFlagCodings(sourceProduct, targetProduct);
-
-        for (final Band sourceBand : sourceProduct.getBands()) {
-            final FlagCoding flagCoding = sourceBand.getFlagCoding();
-            if (flagCoding != null) {
-                targetProduct.getBand(sourceBand.getName()).setFlagCoding(targetProduct.getFlagCoding(flagCoding.getName()));
-            }
-        }
-        ProductUtils.copyBitmaskDefs(sourceProduct, targetProduct);
-        ProductUtils.copyMetadata(sourceProduct.getMetadataRoot(), targetProduct.getMetadataRoot());
         sourceProduct.transferGeoCodingTo(targetProduct, null);
             
         MetadataElement metadataElement = new MetadataElement("Koeffizienten");
