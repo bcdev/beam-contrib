@@ -88,7 +88,7 @@ public class AtmCorrDialog extends ModalDialog {
             String sourceBandName = sourceBands[i].getName();
             String targetBandname = sourceBandName;
             if (targetBandname.startsWith("radiance_")) {
-                targetBandname = targetBandname.replaceFirst("radiance", "reflacatnce");
+                targetBandname = targetBandname.replaceFirst("radiance", "reflectance");
             }
             bandDescriptor.name = targetBandname;
             bandDescriptor.expression = a + " * " + sourceBandName + " + " + b;
