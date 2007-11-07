@@ -37,10 +37,11 @@ public class DecisionTreeConfigurationTest extends TestCase {
 		String xml = "<decisionTree name=\"WAQSomat\">" +
 						"<classes>"+ 
 						"<class name=\"WOLKE\" value=\"1\" color=\"WHITE\"/>" +
+						"<class name=\"SAND\" value=\"2\" color=\"YELLOW\"/>" +
 						"</classes>"+
 						"<decision name=\"d1\" term=\"true\">" +
 						"<yes>WOLKE</yes>" +
-						"<no>WOLKE</no>" +
+						"<no><decision name=\"d2\" term=\"true\"><yes>WOLKE</yes><no>SAND</no></decision></no>" +
 						"</decision>" +
 						"</decisionTree>";
 						
@@ -51,7 +52,7 @@ public class DecisionTreeConfigurationTest extends TestCase {
 		assertEquals("WAQSomat", configuration.getName());
 		
 		Classification[] classes = configuration.getClasses();
-		assertEquals(1, classes.length);
+		assertEquals(2, classes.length);
 		
 		Classification cloudClass = classes[0];
 		assertNotNull(cloudClass);
@@ -63,35 +64,47 @@ public class DecisionTreeConfigurationTest extends TestCase {
 		
 		Decision rootDecisions = configuration.getRootDecisions();
 		assertNotNull(rootDecisions);
+		assertEquals("d1", rootDecisions.getName());
+		assertEquals("WOLKE", rootDecisions.getYesClass().getName());
+		assertNull(rootDecisions.getNoClass());
+		assertNull(rootDecisions.getYesDecision());
+		
+		Decision noDecision = rootDecisions.getNoDecision();
+        assertNotNull(noDecision);
+        assertEquals("d2", noDecision.getName());
+        assertEquals("WOLKE", noDecision.getYesClass().getName());
+        assertEquals("SAND", noDecision.getNoClass().getName());
+        assertNull(noDecision.getYesDecision());
+        assertNull(noDecision.getNoDecision());
 	}
 	
 	public void testparseColor_numerical() throws Exception {
-		Color color123 = DecisionTreeConfiguration.parseColor("1,2,3");
+		Color color123 = DecisionTreeDomConverter.parseColor("1,2,3");
 		assertEquals(new Color(1,2,3), color123);
 		
-		Color color224466 = DecisionTreeConfiguration.parseColor("22,44,66");
+		Color color224466 = DecisionTreeDomConverter.parseColor("22,44,66");
 		assertEquals(new Color(22,44,66), color224466);
 	}
 	
 	public void testparseColor_badNumerical() throws Exception {
 		try {
-			DecisionTreeConfiguration.parseColor("1,2");
+		    DecisionTreeDomConverter.parseColor("1,2");
 			fail("IllegalArgumentException expected");
 		}catch (IllegalArgumentException e) {
 		}
 		
 		try {
-			DecisionTreeConfiguration.parseColor("2828");
+		    DecisionTreeDomConverter.parseColor("2828");
 			fail("IllegalArgumentException expected");
 		}catch (IllegalArgumentException e) {
 		}
 	}
 	
 	public void testparseColor_names() throws Exception {
-		Color smallWhite = DecisionTreeConfiguration.parseColor("white");
+		Color smallWhite = DecisionTreeDomConverter.parseColor("white");
 		assertEquals(Color.white, smallWhite);
 		
-		Color bigWhite = DecisionTreeConfiguration.parseColor("WHITE");
+		Color bigWhite = DecisionTreeDomConverter.parseColor("WHITE");
 		assertEquals(Color.white, bigWhite);
 	}
 

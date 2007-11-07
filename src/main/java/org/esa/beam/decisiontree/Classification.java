@@ -2,12 +2,19 @@ package org.esa.beam.decisiontree;
 
 import java.awt.Color;
 
+import org.esa.beam.framework.gpf.annotations.Parameter;
+
 public class Classification {
-	
+	@Parameter
 	private String name;
+	@Parameter
 	private int value;
+	@Parameter
 	private Color color;
 
+    public Classification() {
+    }
+    
 	public Classification(String name, String valueString, Color color) {
 		this.name = name;
 		value = Integer.parseInt(valueString);

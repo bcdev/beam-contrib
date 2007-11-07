@@ -32,6 +32,7 @@ import org.esa.beam.framework.gpf.Operator;
 import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.OperatorSpi;
 import org.esa.beam.framework.gpf.Tile;
+import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProducts;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
@@ -40,7 +41,15 @@ import org.esa.beam.util.StringUtils;
 
 import com.bc.ceres.core.ProgressMonitor;
 
-
+/**
+ * Implements a classification based on a decision tree.
+ */
+@OperatorMetadata(alias = "DecisionTree",
+                  internal=true,
+                  version = "1.0",
+                  authors = "Marco Zuehlke",
+                  copyright = "(c) 2007 by Brockmann Consult",
+                  description = "Performs a classification based on a decision tree.")
 public class DecisionTreeOp extends Operator {
 
     public static final String CLASSIFICATION_BAND = "classification";
@@ -51,10 +60,12 @@ public class DecisionTreeOp extends Operator {
     private Product targetProduct;
     @Parameter
     private String decisionConfigFile;
-    @Parameter
+    //TODO (mz-07.11.2007) enable,when gpf supports this
+//    @Parameter(domConverter=DecisionTreeDomConverter.class) 
+    @Parameter(converter=NoopConverter.class)
     private DecisionTreeConfiguration configuration;
-    @Parameter
-    private String bandName = CLASSIFICATION_BAND;
+    @Parameter(defaultValue=CLASSIFICATION_BAND)
+    private String bandName;
 
 	private DecisionData[] dds;
 	
@@ -190,7 +201,7 @@ public class DecisionTreeOp extends Operator {
 	
 	public static class Spi extends OperatorSpi {
         public Spi() {
-            super(DecisionTreeOp.class, "DecisionTree");
+            super(DecisionTreeOp.class);
         }
     }
 }
