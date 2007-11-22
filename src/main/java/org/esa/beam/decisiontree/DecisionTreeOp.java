@@ -60,9 +60,7 @@ public class DecisionTreeOp extends Operator {
     private Product targetProduct;
     @Parameter
     private String decisionConfigFile;
-    //TODO (mz-07.11.2007) enable,when gpf supports this
-//    @Parameter(domConverter=DecisionTreeDomConverter.class) 
-    @Parameter(converter=NoopConverter.class)
+    @Parameter(domConverter=DecisionTreeDomConverter.class) 
     private DecisionTreeConfiguration configuration;
     @Parameter(defaultValue=CLASSIFICATION_BAND)
     private String bandName;

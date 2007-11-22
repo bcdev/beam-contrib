@@ -1,7 +1,7 @@
 <module>
     <manifestVersion>1.0.0</manifestVersion>
     <symbolicName>beam-decisiontree</symbolicName>
-    <version>1.0</version>
+    <version>1.1-SNAPSHOT</version>
     <name>BEAM Decisiontree</name>
     <description>A classification based on a decision tree.</description>
 
@@ -13,6 +13,7 @@
 
     <dependency>
         <module>beam-gpf</module>
+        <version>4.1.1</version>
     </dependency>
     <dependency>
         <module>beam-visat</module>
