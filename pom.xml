@@ -8,7 +8,7 @@
     <name>BEAM ofew tools</name>
     <groupId>org.esa.beam</groupId>
     <artifactId>beam-ofew</artifactId>
-    <version>1.0</version>
+    <version>1.0.1</version>
 
     <packaging>jar</packaging>
 
@@ -31,7 +31,7 @@
         <dependency>
             <groupId>org.esa.beam</groupId>
             <artifactId>beam-decisiontree</artifactId>
-            <version>1.1-SNAPSHOT</version>
+            <version>[1.0,)</version>
         </dependency>
         <dependency>
             <groupId>org.esa.beam</groupId>

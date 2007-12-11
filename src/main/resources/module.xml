@@ -1,7 +1,7 @@
 <module>
     <manifestVersion>1.0.0</manifestVersion>
     <symbolicName>beam-ofew</symbolicName>
-    <version>1.0</version>
+    <version>1.0.1</version>
     <name>BEAM OFEW Tools</name>
     <description>BEAM atmospheric correction and classification tool for OFEW.</description>
 
@@ -9,6 +9,13 @@
     <contactAddress>Max Planck Str.2, 21502 Geesthacht (Germany)</contactAddress>
     <copyright>(C) 2007 by Brockmann Consult GmbH</copyright>
     <licenseUrl>http://www.gnu.org/licenses/gpl.html</licenseUrl>
+
+    <changelog>
+        <![CDATA[
+        Changes in 1.0.1<br>
+        [OFEW-1] Modify decision tree thresholds<br>
+        ]]>
+    </changelog>
 
     <dependency>
         <module>beam-gpf</module>

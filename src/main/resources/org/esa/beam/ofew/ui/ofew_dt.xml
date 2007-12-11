@@ -24,7 +24,7 @@
         <variable name="offset_musch" value="0.0" description="Muscheln"/>
     </variables>
 
-    <decision name="nodata?" term="$index.NDVI &lt; 0 or ($landsat.band1 + $landsat.band2 + $landsat.band3 + $landsat.band4) &lt; 0.12 or $index.NDVI &gt; 0.8">
+    <decision name="nodata?" term="$index.NDVI &lt; 0 or ($landsat.band1 + $landsat.band2 + $landsat.band3 + $landsat.band4) &lt; 0.12">
         <yes>nodata</yes>
         <no>
             <decision name="Vegetation?" term="(($index.NDVI &gt; 0.3 - offset_veg) or (($index.Steigung_3_4 &gt; 0.3) and ($index.NDVI &gt; 0.28 - offset_veg)) and ($index.NDVI &lt; 0.45)) or ($index.NDVI &gt; 0.4)">
