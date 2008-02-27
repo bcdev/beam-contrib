@@ -67,11 +67,12 @@ import com.bc.jexp.impl.AbstractSymbol;
  */
 public class ClassificationDialog extends ModalDialog {
 
-	public static final String TITLE = "OFEW Klassifikation";
+    public static final String TITLE = "OFEW Klassifikation";
 	private static final String EM_CSV = "em.csv";
 	private static final String OFEW_DT_XML = "ofew_dt.xml";
 
-	private final ClassificationModel model;
+    
+    private final ClassificationModel model;
 	private final ClassificationForm form;
 	private final SpectralBandFinder bandFinder;
 
