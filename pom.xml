@@ -16,17 +16,17 @@
         <dependency>
             <groupId>org.esa.beam</groupId>
             <artifactId>beam-ui</artifactId>
-            <version>[4.1,4.2)</version>
+            <version>[4.1,4.1.99]</version>
         </dependency>
        <dependency>
             <groupId>org.esa.beam</groupId>
             <artifactId>beam-visat</artifactId>
-            <version>[4.1,4.2)</version>
+            <version>[4.1,4.1.99]</version>
         </dependency>
         <dependency>
             <groupId>org.esa.beam</groupId>
             <artifactId>beam-gpf</artifactId>
-            <version>[4.1,4.2)</version>
+            <version>[4.1,4.1.99]</version>
         </dependency>
         <dependency>
             <groupId>org.esa.beam</groupId>
@@ -36,7 +36,7 @@
         <dependency>
             <groupId>org.esa.beam</groupId>
             <artifactId>beam-unmix</artifactId>
-            <version>1.0</version>
+            <version>[1.0,)</version>
         </dependency>        
     </dependencies>
 
