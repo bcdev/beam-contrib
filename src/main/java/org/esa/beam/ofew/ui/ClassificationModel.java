@@ -29,9 +29,9 @@ import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.ParameterDescriptorFactory;
 import org.esa.beam.ofew.ProductNameValidator;
 
+import com.bc.ceres.binding.ClassFieldDescriptorFactory;
 import com.bc.ceres.binding.ValidationException;
 import com.bc.ceres.binding.ValueContainer;
-import com.bc.ceres.binding.ValueContainerFactory;
 import com.bc.ceres.binding.ValueDescriptor;
 import com.bc.ceres.binding.ValueSet;
 
@@ -84,12 +84,12 @@ public class ClassificationModel {
 	}
 	
 	private void initValueContainers() {
-        final ValueContainerFactory factory = new ValueContainerFactory(new ParameterDescriptorFactory());
+        ClassFieldDescriptorFactory descriptorFactory = new ParameterDescriptorFactory();
         DecisionVariable[] variables = configuration.getVariables();
         variableVC = new ValueContainer[variables.length];
         
         for (int i = 0; i < variables.length; i++) {
-        	variableVC[i] = factory.createObjectBackedValueContainer(variables[i]);
+        	variableVC[i] = ValueContainer.createObjectBacked(variables[i], descriptorFactory);
 		}
         if (session.values == null) {
         	session.values = new double[variables.length];
@@ -102,11 +102,11 @@ public class ClassificationModel {
 				}
         	}
         }
-        modelVC = factory.createObjectBackedValueContainer(this);
+        modelVC = ValueContainer.createObjectBacked(this, descriptorFactory);
         
         String[] bandsWithRoi = getBandsWithRoi();
 		ValueSet valueSet = new ValueSet(bandsWithRoi); 
-        ValueDescriptor valueDescriptor = modelVC.getValueDescriptor("roiBandName");
+        ValueDescriptor valueDescriptor = modelVC.getDescriptor("roiBandName");
         valueDescriptor.setValueSet(valueSet);
 		if (useRoi) {
 		    valueDescriptor.setDefaultValue(roiBandName);

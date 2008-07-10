@@ -2,7 +2,7 @@ package org.esa.beam.ofew.ui;
 
 import com.bc.ceres.binding.ValidationException;
 import com.bc.ceres.binding.ValueContainer;
-import com.bc.ceres.binding.swing.SwingBindingContext;
+import com.bc.ceres.binding.swing.BindingContext;
 import org.esa.beam.framework.ui.TableLayout;
 import org.esa.beam.visat.VisatApp;
 
@@ -50,16 +50,16 @@ class ClassificationForm extends JPanel {
     private void bindComponents() {
     	for (int i = 0; i < variablesVC.length; i++) {
     		ValueContainer container = variablesVC[i];
-    		SwingBindingContext bindingContext = new SwingBindingContext(container);
-    		bindingContext.bind(variablesTextFields[i], "value");
+    		BindingContext bindingContext = new BindingContext(container);
+    		bindingContext.bind("value", variablesTextFields[i]);
 		}
-    	SwingBindingContext bindingContext = new SwingBindingContext(modelVC);
-		bindingContext.bind(classifyProductName, "classification");
-		bindingContext.bind(indexProductName, "index");
-		bindingContext.bind(endmemberProductName, "endmember");
+    	BindingContext bindingContext = new BindingContext(modelVC);
+		bindingContext.bind("classification", classifyProductName);
+		bindingContext.bind("index", indexProductName);
+		bindingContext.bind("endmember", endmemberProductName);
 		
-		bindingContext.bind(roiCombo, "roiBandName");
-		bindingContext.bind(roiCheckBox, "useRoi");
+		bindingContext.bind("roiBandName", roiCombo);
+		bindingContext.bind("useRoi", roiCheckBox);
     }
 
     private void initComponents(ClassificationModel model) {

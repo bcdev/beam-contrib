@@ -6,9 +6,9 @@ import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.ParameterDescriptorFactory;
 import org.esa.beam.ofew.ProductNameValidator;
 
+import com.bc.ceres.binding.ClassFieldDescriptorFactory;
 import com.bc.ceres.binding.ValidationException;
 import com.bc.ceres.binding.ValueContainer;
-import com.bc.ceres.binding.ValueContainerFactory;
 
 /**
  * Presenter for OFEW atmospheric correction form.
@@ -65,8 +65,7 @@ class AtmCorrModel {
         this.sourceBands = sourceBands;
 		this.session = session;
 
-        final ValueContainerFactory factory = new ValueContainerFactory(new ParameterDescriptorFactory());
-
+		ClassFieldDescriptorFactory descriptorFactory = new ParameterDescriptorFactory();
         try {
             coefficientPairContainers = new ValueContainer[sourceBands.length];
             
@@ -78,10 +77,10 @@ class AtmCorrModel {
             }
             for (int i = 0; i < sourceBands.length; i++) {
                 CoefficientPair coefficientPair = new CoefficientPair(session.getCoefficientA(i), session.getCoefficientB(i));
-				coefficientPairContainers[i] = factory.createObjectBackedValueContainer(coefficientPair);
+				coefficientPairContainers[i] = ValueContainer.createObjectBacked(coefficientPair, descriptorFactory);
             }
             
-            targetProductNameContainer = factory.createObjectBackedValueContainer(this);
+            targetProductNameContainer = ValueContainer.createObjectBacked(this, descriptorFactory);
             targetProductNameContainer.setValue("targetProductName", sourceProduct.getName() + "_atmo");
         } catch (ValidationException e) {
             // ignore, can never happen

@@ -2,7 +2,8 @@ package org.esa.beam.ofew.ui;
 
 import com.bc.ceres.binding.ValidationException;
 import com.bc.ceres.binding.ValueModel;
-import com.bc.ceres.binding.swing.SwingBindingContext;
+import com.bc.ceres.binding.swing.BindingContext;
+
 import org.esa.beam.framework.ui.TableLayout;
 import org.esa.beam.visat.VisatApp;
 
@@ -143,14 +144,14 @@ class AtmCorrForm extends JPanel {
 
     private void bindComponents() {
         for (int i = 0; i < model.getBandCount(); i++) {
-            final SwingBindingContext bindingContext = new SwingBindingContext(
+            final BindingContext bindingContext = new BindingContext(
                     model.getCoefficientPairContainer(i));
-            bindingContext.bind(textFieldsA[i], "a");
-            bindingContext.bind(textFieldsB[i], "b");
+            bindingContext.bind("a", textFieldsA[i]);
+            bindingContext.bind("b", textFieldsB[i]);
         }
 
-        new SwingBindingContext(model.getTargetProductNameContainer()).
-                bind(targetProductTextField, "targetProductName");
+        new BindingContext(model.getTargetProductNameContainer()).
+                bind("targetProductName", targetProductTextField);
     }
 
     public boolean hasValidValues() {
