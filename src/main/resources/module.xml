@@ -33,13 +33,13 @@
 
     <categories>Application,Processor,ofew</categories>
 
-    <extension point="beam-visat:actions">
+    <extension point="beam-ui:actions">
         <action>
             <id>ofewClassification</id>
             <class>org.esa.beam.ofew.ui.ClassificationAction</class>
             <text>OFEW Klassifikation...</text>
             <shortDescr>Aufruf des OFEW Klassifikations-Werkzeugs</shortDescr>
-            <mnemonic></mnemonic>
+            <mnemonic/>
             <parent>tools</parent>
             <helpID>ofewClassificationTool</helpID>
             <placeAfter>ofewAtmCorr</placeAfter>
