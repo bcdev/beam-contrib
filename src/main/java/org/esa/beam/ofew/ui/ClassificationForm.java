@@ -3,7 +3,7 @@ package org.esa.beam.ofew.ui;
 import com.bc.ceres.binding.ValidationException;
 import com.bc.ceres.binding.ValueContainer;
 import com.bc.ceres.binding.swing.BindingContext;
-import org.esa.beam.framework.ui.TableLayout;
+import com.bc.ceres.swing.TableLayout;
 import org.esa.beam.visat.VisatApp;
 
 import javax.swing.BorderFactory;
