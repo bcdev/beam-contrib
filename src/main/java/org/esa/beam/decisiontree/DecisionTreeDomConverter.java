@@ -16,33 +16,32 @@
  */
 package org.esa.beam.decisiontree;
 
-import java.awt.Color;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import org.esa.beam.util.StringUtils;
-
 import com.bc.ceres.binding.ConversionException;
 import com.bc.ceres.binding.ValidationException;
 import com.bc.ceres.binding.dom.DomConverter;
 import com.bc.ceres.binding.dom.DomElement;
+import org.esa.beam.util.StringUtils;
+
+import java.awt.Color;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Created by marcoz.
- * 
+ *
  * @author marcoz
  * @version $Revision: $ $Date: $
  */
-public class DecisionTreeDomConverter implements
-        DomConverter<DecisionTreeConfiguration> {
+public class DecisionTreeDomConverter implements DomConverter {
 
-    public DecisionTreeConfiguration convertDomToValue(
-            DomElement parentElement, DecisionTreeConfiguration configuration)
+    public Object convertDomToValue(DomElement parentElement, Object value)
             throws ConversionException, ValidationException {
+
+        DecisionTreeConfiguration configuration = (DecisionTreeConfiguration) value;
         if (configuration == null) {
             configuration = new DecisionTreeConfiguration();
         }
-        
+
         String treeName = parentElement.getAttribute("name");
         configuration.setName(treeName);
 
@@ -61,11 +60,11 @@ public class DecisionTreeDomConverter implements
             DecisionVariable[] theVariables = parseVariables(variableDoms);
             configuration.setVariables(theVariables);
         }
-        
+
         DomElement decisionDom = parentElement.getChild("decision");
         Decision decision = parseDecisions(configuration, decisionDom);
         configuration.setRootDecisions(decision);
-        return null;
+        return configuration;
     }
 
     private static Classification[] parseClasses(DomElement[] classesDom) {
@@ -185,9 +184,8 @@ public class DecisionTreeDomConverter implements
         }
     }
 
-    public void convertValueToDom(DecisionTreeConfiguration decisionTreeConfiguration,
-            DomElement parentElement) {
-        
+    public void convertValueToDom(Object value, DomElement parentElement) {
+        DecisionTreeConfiguration decisionTreeConfiguration = (DecisionTreeConfiguration) value;
         Classification[] classes = decisionTreeConfiguration.getClasses();
         if (classes.length != 0) {
             DomElement classesDom = parentElement.createChild("classes");
@@ -197,33 +195,33 @@ public class DecisionTreeDomConverter implements
                 classDom.setAttribute("value", Integer.toString(classification.getValue()));
                 Color color = classification.getColor();
                 String colorString = Integer.toString(color.getRed()) + "," +
-                    Integer.toString(color.getGreen()) + "," +
-                    Integer.toString(color.getBlue());
+                        Integer.toString(color.getGreen()) + "," +
+                        Integer.toString(color.getBlue());
                 classDom.setAttribute("color", colorString);
             }
         }
-        
+
         DecisionVariable[] variables = decisionTreeConfiguration.getVariables();
         if (variables.length != 0) {
             DomElement variablesDom = parentElement.createChild("variables");
-            for (DecisionVariable variable: variables) {
+            for (DecisionVariable variable : variables) {
                 DomElement varDom = variablesDom.createChild("variable");
                 varDom.setAttribute("name", variable.getName());
                 varDom.setAttribute("value", Double.toString(variable.getValue()));
                 varDom.setAttribute("description", variable.getDescription());
             }
         }
-        
+
         Decision rootDecisions = decisionTreeConfiguration.getRootDecisions();
         addDecision(parentElement, rootDecisions);
     }
 
     private void addDecision(DomElement dom, Decision decision) {
         DomElement decisionDom = dom.createChild("decision");
-        
+
         decisionDom.setAttribute("name", decision.getName());
         decisionDom.setAttribute("term", decision.getTerm());
-        
+
         DomElement yesDom = decisionDom.createChild("yes");
         if (decision.getYesClass() != null) {
             yesDom.setValue(decision.getYesClass().getName());

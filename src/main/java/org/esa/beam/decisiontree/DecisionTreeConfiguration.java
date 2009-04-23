@@ -6,10 +6,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.esa.beam.framework.gpf.internal.Xpp3DomElement;
-
 import com.thoughtworks.xstream.io.xml.xppdom.Xpp3Dom;
 import com.thoughtworks.xstream.io.xml.xppdom.Xpp3DomBuilder;
+import com.bc.ceres.binding.dom.Xpp3DomElement;
 
 public class DecisionTreeConfiguration {
 	
@@ -25,7 +24,7 @@ public class DecisionTreeConfiguration {
 		DecisionTreeDomConverter converter = new DecisionTreeDomConverter();
 		try {
 			dom = Xpp3DomBuilder.build(inputReader);
-			final Xpp3DomElement xpp3DomElement = Xpp3DomElement.createDomElement(dom);
+			final Xpp3DomElement xpp3DomElement = new Xpp3DomElement(dom);
 			converter.convertDomToValue(xpp3DomElement, configuration);
 		} catch (Exception e) {
 			return null;
