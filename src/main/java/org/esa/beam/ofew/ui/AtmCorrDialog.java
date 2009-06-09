@@ -31,7 +31,7 @@ import com.bc.ceres.swing.progress.DialogProgressMonitor;
  */
 public class AtmCorrDialog extends ModalDialog {
 
-    public static final String TITLE = "OFEW Atmosph‰renkorrektur";
+    public static final String TITLE = "OFEW Atmosph√§renkorrektur";
 
     private final AtmCorrModel model;
     private final AtmCorrForm form;
