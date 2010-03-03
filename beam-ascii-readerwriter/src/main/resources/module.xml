@@ -1,0 +1,44 @@
+<module>
+    <manifestVersion>1.0.0</manifestVersion>
+    <symbolicName>beam-ascii-readerwriter</symbolicName>
+    <version>1.0-SNAPSHOT</version>
+    <name>ASCII Product Reader-Writer</name>
+
+    <description>
+        Enables BEAM to read and write data products in an appropriate ASCII format.
+    </description>
+
+    <vendor>Brockmann Consult GmbH</vendor>
+    <contactAddress>Max Planck Str.2, 21502 Geesthacht (Germany)</contactAddress>
+    <copyright>(C) 2007 by Brockmann Consult GmbH</copyright>
+    <url>http://www.brockmann-consult.de/</url>
+    <licenseUrl>http://www.gnu.org/licenses/gpl.html</licenseUrl>
+
+    <dependency>
+        <module>beam-core</module>
+    </dependency>
+    <dependency>
+        <module>beam-visat</module>
+        <optional>true</optional>
+    </dependency>
+
+    <categories>Reader,Writer</categories>
+
+    <extension point="beam-ui:actions">
+        <action>
+            <text>Import ASCII Product</text>
+            <class>org.esa.beam.visat.actions.ProductImportAction</class>
+            <formatName>BEAM-ASCII</formatName>
+            <useAllFileFilter>true</useAllFileFilter>
+            <shortDescr>Import a ASCII data product.</shortDescr>
+        </action>
+        <action>
+            <text>Export ASCII Product</text>
+            <class>org.esa.beam.visat.actions.ProductExportAction</class>
+            <formatName>BEAM-ASCII</formatName>
+            <useAllFileFilter>true</useAllFileFilter>
+            <shortDescr>Export a ASCII data product.</shortDescr>
+        </action>
+    </extension>
+
+</module>
