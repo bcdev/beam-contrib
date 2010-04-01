@@ -1,0 +1,11 @@
+<decisionTree name="WAQSomat">
+    <classes>
+        <class name="WOLKE" value="1" color="WHITE"/>
+        <class name="WATT" value="5" color="YELLOW"/>
+    </classes>
+
+    <decision name="land" term="radiance_13 > 30">
+                <yes>WOLKE</yes>
+                <no>WATT</no>
+    </decision>
+</decisionTree>
