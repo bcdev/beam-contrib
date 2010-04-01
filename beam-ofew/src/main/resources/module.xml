@@ -1,0 +1,60 @@
+<module>
+    <manifestVersion>1.0.0</manifestVersion>
+    <symbolicName>beam-ofew</symbolicName>
+    <version>1.0.1</version>
+    <name>OFEW Tools</name>
+    <description>Landsat atmospheric correction and classification tool for the OFEW project (german UI only).</description>
+
+    <vendor>Brockmann Consult GmbH</vendor>
+    <contactAddress>Max Planck Str.2, 21502 Geesthacht (Germany)</contactAddress>
+    <copyright>(C) 2007 by Brockmann Consult GmbH</copyright>
+    <url>http://www.brockmann-consult.de/</url>
+    <licenseUrl>http://www.gnu.org/licenses/gpl.html</licenseUrl>
+
+    <changelog>
+        <![CDATA[
+        Changes in 1.0.1<br>
+        [OFEW-1] Optimise decision tree thresholds<br>
+        ]]>
+    </changelog>
+
+    <dependency>
+        <module>beam-gpf</module>
+    </dependency>
+    <dependency>
+        <module>beam-decisiontree</module>
+    </dependency>
+    <dependency>
+        <module>beam-unmix</module>
+    </dependency>
+    <dependency>
+        <module>beam-visat</module>
+        <optional>true</optional>
+    </dependency>
+
+    <categories>Application,Processor,ofew</categories>
+
+    <extension point="beam-ui:actions">
+        <action>
+            <id>ofewClassification</id>
+            <class>org.esa.beam.ofew.ui.ClassificationAction</class>
+            <text>OFEW Klassifikation...</text>
+            <shortDescr>Aufruf des OFEW Klassifikations-Werkzeugs</shortDescr>
+            <mnemonic/>
+            <parent>tools</parent>
+            <helpID>ofewClassificationTool</helpID>
+            <placeAfter>ofewAtmCorr</placeAfter>
+        </action>
+
+        <action>
+            <id>ofewAtmCorr</id>
+            <class>org.esa.beam.ofew.ui.AtmCorrAction</class>
+            <text>OFEW Atmosph&#xE4;renkorrektur...</text>
+            <shortDescr>Aufruf des OFEW Atmosph&#xE4;renkorrektur-Werkzeugs</shortDescr>
+            <mnemonic></mnemonic>
+            <parent>tools</parent>
+            <helpID>ofewAtmCorrTool</helpID>
+            <placeAfter></placeAfter>
+        </action>
+    </extension>
+</module>
