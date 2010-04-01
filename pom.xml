@@ -13,6 +13,8 @@
     <modules>
         <module>beam-ascii-readerwriter</module>
         <module>beam-envi-reader</module>
+        <module>beam-decisiontree</module>
+        <module>beam-ofew</module>
     </modules>
     
 </project>
