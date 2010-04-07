@@ -40,13 +40,21 @@
         </dependency>        
     </dependencies>
 
-    <distributionManagement>
+    <repositories>
         <repository>
-            <id>bc-public</id>
-            <name>Public Maven Repository at Brockmann-Consult</name>
-            <url></url>
+            <id>bc-mvn</id>
+            <name>Public Maven Repository at Brockmann Consult</name>
+            <url>http://www.brockmann-consult.de/mvn/os</url>
+            <releases>
+                <enabled>true</enabled>
+                <checksumPolicy>warn</checksumPolicy>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+                <checksumPolicy>warn</checksumPolicy>
+            </snapshots>
         </repository>
-    </distributionManagement>
+        </repositories>
 
     <!--
     In version 3 of Maven the sourceEncoding property will be embedded in the
