@@ -16,11 +16,11 @@
  */
 package org.esa.beam.ofew.ui;
 
-import java.io.IOException;
-import java.io.Reader;
-import java.util.ArrayList;
-import java.util.List;
-
+import com.bc.ceres.binding.PropertyContainer;
+import com.bc.ceres.binding.PropertyDescriptor;
+import com.bc.ceres.binding.PropertyDescriptorFactory;
+import com.bc.ceres.binding.PropertySet;
+import com.bc.ceres.binding.ValueSet;
 import org.esa.beam.decisiontree.DecisionTreeConfiguration;
 import org.esa.beam.decisiontree.DecisionVariable;
 import org.esa.beam.framework.datamodel.Band;
@@ -29,11 +29,10 @@ import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.ParameterDescriptorFactory;
 import org.esa.beam.ofew.ProductNameValidator;
 
-import com.bc.ceres.binding.ClassFieldDescriptorFactory;
-import com.bc.ceres.binding.ValidationException;
-import com.bc.ceres.binding.ValueContainer;
-import com.bc.ceres.binding.ValueDescriptor;
-import com.bc.ceres.binding.ValueSet;
+import java.io.IOException;
+import java.io.Reader;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by marcoz.
@@ -60,8 +59,8 @@ public class ClassificationModel {
 	private final DecisionTreeConfiguration configuration;
 	private final Product inputProduct;
 	
-	private ValueContainer[] variableVC;
-	private ValueContainer modelVC;
+	private PropertySet[] variableVC;
+	private PropertySet modelVC;
 	private Session session;
 
 	public ClassificationModel(Product selectedProduct, Reader reader, Session session) throws IOException {
@@ -84,12 +83,12 @@ public class ClassificationModel {
 	}
 	
 	private void initValueContainers() {
-        ClassFieldDescriptorFactory descriptorFactory = new ParameterDescriptorFactory();
+        PropertyDescriptorFactory descriptorFactory = new ParameterDescriptorFactory();
         DecisionVariable[] variables = configuration.getVariables();
-        variableVC = new ValueContainer[variables.length];
+        variableVC = new PropertySet[variables.length];
         
         for (int i = 0; i < variables.length; i++) {
-        	variableVC[i] = ValueContainer.createObjectBacked(variables[i], descriptorFactory);
+        	variableVC[i] = PropertyContainer.createObjectBacked(variables[i], descriptorFactory);
 		}
         if (session.values == null) {
         	session.values = new double[variables.length];
@@ -97,16 +96,16 @@ public class ClassificationModel {
         	for (int i = 0; i < variables.length; i++) {
         		try {
 					variableVC[i].setValue("value", session.values[i]);
-				} catch (ValidationException e) {
+				} catch (IllegalArgumentException e) {
 					//ignore
 				}
         	}
         }
-        modelVC = ValueContainer.createObjectBacked(this, descriptorFactory);
+        modelVC = PropertyContainer.createObjectBacked(this, descriptorFactory);
         
         String[] bandsWithRoi = getBandsWithRoi();
-		ValueSet valueSet = new ValueSet(bandsWithRoi); 
-        ValueDescriptor valueDescriptor = modelVC.getDescriptor("roiBandName");
+		ValueSet valueSet = new ValueSet(bandsWithRoi);
+        PropertyDescriptor valueDescriptor = modelVC.getDescriptor("roiBandName");
         valueDescriptor.setValueSet(valueSet);
 		if (useRoi) {
 		    valueDescriptor.setDefaultValue(roiBandName);
@@ -128,8 +127,8 @@ public class ClassificationModel {
 		return nameList.toArray(new String[nameList.size()]);
 	}
 
-	public ValueContainer getParamValueContainer(String name) {
-		for (ValueContainer valueContainer : variableVC) {
+	public PropertySet getParamValueContainer(String name) {
+		for (PropertySet valueContainer : variableVC) {
 			if (valueContainer.getValue("name").equals(name)) {
 				return valueContainer;
 			}
@@ -137,7 +136,7 @@ public class ClassificationModel {
 		return null;
 	}
 	
-	public ValueContainer getModelValueContainer() {
+	public PropertySet getModelValueContainer() {
 		return modelVC;
 	}
 
@@ -169,7 +168,7 @@ public class ClassificationModel {
 		return configuration;
 	}
 
-	public ValueContainer[] getVariableValueContainers() {
+	public PropertySet[] getVariableValueContainers() {
 		return variableVC;
 	}
 

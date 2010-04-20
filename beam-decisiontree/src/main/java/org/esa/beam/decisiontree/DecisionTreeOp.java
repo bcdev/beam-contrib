@@ -16,12 +16,7 @@
  */
 package org.esa.beam.decisiontree;
 
-import java.awt.Rectangle;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.util.HashMap;
-import java.util.Map;
-
+import com.bc.ceres.core.ProgressMonitor;
 import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.BitmaskDef;
 import org.esa.beam.framework.datamodel.BitmaskOverlayInfo;
@@ -36,10 +31,14 @@ import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProducts;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
-import org.esa.beam.framework.gpf.operators.common.BandArithmeticOp;
+import org.esa.beam.gpf.operators.standard.BandMathsOp;
 import org.esa.beam.util.StringUtils;
 
-import com.bc.ceres.core.ProgressMonitor;
+import java.awt.Rectangle;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Implements a classification based on a decision tree.
@@ -95,10 +94,10 @@ public class DecisionTreeOp extends Operator {
         
         Map<String, Object> parameters = new HashMap<String, Object>();
         Decision[] decisions = configuration.getAllDecisions();
-        
-        BandArithmeticOp.BandDescriptor[] bandDescriptions = new BandArithmeticOp.BandDescriptor[decisions.length];
+
+        BandMathsOp.BandDescriptor[] bandDescriptions = new BandMathsOp.BandDescriptor[decisions.length];
         for (int i = 0; i < decisions.length; i++) {
-        	BandArithmeticOp.BandDescriptor bandDescriptor = new BandArithmeticOp.BandDescriptor();
+            BandMathsOp.BandDescriptor bandDescriptor = new BandMathsOp.BandDescriptor();
         	bandDescriptor.name = "b"+i;
 			bandDescriptor.expression = decisions[i].getTerm();
 			bandDescriptor.type = ProductData.TYPESTRING_INT8;
@@ -108,9 +107,9 @@ public class DecisionTreeOp extends Operator {
 		
 		DecisionVariable[] decisionVariables = configuration.getVariables();
 		if (decisionVariables != null) {
-			BandArithmeticOp.Variable[] variables = new BandArithmeticOp.Variable[decisionVariables.length];
+            BandMathsOp.Variable[] variables = new BandMathsOp.Variable[decisionVariables.length];
 			for (int i = 0; i < decisionVariables.length; i++) {
-				BandArithmeticOp.Variable variable = new BandArithmeticOp.Variable();
+                BandMathsOp.Variable variable = new BandMathsOp.Variable();
 				variable.name = decisionVariables[i].getName();
 				variable.type = ProductData.TYPESTRING_FLOAT32;
 				variable.value = Double.toString(decisionVariables[i].getValue());

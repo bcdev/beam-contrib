@@ -13,7 +13,6 @@
 
     <dependency>
         <module>beam-gpf</module>
-        <version>4.1.1</version>
     </dependency>
     <dependency>
         <module>beam-visat</module>

@@ -1,10 +1,9 @@
 package org.esa.beam.ofew.ui;
 
+import com.bc.ceres.binding.Property;
 import com.bc.ceres.binding.ValidationException;
-import com.bc.ceres.binding.ValueModel;
-import com.bc.ceres.binding.swing.BindingContext;
 import com.bc.ceres.swing.TableLayout;
-
+import com.bc.ceres.swing.binding.BindingContext;
 import org.esa.beam.visat.VisatApp;
 
 import javax.swing.BorderFactory;
@@ -16,7 +15,6 @@ import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import javax.swing.border.TitledBorder;
 import javax.swing.text.JTextComponent;
-
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Font;
@@ -156,7 +154,7 @@ class AtmCorrForm extends JPanel {
 
     public boolean hasValidValues() {
         try {
-            final ValueModel valueModel = model.getTargetProductNameContainer().getModel("targetProductName");
+            final Property valueModel = model.getTargetProductNameContainer().getProperty("targetProductName");
             valueModel.validate(targetProductTextField.getValue());
         } catch (ValidationException e) {
             JOptionPane.showMessageDialog(VisatApp.getApp().getMainFrame(),

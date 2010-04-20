@@ -1,13 +1,7 @@
 package org.esa.beam.ofew.ui;
 
-import java.awt.Dialog;
-import java.awt.Window;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.logging.Level;
-
+import com.bc.ceres.swing.progress.DialogProgressMonitor;
 import org.esa.beam.framework.datamodel.Band;
-import org.esa.beam.framework.datamodel.FlagCoding;
 import org.esa.beam.framework.datamodel.MetadataAttribute;
 import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.beam.framework.datamodel.Product;
@@ -15,13 +9,16 @@ import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.framework.gpf.GPF;
 import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.OperatorSpi;
-import org.esa.beam.framework.gpf.operators.common.BandArithmeticOp;
 import org.esa.beam.framework.ui.ModalDialog;
+import org.esa.beam.gpf.operators.standard.BandMathsOp;
 import org.esa.beam.ofew.ui.AtmCorrModel.Session;
-import org.esa.beam.util.ProductUtils;
 import org.esa.beam.visat.VisatApp;
 
-import com.bc.ceres.swing.progress.DialogProgressMonitor;
+import java.awt.Dialog;
+import java.awt.Window;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.logging.Level;
 
 /**
  * Dialog for OFEW atmospheric correction.
@@ -77,11 +74,11 @@ public class AtmCorrDialog extends ModalDialog {
 
     private Product createTargetProduct() throws OperatorException {
         final Map<String, Object> parameterMap = new HashMap<String, Object>();
-        final BandArithmeticOp.BandDescriptor[] bandDescriptors =
-            new BandArithmeticOp.BandDescriptor[sourceBands.length];
+        final BandMathsOp.BandDescriptor[] bandDescriptors =
+            new BandMathsOp.BandDescriptor[sourceBands.length];
 
         for (int i = 0; i < sourceBands.length; ++i) {
-            final BandArithmeticOp.BandDescriptor bandDescriptor = new BandArithmeticOp.BandDescriptor();
+            final BandMathsOp.BandDescriptor bandDescriptor = new BandMathsOp.BandDescriptor();
             final double a = model.getCoefficientA(i);
             final double b = model.getCoefficientB(i);
 
@@ -102,7 +99,7 @@ public class AtmCorrDialog extends ModalDialog {
         }
         parameterMap.put("targetBands", bandDescriptors);
 
-        String bandarithmeticAlias = OperatorSpi.getOperatorAlias(BandArithmeticOp.class);
+        String bandarithmeticAlias = OperatorSpi.getOperatorAlias(BandMathsOp.class);
         final Product targetProduct = GPF.createProduct(bandarithmeticAlias, parameterMap, sourceProduct);
         targetProduct.setName(model.getTargetProductName());
         targetProduct.setStartTime(sourceProduct.getStartTime());

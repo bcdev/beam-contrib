@@ -1,14 +1,13 @@
 package org.esa.beam.ofew.ui;
 
+import com.bc.ceres.binding.PropertyContainer;
+import com.bc.ceres.binding.PropertyDescriptorFactory;
+import com.bc.ceres.binding.PropertySet;
 import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.ParameterDescriptorFactory;
 import org.esa.beam.ofew.ProductNameValidator;
-
-import com.bc.ceres.binding.ClassFieldDescriptorFactory;
-import com.bc.ceres.binding.ValidationException;
-import com.bc.ceres.binding.ValueContainer;
 
 /**
  * Presenter for OFEW atmospheric correction form.
@@ -56,8 +55,8 @@ class AtmCorrModel {
     private Product sourceProduct;
     private Band[] sourceBands;
 
-    private ValueContainer[] coefficientPairContainers;
-    private ValueContainer targetProductNameContainer;
+    private PropertySet[] coefficientPairContainers;
+    private PropertySet targetProductNameContainer;
     private Session session;
 
     public AtmCorrModel(Product sourceProduct, Band[] sourceBands, Session session) {
@@ -65,9 +64,9 @@ class AtmCorrModel {
         this.sourceBands = sourceBands;
 		this.session = session;
 
-		ClassFieldDescriptorFactory descriptorFactory = new ParameterDescriptorFactory();
+		PropertyDescriptorFactory descriptorFactory = new ParameterDescriptorFactory();
         try {
-            coefficientPairContainers = new ValueContainer[sourceBands.length];
+            coefficientPairContainers = new PropertySet[sourceBands.length];
             
             if (session.values == null) {
             	session.values = new CoefficientPair[sourceBands.length];
@@ -77,12 +76,12 @@ class AtmCorrModel {
             }
             for (int i = 0; i < sourceBands.length; i++) {
                 CoefficientPair coefficientPair = new CoefficientPair(session.getCoefficientA(i), session.getCoefficientB(i));
-				coefficientPairContainers[i] = ValueContainer.createObjectBacked(coefficientPair, descriptorFactory);
+				coefficientPairContainers[i] = PropertyContainer.createObjectBacked(coefficientPair, descriptorFactory);
             }
             
-            targetProductNameContainer = ValueContainer.createObjectBacked(this, descriptorFactory);
+            targetProductNameContainer = PropertyContainer.createObjectBacked(this, descriptorFactory);
             targetProductNameContainer.setValue("targetProductName", sourceProduct.getName() + "_atmo");
-        } catch (ValidationException e) {
+        } catch (IllegalArgumentException e) {
             // ignore, can never happen
         }
     }
@@ -95,11 +94,11 @@ class AtmCorrModel {
         return (String) targetProductNameContainer.getValue("targetProductName");
     }
 
-    public ValueContainer getTargetProductNameContainer() {
+    public PropertySet getTargetProductNameContainer() {
         return targetProductNameContainer;
     }
 
-    public ValueContainer getCoefficientPairContainer(int i) {
+    public PropertySet getCoefficientPairContainer(int i) {
         return coefficientPairContainers[i];
     }
 

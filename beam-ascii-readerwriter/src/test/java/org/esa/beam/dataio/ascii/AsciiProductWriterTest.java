@@ -402,6 +402,21 @@ public class AsciiProductWriterTest extends TestCase {
             }
 
             @Override
+            public CoordinateReferenceSystem getMapCRS() {
+                return null;
+            }
+
+            @Override
+            public CoordinateReferenceSystem getGeoCRS() {
+                return null;
+            }
+
+            @Override
+            public MathTransform getImageToMapTransform() {
+                return null;
+            }
+
+            @Override
             public CoordinateReferenceSystem getModelCRS() {
                 return null;
             }

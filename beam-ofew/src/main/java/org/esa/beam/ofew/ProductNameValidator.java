@@ -20,7 +20,7 @@ import org.esa.beam.framework.datamodel.ProductNode;
 
 import com.bc.ceres.binding.ValidationException;
 import com.bc.ceres.binding.Validator;
-import com.bc.ceres.binding.ValueModel;
+import com.bc.ceres.binding.Property;
 
 /**
  * Created by marcoz.
@@ -30,7 +30,7 @@ import com.bc.ceres.binding.ValueModel;
  */
 public class ProductNameValidator implements Validator {
 
-	public void validateValue(ValueModel valueModel, Object value) throws ValidationException {
+	public void validateValue(Property valueModel, Object value) throws ValidationException {
         if (value == null ||
         		value.toString().trim().isEmpty() ||
         		!ProductNode.isValidNodeName(value.toString().trim())) {

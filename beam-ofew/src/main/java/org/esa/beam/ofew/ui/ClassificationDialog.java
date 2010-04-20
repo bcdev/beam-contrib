@@ -16,17 +16,11 @@
  */
 package org.esa.beam.ofew.ui;
 
-import java.awt.Window;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.logging.Level;
-
-import javax.media.jai.ROI;
-
+import com.bc.ceres.core.ProgressMonitor;
+import com.bc.jexp.EvalEnv;
+import com.bc.jexp.EvalException;
+import com.bc.jexp.Symbol;
+import com.bc.jexp.impl.AbstractSymbol;
 import org.esa.beam.decisiontree.Decision;
 import org.esa.beam.decisiontree.DecisionTreeConfiguration;
 import org.esa.beam.decisiontree.DecisionTreeOp;
@@ -41,10 +35,10 @@ import org.esa.beam.framework.dataop.barithm.RasterDataEvalEnv;
 import org.esa.beam.framework.gpf.GPF;
 import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.OperatorSpi;
-import org.esa.beam.framework.gpf.operators.common.BandArithmeticOp;
 import org.esa.beam.framework.ui.ModalDialog;
 import org.esa.beam.framework.ui.diagram.DiagramGraph;
 import org.esa.beam.framework.ui.diagram.DiagramGraphIO;
+import org.esa.beam.gpf.operators.standard.BandMathsOp;
 import org.esa.beam.ofew.SpectralBandFinder;
 import org.esa.beam.ofew.ui.ClassificationModel.Session;
 import org.esa.beam.unmixing.Endmember;
@@ -53,11 +47,15 @@ import org.esa.beam.util.Guardian;
 import org.esa.beam.util.ProductUtils;
 import org.esa.beam.visat.VisatApp;
 
-import com.bc.ceres.core.ProgressMonitor;
-import com.bc.jexp.EvalEnv;
-import com.bc.jexp.EvalException;
-import com.bc.jexp.Symbol;
-import com.bc.jexp.impl.AbstractSymbol;
+import javax.media.jai.ROI;
+import java.awt.Window;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.logging.Level;
 
 /**
  * Created by marcoz.
@@ -129,7 +127,7 @@ public class ClassificationDialog extends ModalDialog {
 	    Map<String, Product> indexInputProducts = new HashMap<String, Product>();
 	    indexInputProducts.put("landsat", landsatProduct);
 	    indexInputProducts.put("endmember", endmemberProduct);
-	    String bandarithmeticAlias = OperatorSpi.getOperatorAlias(BandArithmeticOp.class);
+	    String bandarithmeticAlias = OperatorSpi.getOperatorAlias(BandMathsOp.class);
 	    final Product indexProduct = GPF.createProduct(bandarithmeticAlias,
 					indexParameter, indexInputProducts);
 	    indexProduct.setName(model.getIndexProductName());
@@ -174,23 +172,23 @@ public class ClassificationDialog extends ModalDialog {
 		String band4 = bandFinder.getBand(3).getName();
 		String band5 = bandFinder.getBand(4).getName();
 		Map<String, Object> parameter = new HashMap<String, Object>();
-		BandArithmeticOp.BandDescriptor[] bandDesc = new BandArithmeticOp.BandDescriptor[4];
-		bandDesc[0] = new BandArithmeticOp.BandDescriptor();
+        BandMathsOp.BandDescriptor[] bandDesc = new BandMathsOp.BandDescriptor[4];
+		bandDesc[0] = new BandMathsOp.BandDescriptor();
 		bandDesc[0].name = "NDVI";
 		bandDesc[0].expression = "($landsat."+band4+" - $landsat."+band3+")/($landsat."+band4+" + $landsat."+band3+")";
 		bandDesc[0].type = ProductData.TYPESTRING_FLOAT32;
 
-		bandDesc[1] = new BandArithmeticOp.BandDescriptor();
+		bandDesc[1] = new BandMathsOp.BandDescriptor();
 		bandDesc[1].name = "Steigung_3_4";
 		bandDesc[1].expression = "($landsat."+band3+" - $landsat."+band4+")/(0.66-0.835)";
 		bandDesc[1].type = ProductData.TYPESTRING_FLOAT32;
 
-		bandDesc[2] = new BandArithmeticOp.BandDescriptor();
+		bandDesc[2] = new BandMathsOp.BandDescriptor();
 		bandDesc[2].name = "Steigung_4_5";
 		bandDesc[2].expression = "($landsat."+band4+" - $landsat."+band5+")/(0.835-1.65)";
 		bandDesc[2].type = ProductData.TYPESTRING_FLOAT32;
 
-		bandDesc[3] = new BandArithmeticOp.BandDescriptor();
+		bandDesc[3] = new BandMathsOp.BandDescriptor();
 		bandDesc[3].name = "Schlick_corr";
 		bandDesc[3].expression = "($endmember.Sand_wc < 0.0) ? $endmember.Sand_wc + $endmember.Schlick : $endmember.Schlick";
 		bandDesc[3].type = ProductData.TYPESTRING_FLOAT32;

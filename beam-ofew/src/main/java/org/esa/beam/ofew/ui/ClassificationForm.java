@@ -1,9 +1,9 @@
 package org.esa.beam.ofew.ui;
 
+import com.bc.ceres.binding.PropertySet;
 import com.bc.ceres.binding.ValidationException;
-import com.bc.ceres.binding.ValueContainer;
-import com.bc.ceres.binding.swing.BindingContext;
 import com.bc.ceres.swing.TableLayout;
+import com.bc.ceres.swing.binding.BindingContext;
 import org.esa.beam.visat.VisatApp;
 
 import javax.swing.BorderFactory;
@@ -17,7 +17,6 @@ import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import javax.swing.border.TitledBorder;
 import javax.swing.text.JTextComponent;
-
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
@@ -30,8 +29,8 @@ import java.text.DecimalFormat;
 class ClassificationForm extends JPanel {
 
     private JFormattedTextField[] variablesTextFields;
-	private ValueContainer[] variablesVC;
-	private ValueContainer modelVC;
+	private PropertySet[] variablesVC;
+	private PropertySet modelVC;
 	private JComboBox roiCombo;
 	private JCheckBox roiCheckBox;
 	private JFormattedTextField indexProductName;
@@ -49,7 +48,7 @@ class ClassificationForm extends JPanel {
 	
     private void bindComponents() {
     	for (int i = 0; i < variablesVC.length; i++) {
-    		ValueContainer container = variablesVC[i];
+            PropertySet container = variablesVC[i];
     		BindingContext bindingContext = new BindingContext(container);
     		bindingContext.bind("value", variablesTextFields[i]);
 		}
@@ -182,9 +181,9 @@ class ClassificationForm extends JPanel {
 
 	public boolean hasValidValues() {
 		try {
-			modelVC.getModel("classification").validate(classifyProductName.getValue());
-			modelVC.getModel("index").validate(indexProductName.getValue());
-			modelVC.getModel("endmember").validate(endmemberProductName.getValue());
+			modelVC.getProperty("classification").validate(classifyProductName.getValue());
+			modelVC.getProperty("index").validate(indexProductName.getValue());
+			modelVC.getProperty("endmember").validate(endmemberProductName.getValue());
 		} catch (ValidationException e) {
 			JOptionPane.showMessageDialog(VisatApp.getApp().getMainFrame(),
         			e.getMessage(), ClassificationDialog.TITLE, JOptionPane.ERROR_MESSAGE);
