@@ -10,7 +10,7 @@
     <name>ENVI Product Reader</name>
     <version>1.1</version>
     <url>http://envisat.esa.int/beam/</url>
-    
+
     <dependencies>
         <dependency>
             <groupId>org.esa.beam</groupId>
@@ -30,7 +30,7 @@
         </dependency>
     </dependencies>
 
-        <repositories>
+    <repositories>
         <repository>
             <id>bc-mvn</id>
             <name>Public Maven Repository at Brockmann-Consult</name>
@@ -60,7 +60,7 @@
             <uniqueVersion>false</uniqueVersion>
         </snapshotRepository>
     </distributionManagement>
-    
+
     <!--
     In version 3 of Maven the sourceEncoding property will be embedded in the
     build tag. For now the convention is to that it as property.

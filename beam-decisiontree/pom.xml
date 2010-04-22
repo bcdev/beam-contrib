@@ -13,7 +13,7 @@
     <packaging>jar</packaging>
 
     <dependencies>
-       <dependency>
+        <dependency>
             <groupId>org.esa.beam</groupId>
             <artifactId>beam-visat</artifactId>
             <version>4.7.1</version>
@@ -22,10 +22,10 @@
             <groupId>org.esa.beam</groupId>
             <artifactId>beam-gpf</artifactId>
             <version>4.7.1</version>
-        </dependency>        
+        </dependency>
     </dependencies>
 
-        <repositories>
+    <repositories>
         <repository>
             <id>bc-mvn</id>
             <name>Public Maven Repository at Brockmann-Consult</name>
@@ -55,7 +55,7 @@
             <uniqueVersion>false</uniqueVersion>
         </snapshotRepository>
     </distributionManagement>
-    
+
     <!--
     In version 3 of Maven the sourceEncoding property will be embedded in the
     build tag. For now the convention is to that it as property.
