@@ -6,6 +6,7 @@
 
     <groupId>org.esa.beam</groupId>
     <artifactId>beam-contrib</artifactId>
+    <name>BEAM Contribution Modules</name>
     <version>1.0</version>
 
     <packaging>pom</packaging>
