@@ -17,34 +17,4 @@
         <module>beam-ofew</module>
     </modules>
 
-    <repositories>
-        <repository>
-            <id>bc-mvn</id>
-            <name>Public Maven Repository at Brockmann-Consult</name>
-            <url>http://www.brockmann-consult.de/mvn/os</url>
-            <releases>
-                <enabled>true</enabled>
-                <checksumPolicy>warn</checksumPolicy>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-                <checksumPolicy>warn</checksumPolicy>
-            </snapshots>
-        </repository>
-    </repositories>
-
-    <distributionManagement>
-        <repository>
-            <id>bc-mvn-repo-public</id>
-            <name>Public Maven Repository at Brockmann Consult</name>
-            <url>scp://www.brockmann-consult.de/var/www/www.brockmann-consult.de/mvn/os</url>
-            <uniqueVersion>false</uniqueVersion>
-        </repository>
-        <snapshotRepository>
-            <id>bc-mvn-repo-public</id>
-            <name>Public Maven Snapshot Repository at Brockmann Consult</name>
-            <url>scp://www.brockmann-consult.de/var/www/www.brockmann-consult.de/mvn/os</url>
-            <uniqueVersion>false</uniqueVersion>
-        </snapshotRepository>
-    </distributionManagement>
 </project>
