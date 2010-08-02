@@ -8,7 +8,7 @@
     <name>BEAM decision tree</name>
     <groupId>org.esa.beam</groupId>
     <artifactId>beam-decisiontree</artifactId>
-    <version>1.1</version>
+    <version>1.1.1</version>
 
     <packaging>jar</packaging>
 
@@ -16,12 +16,12 @@
         <dependency>
             <groupId>org.esa.beam</groupId>
             <artifactId>beam-visat</artifactId>
-            <version>4.7.1</version>
+            <version>4.8</version>
         </dependency>
         <dependency>
             <groupId>org.esa.beam</groupId>
             <artifactId>beam-gpf</artifactId>
-            <version>4.7.1</version>
+            <version>4.8</version>
         </dependency>
     </dependencies>
 
