@@ -392,11 +392,6 @@ public class AsciiProductWriterTest extends TestCase {
             }
 
             @Override
-            public CoordinateReferenceSystem getBaseCRS() {
-                return null;
-            }
-
-            @Override
             public CoordinateReferenceSystem getImageCRS() {
                 return null;
             }
@@ -413,16 +408,6 @@ public class AsciiProductWriterTest extends TestCase {
 
             @Override
             public MathTransform getImageToMapTransform() {
-                return null;
-            }
-
-            @Override
-            public CoordinateReferenceSystem getModelCRS() {
-                return null;
-            }
-
-            @Override
-            public AffineTransform getImageToModelTransform() {
                 return null;
             }
         };

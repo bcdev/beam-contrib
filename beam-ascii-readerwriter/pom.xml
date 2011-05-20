@@ -14,12 +14,12 @@
         <dependency>
             <groupId>org.esa.beam</groupId>
             <artifactId>beam-core</artifactId>
-            <version>4.8</version>
+            <version>4.9</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.4</version>
+            <version>4.8.2</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -69,5 +69,5 @@
             <uniqueVersion>false</uniqueVersion>
         </snapshotRepository>
     </distributionManagement>
-    
+
 </project>
