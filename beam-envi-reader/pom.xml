@@ -8,19 +8,19 @@
     <groupId>org.esa.beam</groupId>
     <artifactId>beam-envi-reader</artifactId>
     <name>ENVI Product Reader</name>
-    <version>1.1.1</version>
+    <version>1.1.2</version>
     <url>http://envisat.esa.int/beam/</url>
 
     <dependencies>
         <dependency>
             <groupId>org.esa.beam</groupId>
             <artifactId>beam-core</artifactId>
-            <version>4.8</version>
+            <version>4.9</version>
         </dependency>
         <dependency>
             <groupId>org.esa.beam</groupId>
             <artifactId>beam-visat</artifactId>
-            <version>4.8</version>
+            <version>4.9</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
