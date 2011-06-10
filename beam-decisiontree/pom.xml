@@ -5,7 +5,7 @@
 
     <modelVersion>4.0.0</modelVersion>
 
-    <name>BEAM decision tree</name>
+    <name>BEAM Decision Tree</name>
     <groupId>org.esa.beam</groupId>
     <artifactId>beam-decisiontree</artifactId>
     <version>1.1.2-SNAPSHOT</version>
