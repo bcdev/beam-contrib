@@ -24,7 +24,9 @@ import com.bc.ceres.binding.ValueSet;
 import org.esa.beam.decisiontree.DecisionTreeConfiguration;
 import org.esa.beam.decisiontree.DecisionVariable;
 import org.esa.beam.framework.datamodel.Band;
+import org.esa.beam.framework.datamodel.Mask;
 import org.esa.beam.framework.datamodel.Product;
+import org.esa.beam.framework.datamodel.ProductNodeGroup;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.ParameterDescriptorFactory;
 import org.esa.beam.ofew.ProductNameValidator;
@@ -53,7 +55,7 @@ public class ClassificationModel {
 	@Parameter(validator=ProductNameValidator.class, label="Endmember-Product")
 	private String endmember;
 	@Parameter
-	private String roiBandName;
+	private String maskName;
 	@Parameter
 	private boolean useRoi;
 	private final DecisionTreeConfiguration configuration;
@@ -103,28 +105,23 @@ public class ClassificationModel {
         }
         modelVC = PropertyContainer.createObjectBacked(this, descriptorFactory);
         
-        String[] bandsWithRoi = getBandsWithRoi();
-		ValueSet valueSet = new ValueSet(bandsWithRoi);
-        PropertyDescriptor valueDescriptor = modelVC.getDescriptor("roiBandName");
+        String[] maskNames = getMaskNames();
+		ValueSet valueSet = new ValueSet(maskNames);
+        PropertyDescriptor valueDescriptor = modelVC.getDescriptor("maskName");
         valueDescriptor.setValueSet(valueSet);
 		if (useRoi) {
-		    valueDescriptor.setDefaultValue(roiBandName);
+		    valueDescriptor.setDefaultValue(maskName);
 		}
     }
 	
-	private String[] getBandsWithRoi() {
-		Band[] bands = inputProduct.getBands();
-		List<String> nameList = new ArrayList<String>(bands.length);
-		for (Band band : bands) {
-			if (band.isROIUsable()) {
-				nameList.add(band.getName());
-			}
-		}
-		if (nameList.size() > 0) {
+	private String[] getMaskNames() {
+        ProductNodeGroup<Mask> maskGroup = inputProduct.getMaskGroup();
+        String[] maskNames = maskGroup.getNodeNames();
+		if (maskNames.length > 0) {
 			useRoi = true;
-			roiBandName = nameList.get(0);
+			maskName = maskNames[0];
 		}
-		return nameList.toArray(new String[nameList.size()]);
+		return maskNames;
 	}
 
 	public PropertySet getParamValueContainer(String name) {
@@ -156,8 +153,8 @@ public class ClassificationModel {
 		return index;
 	}
 	
-	public String getRoiBandName() {
-		return roiBandName;
+	public String getMaskName() {
+		return maskName;
 	}
 	
 	public boolean useRoi() {

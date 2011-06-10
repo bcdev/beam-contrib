@@ -38,7 +38,7 @@ class ClassificationForm extends JPanel {
 	private JFormattedTextField classifyProductName;
     
 
-	public ClassificationForm(ClassificationModel model) {
+	ClassificationForm(ClassificationModel model) {
 		variablesVC = model.getVariableValueContainers();
 		modelVC = model.getModelValueContainer();
 		
@@ -57,7 +57,7 @@ class ClassificationForm extends JPanel {
 		bindingContext.bind("index", indexProductName);
 		bindingContext.bind("endmember", endmemberProductName);
 		
-		bindingContext.bind("roiBandName", roiCombo);
+		bindingContext.bind("maskName", roiCombo);
 		bindingContext.bind("useRoi", roiCheckBox);
     }
 
@@ -69,6 +69,7 @@ class ClassificationForm extends JPanel {
                 if (tc instanceof JFormattedTextField) {
                     final JFormattedTextField ftf = (JFormattedTextField)tc;
                     SwingUtilities.invokeLater(new Runnable() {
+                        @Override
                         public void run() {
                             ftf.selectAll();
                         }
@@ -104,14 +105,15 @@ class ClassificationForm extends JPanel {
         inputProductTextField.setEditable(false);
 		inputPanel.add(inputProductTextField);
 		
-		roiCheckBox = new JCheckBox("Nur in der ROI von ", true);
+		roiCheckBox = new JCheckBox("Nur in der Maske:", true);
 		inputPanel.add(roiCheckBox);
 		roiCombo = new JComboBox();
 		inputPanel.add(roiCombo);
 
 		if (model.useRoi()) {
 			roiCheckBox.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent e) {
+				@Override
+                public void actionPerformed(ActionEvent e) {
 					roiCombo.setEnabled(roiCheckBox.isSelected());
 				}
 			});
@@ -138,7 +140,7 @@ class ClassificationForm extends JPanel {
         	variablesTextFields = new JFormattedTextField[variablesVC.length];
         	final DecimalFormat format = new DecimalFormat("0.000#####");
         	for (int i = 0; i < variablesVC.length; i++) {
-        		paramPanel.add(new JLabel((String) variablesVC[i].getValue("description") + ":"));
+        		paramPanel.add(new JLabel(variablesVC[i].getValue("description") + ":"));
         		
         		JFormattedTextField textField = new JFormattedTextField(format);
         		textField.setHorizontalAlignment(JTextField.RIGHT);

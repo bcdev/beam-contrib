@@ -99,8 +99,8 @@ public class AtmCorrDialog extends ModalDialog {
         }
         parameterMap.put("targetBands", bandDescriptors);
 
-        String bandarithmeticAlias = OperatorSpi.getOperatorAlias(BandMathsOp.class);
-        final Product targetProduct = GPF.createProduct(bandarithmeticAlias, parameterMap, sourceProduct);
+        String bandMathsAlias = OperatorSpi.getOperatorAlias(BandMathsOp.class);
+        final Product targetProduct = GPF.createProduct(bandMathsAlias, parameterMap, sourceProduct);
         targetProduct.setName(model.getTargetProductName());
         targetProduct.setStartTime(sourceProduct.getStartTime());
         targetProduct.setEndTime(sourceProduct.getEndTime());

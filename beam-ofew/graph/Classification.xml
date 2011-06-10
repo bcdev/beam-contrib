@@ -75,32 +75,34 @@
 
     <node>
         <id>index</id>
-        <operator>org.esa.beam.framework.gpf.operators.common.BandArithmeticOp$Spi</operator>
+        <operator>BandMaths</operator>
         <sources>
             <landsat>landsat</landsat>
             <endmember>endmember</endmember>
         </sources>
         <parameters>
-                <bandDescriptor>
-            		<name>NDVI</name>
+            <targetBands>
+                <targetBand>
+                    <name>NDVI</name>
             		<expression>($landsat.band4 - $landsat.band3)/($landsat.band4 + $landsat.band3)</expression>
             		<type>float32</type>
-                </bandDescriptor>
-                <bandDescriptor>
+                </targetBand>
+                <targetBand>
             		<name>Steigung_3_4</name>
             		<expression>($landsat.band3 - $landsat.band4)/(0.66-0.835)</expression>
             		<type>float32</type>
-                </bandDescriptor>
-                <bandDescriptor>
+                </targetBand>
+                <targetBand>
             		<name>Steigung_4_5</name>
             		<expression>($landsat.band4 - $landsat.band5)/(0.835-1.65)</expression>
             		<type>float32</type>
-                </bandDescriptor>
-                <bandDescriptor>
+                </targetBand>
+                <targetBand>
             		<name>Schlick_corr</name>
             		<expression>($endmember.Sand_wc &lt; 0.0) ? $endmember.Sand_wc + $endmember.Schlick : $endmember.Schlick</expression>
             		<type>float32</type>
-                </bandDescriptor>
+                </targetBand>
+            </targetBands>
         </parameters>
     </node>
 

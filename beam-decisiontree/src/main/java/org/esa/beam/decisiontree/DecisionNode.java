@@ -55,7 +55,7 @@ class DecisionNode {
 				StringUtils.isNotNullAndNotEmpty(yes) &&
 				StringUtils.isNotNullAndNotEmpty(no)) {
 			try {
-				term = sourceProduct.createTerm(expression);
+				term = sourceProduct.parseExpression(expression);
 			} catch (ParseException e) {
 				throw new OperatorException(
 						"Couldn't creat term for expression: " + expression, e);

@@ -18,10 +18,10 @@ package org.esa.beam.decisiontree;
 
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.beam.framework.datamodel.Band;
-import org.esa.beam.framework.datamodel.BitmaskDef;
-import org.esa.beam.framework.datamodel.BitmaskOverlayInfo;
+import org.esa.beam.framework.datamodel.Mask;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.ProductData;
+import org.esa.beam.framework.datamodel.ProductNodeGroup;
 import org.esa.beam.framework.gpf.GPF;
 import org.esa.beam.framework.gpf.Operator;
 import org.esa.beam.framework.gpf.OperatorException;
@@ -32,6 +32,7 @@ import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProducts;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
 import org.esa.beam.gpf.operators.standard.BandMathsOp;
+import org.esa.beam.util.ProductUtils;
 import org.esa.beam.util.StringUtils;
 
 import java.awt.Rectangle;
@@ -44,7 +45,7 @@ import java.util.Map;
  * Implements a classification based on a decision tree.
  */
 @OperatorMetadata(alias = "DecisionTree",
-                  internal=true,
+                  internal = true,
                   version = "1.0",
                   authors = "Marco Zuehlke",
                   copyright = "(c) 2007 by Brockmann Consult",
@@ -59,144 +60,151 @@ public class DecisionTreeOp extends Operator {
     private Product targetProduct;
     @Parameter
     private String decisionConfigFile;
-    @Parameter(domConverter=DecisionTreeDomConverter.class) 
+    @Parameter(domConverter = DecisionTreeDomConverter.class)
     private DecisionTreeConfiguration configuration;
-    @Parameter(defaultValue=CLASSIFICATION_BAND)
+    @Parameter(defaultValue = CLASSIFICATION_BAND)
     private String bandName;
 
-	private DecisionData[] dds;
-	
-	private static class DecisionData {
-		Decision decision;
-		Band band;
-	}
-    
-    @Override
-	public void initialize() throws OperatorException {
-        targetProduct = new Product("name", "type",
-        		sourceProducts[0].getSceneRasterWidth(), sourceProducts[0].getSceneRasterHeight());
-        
-        if (StringUtils.isNotNullAndNotEmpty(decisionConfigFile)) {
-        	try {
-        		FileReader reader = new FileReader(decisionConfigFile);
-        		configuration = DecisionTreeConfiguration.fromXML(reader);
-        		if (configuration == null) {
-        			throw new OperatorException("Could not parse config file: "+decisionConfigFile);
-        		}
-        	} catch (FileNotFoundException e) {
-				throw new OperatorException("Could not open config file: "+decisionConfigFile, e);
-			}
-        }
-        
-        targetProduct.addBand(bandName, ProductData.TYPE_UINT8);
-        addBitmaskDefs();
+    private DecisionData[] dds;
 
-        
+    private static class DecisionData {
+
+        Decision decision;
+        Band band;
+    }
+
+    @Override
+    public void initialize() throws OperatorException {
+        Product sourceProduct = sourceProducts[0];
+        targetProduct = new Product("name", "type",
+                                    sourceProduct.getSceneRasterWidth(), sourceProduct.getSceneRasterHeight());
+
+        if (StringUtils.isNotNullAndNotEmpty(decisionConfigFile)) {
+            try {
+                FileReader reader = new FileReader(decisionConfigFile);
+                configuration = DecisionTreeConfiguration.fromXML(reader);
+                if (configuration == null) {
+                    throw new OperatorException("Could not parse config file: " + decisionConfigFile);
+                }
+            } catch (FileNotFoundException e) {
+                throw new OperatorException("Could not open config file: " + decisionConfigFile, e);
+            }
+        }
+
+        targetProduct.addBand(bandName, ProductData.TYPE_UINT8);
+        sourceProduct.transferGeoCodingTo(targetProduct, null);
+        ProductUtils.copyMetadata(sourceProduct, targetProduct);
+
+        addMasks();
+
+
         Map<String, Object> parameters = new HashMap<String, Object>();
         Decision[] decisions = configuration.getAllDecisions();
 
         BandMathsOp.BandDescriptor[] bandDescriptions = new BandMathsOp.BandDescriptor[decisions.length];
         for (int i = 0; i < decisions.length; i++) {
             BandMathsOp.BandDescriptor bandDescriptor = new BandMathsOp.BandDescriptor();
-        	bandDescriptor.name = "b"+i;
-			bandDescriptor.expression = decisions[i].getTerm();
-			bandDescriptor.type = ProductData.TYPESTRING_INT8;
-			bandDescriptions[i] = bandDescriptor;
-    	}
-		parameters.put("targetBands", bandDescriptions);
-		
-		DecisionVariable[] decisionVariables = configuration.getVariables();
-		if (decisionVariables != null) {
+            bandDescriptor.name = "b" + i;
+            bandDescriptor.expression = decisions[i].getTerm();
+            bandDescriptor.type = ProductData.TYPESTRING_INT8;
+            bandDescriptions[i] = bandDescriptor;
+        }
+        parameters.put("targetBands", bandDescriptions);
+
+        DecisionVariable[] decisionVariables = configuration.getVariables();
+        if (decisionVariables != null) {
             BandMathsOp.Variable[] variables = new BandMathsOp.Variable[decisionVariables.length];
-			for (int i = 0; i < decisionVariables.length; i++) {
+            for (int i = 0; i < decisionVariables.length; i++) {
                 BandMathsOp.Variable variable = new BandMathsOp.Variable();
-				variable.name = decisionVariables[i].getName();
-				variable.type = ProductData.TYPESTRING_FLOAT32;
-				variable.value = Double.toString(decisionVariables[i].getValue());
-				variables[i] = variable;
-			}
-			parameters.put("variables", variables);
-		}
-		
-		Map<String, Product> products = new HashMap<String, Product>();
-		for (Product product : sourceProducts) {
-			products.put(getSourceProductId(product), product);	
-		}
-		Product expressionProduct = GPF.createProduct("BandArithmetic", parameters, products);
-		
-		dds = new DecisionData[decisions.length];
-		for (int i = 0; i < decisions.length; i++) {
-			DecisionData dd = new DecisionData();
-        	dd.decision = decisions[i];
-        	dd.band = expressionProduct.getBand("b"+i);
-        	dds[i] = dd;	
-		}
+                variable.name = decisionVariables[i].getName();
+                variable.type = ProductData.TYPESTRING_FLOAT32;
+                variable.value = Double.toString(decisionVariables[i].getValue());
+                variables[i] = variable;
+            }
+            parameters.put("variables", variables);
+        }
+
+        Map<String, Product> products = new HashMap<String, Product>();
+        for (Product product : sourceProducts) {
+            products.put(getSourceProductId(product), product);
+        }
+        Product expressionProduct = GPF.createProduct("BandMaths", parameters, products);
+
+        dds = new DecisionData[decisions.length];
+        for (int i = 0; i < decisions.length; i++) {
+            DecisionData decisionData = new DecisionData();
+            decisionData.decision = decisions[i];
+            decisionData.band = expressionProduct.getBand("b" + i);
+            dds[i] = decisionData;
+        }
     }
 
-	private void addBitmaskDefs() {
-		Classification[] classes = configuration.getClasses();
-		BitmaskOverlayInfo bitmaskOverlayInfo = new BitmaskOverlayInfo();
-		for (Classification aClass : classes) {
-			BitmaskDef bitmaskDef = new BitmaskDef(aClass.getName(), "",
-					bandName + " == " + aClass.getValue(), aClass.getColor(),
-					0.0f);
-			targetProduct.addBitmaskDef(bitmaskDef);
-			bitmaskOverlayInfo.addBitmaskDef(bitmaskDef);
-		}
-		targetProduct.getBand(bandName).setBitmaskOverlayInfo(bitmaskOverlayInfo);
-	}
+    private void addMasks() {
+        Classification[] classes = configuration.getClasses();
+        int width = targetProduct.getSceneRasterWidth();
+        int height = targetProduct.getSceneRasterHeight();
+        ProductNodeGroup<Mask> maskGroup = targetProduct.getMaskGroup();
+        ProductNodeGroup<Mask> overlayMaskGroup = targetProduct.getBand(bandName).getOverlayMaskGroup();
+        for (Classification aClass : classes) {
+            Mask mask = Mask.BandMathsType.create(aClass.getName(), "", width, height,
+                                                  bandName + " == " + aClass.getValue(), aClass.getColor(),
+                                                  0.0f);
+            maskGroup.add(mask);
+            overlayMaskGroup.add(mask);
+        }
+    }
 
-	@Override
+    @Override
     public void computeTile(Band band, Tile targetTile, ProgressMonitor pm) throws OperatorException {
-    	
-    	Rectangle rect = targetTile.getRectangle();
+
+        Rectangle rect = targetTile.getRectangle();
         pm.beginTask("Processing frame...", rect.height);
         try {
-        	Map<Decision, Tile> sourceTileMap = new HashMap<Decision, Tile>(dds.length);
-        	for (int i = 0; i < dds.length; i++) {
-        		DecisionData decisionData = dds[i];
-				Tile tile = getSourceTile(decisionData.band, rect, pm);
-				sourceTileMap.put(decisionData.decision, tile);
-        	}
-        	
-        	for (int y = rect.y; y < rect.y + rect.height; y++) {
-				if (pm.isCanceled()) {
-					break;
-				}
-				for (int x = rect.x; x < rect.x+rect.width; x++) {
-					Decision decision = configuration.getRootDecisions();
-					int value = evaluateDecision(x, y, decision, sourceTileMap);
-					targetTile.setSample(x, y, value);
-				}
-				pm.worked(1);
-			}
-		} finally {
+            Map<Decision, Tile> sourceTileMap = new HashMap<Decision, Tile>(dds.length);
+            for (DecisionData decisionData : dds) {
+                Tile tile = getSourceTile(decisionData.band, rect);
+                sourceTileMap.put(decisionData.decision, tile);
+            }
+
+            for (int y = rect.y; y < rect.y + rect.height; y++) {
+                if (pm.isCanceled()) {
+                    break;
+                }
+                for (int x = rect.x; x < rect.x + rect.width; x++) {
+                    Decision decision = configuration.getRootDecisions();
+                    int value = evaluateDecision(x, y, decision, sourceTileMap);
+                    targetTile.setSample(x, y, value);
+                }
+                pm.worked(1);
+            }
+        } finally {
             pm.done();
         }
     }
 
-	private int evaluateDecision(int x, int y, Decision decision, Map<Decision, Tile> tileMap) {
-		Tile tile = tileMap.get(decision);
-		boolean b = tile.getSampleBoolean(x, y);
-		if (b) {
-			if (decision.getYesDecision() != null) {
-				Decision yesDecision = decision.getYesDecision();
-				return evaluateDecision(x, y, yesDecision, tileMap);
-			} else {
-				return decision.getYesClass().getValue();
-			}
-		} else {
-			if (decision.getNoDecision() != null) {
-				Decision noDecision = decision.getNoDecision();
-				return evaluateDecision(x, y, noDecision, tileMap);
-			} else {
-				return decision.getNoClass().getValue();
-			}
-		}
-	}
+    private int evaluateDecision(int x, int y, Decision decision, Map<Decision, Tile> tileMap) {
+        Tile tile = tileMap.get(decision);
+        boolean b = tile.getSampleBoolean(x, y);
+        if (b) {
+            if (decision.getYesDecision() != null) {
+                Decision yesDecision = decision.getYesDecision();
+                return evaluateDecision(x, y, yesDecision, tileMap);
+            } else {
+                return decision.getYesClass().getValue();
+            }
+        } else {
+            if (decision.getNoDecision() != null) {
+                Decision noDecision = decision.getNoDecision();
+                return evaluateDecision(x, y, noDecision, tileMap);
+            } else {
+                return decision.getNoClass().getValue();
+            }
+        }
+    }
 
-	
-	public static class Spi extends OperatorSpi {
+
+    public static class Spi extends OperatorSpi {
+
         public Spi() {
             super(DecisionTreeOp.class);
         }

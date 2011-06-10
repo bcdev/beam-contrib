@@ -1,7 +1,7 @@
 <module>
     <manifestVersion>1.0.0</manifestVersion>
     <symbolicName>beam-decisiontree</symbolicName>
-    <version>1.1.1</version>
+    <version>1.1.2</version>
     <name>OFEW Decisiontree</name>
     <description>An internal component of the OFEW project for image classification based on a decision tree.</description>
 
