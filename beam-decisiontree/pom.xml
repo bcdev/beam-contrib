@@ -8,7 +8,7 @@
     <name>BEAM Decision Tree</name>
     <groupId>org.esa.beam</groupId>
     <artifactId>beam-decisiontree</artifactId>
-    <version>1.1.2-SNAPSHOT</version>
+    <version>1.1.2</version>
 
     <packaging>jar</packaging>
 
