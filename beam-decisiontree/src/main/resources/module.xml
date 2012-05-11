@@ -6,6 +6,7 @@
     <description>An internal component of the OFEW project for image classification based on a decision tree.</description>
 
     <vendor>Brockmann Consult GmbH</vendor>
+    <funding>LANU, NLWKN, Germany</funding>
     <contactAddress>Max Planck Str.2, 21502 Geesthacht (Germany)</contactAddress>
     <copyright>(C) 2007 by Brockmann Consult GmbH</copyright>
     <url>http://envisat.esa.int/beam</url>

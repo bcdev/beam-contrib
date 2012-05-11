@@ -6,6 +6,7 @@
     <description>Landsat atmospheric correction and classification tool for the OFEW project (german UI only).</description>
 
     <vendor>Brockmann Consult GmbH</vendor>
+    <funding>LANU, NLWKN, Germany</funding>
     <contactAddress>Max Planck Str.2, 21502 Geesthacht (Germany)</contactAddress>
     <copyright>(C) 2007 by Brockmann Consult GmbH</copyright>
     <url>http://www.brockmann-consult.de/</url>
