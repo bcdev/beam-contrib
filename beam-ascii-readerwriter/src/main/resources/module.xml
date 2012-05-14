@@ -26,14 +26,14 @@
 
     <extension point="beam-ui:actions">
         <action>
-            <text>Import ASCII Product</text>
+            <text>ASCII</text>
             <class>org.esa.beam.visat.actions.ProductImportAction</class>
             <formatName>BEAM-ASCII</formatName>
             <useAllFileFilter>true</useAllFileFilter>
             <shortDescr>Import a ASCII data product.</shortDescr>
         </action>
         <action>
-            <text>Export ASCII Product</text>
+            <text>ASCII</text>
             <class>org.esa.beam.visat.actions.ProductExportAction</class>
             <formatName>BEAM-ASCII</formatName>
             <useAllFileFilter>true</useAllFileFilter>
