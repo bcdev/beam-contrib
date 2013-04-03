@@ -7,14 +7,14 @@
     <groupId>org.esa.beam</groupId>
     <artifactId>beam-ascii-readerwriter</artifactId>
     <name>ASCII Product Reader-Writer</name>
-    <version>1.1.1</version>
+    <version>1.1.2</version>
     <url>http://envisat.esa.int/beam/</url>
 
     <dependencies>
         <dependency>
             <groupId>org.esa.beam</groupId>
             <artifactId>beam-core</artifactId>
-            <version>4.9</version>
+            <version>4.11</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
