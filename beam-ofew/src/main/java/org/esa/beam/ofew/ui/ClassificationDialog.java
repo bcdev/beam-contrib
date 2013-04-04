@@ -199,7 +199,7 @@ public class ClassificationDialog extends ModalDialog {
         InputStream inputStream = this.getClass().getResourceAsStream(EM_CSV);
         InputStreamReader reader = new InputStreamReader(inputStream);
         DiagramGraph[] diagramGraphs = DiagramGraphIO.readGraphs(reader);
-        Endmember[] endmembers = SpectralUnmixingOp.convertGraphsToEndmembers(diagramGraphs);
+        Endmember[] endmembers = convertGraphsToEndmembers(diagramGraphs);
         Endmember[] realEndmembers = new Endmember[endmembers.length];
         double[] realWavelengths = new double[bandFinder.getBandCount()];
         for (int i = 0; i < realWavelengths.length; i++) {
@@ -216,6 +216,22 @@ public class ClassificationDialog extends ModalDialog {
         parameter.put("unmixingModelName", "Constrained LSU");
         parameter.put("abundanceBandNameSuffix", "");
         return parameter;
+    }
+
+    private Endmember[] convertGraphsToEndmembers(DiagramGraph[] diagramGraphs) {
+        Endmember[] endmembers = new Endmember[diagramGraphs.length];
+        for (int i = 0; i < diagramGraphs.length; i++) {
+            DiagramGraph diagramGraph = diagramGraphs[i];
+            int numValues = diagramGraph.getNumValues();
+            double[] wavelengths = new double[numValues];
+            double[] radiations = new double[numValues];
+            for (int j = 0; j < numValues; j++) {
+                wavelengths[j] = diagramGraph.getXValueAt(j);
+                radiations[j] = diagramGraph.getYValueAt(j);
+            }
+            endmembers[i] = new Endmember(diagramGraph.getYName(), wavelengths, radiations);
+        }
+        return endmembers;
     }
 
     private Map<String, Object> getClassificationParameter() throws OperatorException {

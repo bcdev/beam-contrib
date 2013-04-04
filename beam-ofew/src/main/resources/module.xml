@@ -1,7 +1,7 @@
 <module>
     <manifestVersion>1.0.0</manifestVersion>
     <symbolicName>beam-ofew</symbolicName>
-    <version>1.0.3</version>
+    <version>1.0.4</version>
     <name>OFEW Tools</name>
     <description>Landsat atmospheric correction and classification tool for the OFEW project (german UI only).</description>
 
@@ -14,6 +14,10 @@
 
     <changelog>
         <![CDATA[
+        Changes from 1.0.3 to 1.0.4<br>
+          - change dependency from BEAM 4.9 to BEAM 4.11<br/>
+          - change dependency from OFEW Decisiontree 1.1.2 to OFEW Decisiontree 1.1.3<br/>
+          - change dependency from beam-unmix 1.1 to beam-unmix 1.2.1<br/>
         Changes in 1.0.3<br>
         Adapted to changes in BEAM 4.9<br>
         Changes in 1.0.1<br>
